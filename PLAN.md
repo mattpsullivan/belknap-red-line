@@ -143,23 +143,23 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 ### Prototype Checklist
 
 #### Phase 0: UI Prototyping
-- [ ] Create `UI-SPEC.md` with full design spec
-- [ ] Create `prototypes/` directory structure
-- [ ] **Prototype A: Map-Centric**
-  - [ ] index.html (entry/dashboard)
-  - [ ] map.html (map view)
-  - [ ] trails.html (trail list)
-  - [ ] trail-detail.html (single trail)
-- [ ] **Prototype B: Dashboard-First**
-  - [ ] index.html
-  - [ ] map.html
-  - [ ] trails.html
-  - [ ] trail-detail.html
-- [ ] **Prototype C: List-Focused**
-  - [ ] index.html
-  - [ ] map.html
-  - [ ] trails.html
-  - [ ] trail-detail.html
+- [x] Create `UI-SPEC.md` with full design spec
+- [x] Create `prototypes/` directory structure
+- [x] **Prototype A: Map-Centric**
+  - [x] index.html (entry/dashboard)
+  - [x] progress.html (progress view)
+  - [x] trails.html (trail list)
+  - [x] trail-detail.html (single trail)
+- [x] **Prototype B: Dashboard-First**
+  - [x] index.html
+  - [x] map.html
+  - [x] trails.html
+  - [x] trail-detail.html
+- [x] **Prototype C: List-Focused**
+  - [x] index.html
+  - [x] map.html
+  - [x] trail-detail.html
+  - [x] settings.html
 - [ ] Review prototypes and select direction
 - [ ] Document chosen design in UI-SPEC.md
 
@@ -390,5 +390,7 @@ const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 | 2024-12-20 | Added UI Prototyping section to PLAN.md | Done |
 | 2024-12-20 | Added cross-references between docs for agent context | Done |
 | 2024-12-20 | Verified devcontainer builds and runs correctly | Done |
+| 2025-12-20 | Created UI-SPEC.md with design spec, color system, components | Done |
+| 2025-12-20 | Built 3 HTML/Tailwind prototypes (A: Map-Centric, B: Dashboard-First, C: List-Focused) | Done |
 
 <!-- Update this log after each work session -->

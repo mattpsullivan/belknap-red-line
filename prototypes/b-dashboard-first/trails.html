@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Trails - Belknap Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            complete: '#22C55E',
+            incomplete: '#EF4444',
+            location: '#3B82F6',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="min-h-screen bg-slate-100 font-[-apple-system,BlinkMacSystemFont,'Segoe_UI',Roboto,sans-serif] pb-20">
+
+  <!-- Header -->
+  <header class="bg-white sticky top-0 z-10">
+    <div class="flex items-center h-14 px-4 border-b border-slate-200">
+      <h1 class="text-lg font-semibold text-slate-800">All Trails</h1>
+    </div>
+
+    <!-- Search -->
+    <div class="px-4 py-3">
+      <div class="relative">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input type="text" placeholder="Search trails..." class="w-full pl-10 pr-4 py-2.5 bg-slate-100 rounded-xl text-sm">
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="px-4 pb-3 flex gap-2 overflow-x-auto">
+      <button class="px-4 py-1.5 text-sm font-medium bg-slate-800 text-white rounded-full whitespace-nowrap">All</button>
+      <button class="px-4 py-1.5 text-sm font-medium bg-white text-slate-600 rounded-full whitespace-nowrap border border-slate-200">Complete</button>
+      <button class="px-4 py-1.5 text-sm font-medium bg-white text-slate-600 rounded-full whitespace-nowrap border border-slate-200">Incomplete</button>
+      <button class="px-4 py-1.5 text-sm font-medium bg-white text-slate-600 rounded-full whitespace-nowrap border border-slate-200">Easy</button>
+      <button class="px-4 py-1.5 text-sm font-medium bg-white text-slate-600 rounded-full whitespace-nowrap border border-slate-200">Moderate</button>
+      <button class="px-4 py-1.5 text-sm font-medium bg-white text-slate-600 rounded-full whitespace-nowrap border border-slate-200">Difficult</button>
+    </div>
+  </header>
+
+  <!-- Trail List -->
+  <main class="p-4 space-y-3">
+    <!-- Complete Trail Card -->
+    <a href="trail-detail.html" class="block bg-white rounded-xl p-4 shadow-sm">
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+          <svg class="w-5 h-5 text-complete" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold text-slate-800">Mount Belknap via East Trail</div>
+          <div class="flex items-center gap-2 mt-1 text-sm text-slate-500">
+            <span>2.4 mi</span>
+            <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+            <span class="text-yellow-600">Moderate</span>
+            <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+            <span>1,200 ft</span>
+          </div>
+          <div class="mt-2 text-sm text-complete font-medium">Completed Dec 15, 2024</div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Complete Trail Card -->
+    <a href="trail-detail.html" class="block bg-white rounded-xl p-4 shadow-sm">
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+          <svg class="w-5 h-5 text-complete" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold text-slate-800">Mount Major via Main Trail</div>
+          <div class="flex items-center gap-2 mt-1 text-sm text-slate-500">
+            <span>2.8 mi</span>
+            <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+            <span class="text-green-600">Easy</span>
+            <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+            <span>1,100 ft</span>
+          </div>
+          <div class="mt-2 text-sm text-complete font-medium">Completed Dec 10, 2024</div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Incomplete Trail Card -->
+    <a href="trail-detail.html" class="block bg-white rounded-xl p-4 shadow-sm">
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-dashed border-red-200">
+          <svg class="w-5 h-5 text-incomplete" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold text-slate-800">Gunstock Mountain</div>
+          <div class="flex items-center gap-2 mt-1 text-sm text-slate-500">
+            <span>3.2 mi</span>
+            <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+            <span class="text-yellow-600">Moderate</span>
+            <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+            <span>1,400 ft</span>
+          </div>
+          <div class="mt-2 text-sm text-incomplete">Not completed</div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Incomplete Trail Card -->
+    <a href="trail-detail.html" class="block bg-white rounded-xl p-4 shadow-sm">
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-dashed border-red-200">
+          <svg class="w-5 h-5 text-incomplete" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold text-slate-800">Piper Mountain</div>
+          <div class="flex items-center gap-2 mt-1 text-sm text-slate-500">
+            <span>2.0 mi</span>
+            <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+            <span class="text-green-600">Easy</span>
+            <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+            <span>800 ft</span>
+          </div>
+          <div class="mt-2 text-sm text-incomplete">Not completed</div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Complete Trail Card -->
+    <a href="trail-detail.html" class="block bg-white rounded-xl p-4 shadow-sm">
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+          <svg class="w-5 h-5 text-complete" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold text-slate-800">Mount Klem</div>
+          <div class="flex items-center gap-2 mt-1 text-sm text-slate-500">
+            <span>1.8 mi</span>
+            <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+            <span class="text-green-600">Easy</span>
+            <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+            <span>600 ft</span>
+          </div>
+          <div class="mt-2 text-sm text-complete font-medium">Completed Nov 28, 2024</div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Incomplete Trail Card -->
+    <a href="trail-detail.html" class="block bg-white rounded-xl p-4 shadow-sm">
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-dashed border-red-200">
+          <svg class="w-5 h-5 text-incomplete" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold text-slate-800">Whiteface Mountain</div>
+          <div class="flex items-center gap-2 mt-1 text-sm text-slate-500">
+            <span>4.5 mi</span>
+            <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+            <span class="text-red-600">Difficult</span>
+            <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+            <span>1,800 ft</span>
+          </div>
+          <div class="mt-2 text-sm text-incomplete">Not completed</div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Incomplete Trail Card -->
+    <a href="trail-detail.html" class="block bg-white rounded-xl p-4 shadow-sm">
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-dashed border-red-200">
+          <svg class="w-5 h-5 text-incomplete" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold text-slate-800">Mount Mack</div>
+          <div class="flex items-center gap-2 mt-1 text-sm text-slate-500">
+            <span>2.2 mi</span>
+            <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+            <span class="text-yellow-600">Moderate</span>
+            <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+            <span>950 ft</span>
+          </div>
+          <div class="mt-2 text-sm text-incomplete">Not completed</div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Complete Trail Card -->
+    <a href="trail-detail.html" class="block bg-white rounded-xl p-4 shadow-sm">
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+          <svg class="w-5 h-5 text-complete" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold text-slate-800">Round Pond Trail</div>
+          <div class="flex items-center gap-2 mt-1 text-sm text-slate-500">
+            <span>1.5 mi</span>
+            <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+            <span class="text-green-600">Easy</span>
+            <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+            <span>400 ft</span>
+          </div>
+          <div class="mt-2 text-sm text-complete font-medium">Completed Dec 1, 2024</div>
+        </div>
+      </div>
+    </a>
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-6 py-2 flex justify-around">
+    <a href="index.html" class="flex flex-col items-center py-1 px-3 text-slate-400">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+      </svg>
+      <span class="text-xs mt-1">Home</span>
+    </a>
+    <a href="map.html" class="flex flex-col items-center py-1 px-3 text-slate-400">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+      </svg>
+      <span class="text-xs mt-1">Map</span>
+    </a>
+    <a href="trails.html" class="flex flex-col items-center py-1 px-3 text-location">
+      <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+      </svg>
+      <span class="text-xs font-medium mt-1">Trails</span>
+    </a>
+    <a href="settings.html" class="flex flex-col items-center py-1 px-3 text-slate-400">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+      </svg>
+      <span class="text-xs mt-1">Settings</span>
+    </a>
+  </nav>
+</body>
+</html>

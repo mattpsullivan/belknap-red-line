@@ -206,10 +206,9 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 
 #### 1.2 Trail Data
 - [x] Create sample trail data for development (8 trails, ~20 miles)
-- [ ] Download BRATTS Redlining Workbook (deferred - use sample data for MVP)
-- [ ] Download Trailforks GPX for Belknap Range (deferred)
-- [ ] Create data conversion script (deferred)
-- [ ] Generate production `trails.json` (deferred)
+- [x] Download BRATTS Redlining Workbook and extract trail names/distances
+- [x] Generate production `trails.json` with 61 trails, 70.45 miles
+- [ ] Refine trail coordinates with GPX data (moved to Phase 2)
 
 #### 1.3 Database Layer
 - [x] Set up Dexie.js database (`src/services/database/db.ts`)
@@ -269,6 +268,13 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 ---
 
 ### Phase 2: GPS Tracking
+
+#### 2.0 Detailed Trail Coordinates
+- [ ] Download Trailforks GPX data for Belknap Range trails
+- [ ] Cross-reference GPX trails with BRATTS trail names
+- [ ] Create script to convert GPX to JSON coordinates
+- [ ] Update `trails.json` with accurate trail polylines
+- [ ] Verify trail paths render correctly on map
 
 #### 2.1 Geolocation
 - [ ] `useGeolocation` hook

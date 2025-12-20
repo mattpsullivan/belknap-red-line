@@ -167,15 +167,19 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 
 ---
 
-### ▶️ CURRENT STATE: Phase 1 - MVP Implementation
+### ✅ CURRENT STATE: Phase 1 MVP Complete
 
-**Status:** Phase 0 complete. Prototype B (Dashboard-First) selected. Now implementing Phase 1 MVP.
+**Status:** Phase 1 MVP implementation complete with 32 passing tests.
 
-**Design Direction:** Dashboard-First
-- Progress/gamification as home screen
-- Card-based UI throughout
-- Bottom tab navigation
-- Map as separate tab
+**What's Working:**
+- Progress Dashboard with animated progress ring
+- Trail list with search and filtering
+- Map view with trail polylines (green=complete, red=incomplete)
+- Completion modal with date picker and notes
+- PWA configured with service worker and offline caching
+- IndexedDB for persistent offline storage
+
+**Next:** Phase 2 (GPS Tracking) or Phase 3 (Enhanced Offline)
 
 ---
 
@@ -225,23 +229,21 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
   - [x] Implement hook
 
 #### 1.5 Map View
-- [ ] `TrailMap` - MapLibre + OpenFreeMap container
-  - [ ] Write tests
-  - [ ] Implement component
-- [ ] `TrailLayer` - trail polylines (green/red)
-  - [ ] Write tests
-  - [ ] Implement component
-- [ ] `TrailPopup` - trail info on click
-  - [ ] Write tests
-  - [ ] Implement component
+- [x] `TrailMap` - MapLibre + OpenFreeMap container
+  - [x] Write tests
+  - [x] Implement component
+- [x] `TrailLayer` - trail polylines (green/red) - integrated into TrailMap
+  - [x] Write tests
+  - [x] Implement component
+- [ ] `TrailPopup` - trail info on click (deferred to Phase 2)
 
 #### 1.6 Manual Entry
-- [ ] `TrailDetail` - completion modal
-  - [ ] Write tests
-  - [ ] Implement component
-- [ ] Date picker for completion date
-- [ ] Notes field
-- [ ] Undo/remove completion
+- [x] `CompletionModal` - completion modal
+  - [x] Write tests (6 tests)
+  - [x] Implement component
+- [x] Date picker for completion date
+- [x] Notes field
+- [ ] Undo/remove completion (deferred)
 
 #### 1.7 Progress Dashboard
 - [x] `ProgressDashboard` - layout container
@@ -252,17 +254,17 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 - [x] Stats cards row
 
 #### 1.8 Navigation & Layout
-- [ ] `Header` component
-- [ ] `Navigation` - bottom tabs
-- [ ] Route setup (`/map`, `/progress`, `/trails`)
-- [ ] `OfflineIndicator` component
+- [x] `Header` component (in Layout.tsx)
+- [x] `Navigation` - bottom tabs (BottomNav.tsx)
+- [x] Route setup (`/map`, `/progress`, `/trails`, `/settings`)
+- [ ] `OfflineIndicator` component (deferred to Phase 3)
 
 #### 1.9 PWA Configuration
-- [ ] Create app icons (192x192, 512x512, maskable)
-- [ ] Configure `manifest.json`
-- [ ] Set up service worker caching
-- [ ] Test offline app shell
-- [ ] Test install prompt
+- [x] Create app icons (SVG placeholders)
+- [x] Configure `manifest.json` (in vite.config.ts)
+- [x] Set up service worker caching (workbox configured)
+- [ ] Test offline app shell (requires deployment)
+- [ ] Test install prompt (requires deployment)
 
 ---
 
@@ -413,5 +415,9 @@ const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 | 2025-12-20 | Phase 1.1: Project setup complete (Vite, Tailwind, Router, PWA, Vitest, paths) | Done |
 | 2025-12-20 | Phase 1.2-1.4: Trail data, database, and core hooks complete (24 tests passing) | Done |
 | 2025-12-20 | Phase 1.7-1.8: Progress Dashboard and Trails List pages complete | Done |
+| 2025-12-20 | Phase 1.5: TrailMap with MapLibre + OpenFreeMap | Done |
+| 2025-12-20 | Phase 1.6: CompletionModal with date picker and notes | Done |
+| 2025-12-20 | Phase 1.9: PWA icons and manifest configured | Done |
+| 2025-12-20 | **Phase 1 MVP Complete** (32 tests passing) | Done |
 
 <!-- Update this log after each work session -->

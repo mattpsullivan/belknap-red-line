@@ -163,6 +163,32 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 - [ ] Review prototypes and select direction
 - [ ] Document chosen design in UI-SPEC.md
 
+---
+
+### ⏸️ CURRENT STATE: Awaiting Prototype Review
+
+**Status:** Phase 0 prototypes complete. Waiting for user feedback before proceeding.
+
+**Action Required:** Review the 3 prototype directions and provide feedback:
+
+| Prototype | Path | Description |
+|-----------|------|-------------|
+| A | `prototypes/a-map-centric/index.html` | Map dominates viewport, bottom sheet for trails, floating progress pill |
+| B | `prototypes/b-dashboard-first/index.html` | Progress/gamification home screen, bottom tab navigation, card-based UI |
+| C | `prototypes/c-list-focused/index.html` | Compact table layout, inline checkboxes, power-user focused |
+
+**Feedback needed:**
+1. Which prototype direction do you prefer? (A, B, C, or hybrid)
+2. What elements work well that should be kept?
+3. What elements don't work or should be changed?
+4. Any other UI/UX preferences?
+
+**Next steps after feedback:**
+1. Document chosen design direction in UI-SPEC.md
+2. Proceed to Phase 1: MVP implementation
+
+---
+
 ### Prototype Technical Requirements
 - Tailwind CSS via CDN (no build step)
 - Mobile viewport meta tag

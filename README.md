@@ -135,7 +135,7 @@ This project follows [Conventional Commits](https://www.conventionalcommits.org/
 
 ## License
 
-This project is not currently licensed. Please contact the maintainers for usage terms.
+This project is licensed under the [MIT License](./LICENSE).
 
 ---
 

@@ -45,19 +45,9 @@ If these checks fail, you are NOT in the devcontainer. Stop and ask the user to 
 
 ### Prerequisites
 
-> **TODO:** Set up authentication for Claude Code and Gemini CLI (API keys not yet configured)
+**Claude Code CLI:** Your `~/.claude` directory is mounted into the container, so it uses your existing subscription automatically.
 
-Before opening the project in the devcontainer, set these environment variables on your **host machine**:
-
-```bash
-# Required for Claude Code CLI
-export ANTHROPIC_API_KEY="your-anthropic-api-key"
-
-# Required for Gemini CLI (or sign in with Google account)
-export GEMINI_API_KEY="your-gemini-api-key"
-```
-
-Add these to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.) for persistence.
+**Gemini CLI:** Your `~/.gemini` directory is mounted into the container. If not already authenticated, run `gemini` inside the container and sign in with your Google account.
 
 ### Opening the Devcontainer
 

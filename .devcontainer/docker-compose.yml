@@ -13,10 +13,8 @@ services:
       # Use delegated for node_modules for better performance
       - node-modules:/workspace/node_modules
     environment:
-      # Forward API keys from host
-      - ANTHROPIC_API_KEY
-      - GOOGLE_API_KEY
-      - GEMINI_API_KEY
+      # Tell Claude Code where to find its config
+      - CLAUDE_CONFIG_DIR=/home/node/.claude
     command: sleep infinity
     network_mode: service:services
 
@@ -26,7 +24,7 @@ services:
     ports:
       - "3000:3000"   # React/CRA
       - "5173:5173"   # Vite
-      - "8080:8080"   # Generic dev server
+      - "8080:8080"   # Generic dev server / Claude OAuth callback
       - "4173:4173"   # Vite preview
 
   # Uncomment if you need a database

@@ -14,6 +14,14 @@
     }
   },
 
+  // Mount AI CLI configs from host (uses your existing subscriptions)
+  "mounts": [
+    "source=${localEnv:HOME}/.claude,target=/home/node/.claude,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.claude.json,target=/home/node/.claude.json,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.gemini,target=/home/node/.gemini,type=bind,consistency=cached",
+    "source=/etc/machine-id,target=/etc/machine-id,type=bind,readonly"
+  ],
+
   // VS Code customizations
   "customizations": {
     "vscode": {

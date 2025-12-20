@@ -160,32 +160,22 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
   - [x] map.html
   - [x] trail-detail.html
   - [x] settings.html
-- [ ] Review prototypes and select direction
-- [ ] Document chosen design in UI-SPEC.md
+- [x] Review prototypes and select direction
+- [x] Document chosen design in UI-SPEC.md
+
+**Selected: Prototype B (Dashboard-First)** - Progress/gamification as home screen, card-based UI, bottom tab navigation.
 
 ---
 
-### ⏸️ CURRENT STATE: Awaiting Prototype Review
+### ▶️ CURRENT STATE: Phase 1 - MVP Implementation
 
-**Status:** Phase 0 prototypes complete. Waiting for user feedback before proceeding.
+**Status:** Phase 0 complete. Prototype B (Dashboard-First) selected. Now implementing Phase 1 MVP.
 
-**Action Required:** Review the 3 prototype directions and provide feedback:
-
-| Prototype | Path | Description |
-|-----------|------|-------------|
-| A | `prototypes/a-map-centric/index.html` | Map dominates viewport, bottom sheet for trails, floating progress pill |
-| B | `prototypes/b-dashboard-first/index.html` | Progress/gamification home screen, bottom tab navigation, card-based UI |
-| C | `prototypes/c-list-focused/index.html` | Compact table layout, inline checkboxes, power-user focused |
-
-**Feedback needed:**
-1. Which prototype direction do you prefer? (A, B, C, or hybrid)
-2. What elements work well that should be kept?
-3. What elements don't work or should be changed?
-4. Any other UI/UX preferences?
-
-**Next steps after feedback:**
-1. Document chosen design direction in UI-SPEC.md
-2. Proceed to Phase 1: MVP implementation
+**Design Direction:** Dashboard-First
+- Progress/gamification as home screen
+- Card-based UI throughout
+- Bottom tab navigation
+- Map as separate tab
 
 ---
 
@@ -203,36 +193,36 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 ### Phase 1: MVP
 
 #### 1.1 Project Setup
-- [ ] Initialize Vite + React + TypeScript project
-- [ ] Configure Tailwind CSS
-- [ ] Set up React Router v6
-- [ ] Configure vite-plugin-pwa
-- [ ] Set up Vitest for testing
-- [ ] Configure path aliases (`@/`)
+- [x] Initialize Vite + React + TypeScript project
+- [x] Configure Tailwind CSS (v4 with Vite plugin, custom theme colors)
+- [x] Set up React Router v6 (Layout + 4 pages: Progress, Map, Trails, Settings)
+- [x] Configure vite-plugin-pwa (manifest, service worker, offline caching)
+- [x] Set up Vitest for testing (with React Testing Library)
+- [x] Configure path aliases (`@/`)
 
 #### 1.2 Trail Data
-- [ ] Download BRATTS Redlining Workbook
-- [ ] Download Trailforks GPX for Belknap Range
-- [ ] Create data conversion script
-- [ ] Generate `src/data/trails.json`
-- [ ] Validate trail data completeness
+- [x] Create sample trail data for development (8 trails, ~20 miles)
+- [ ] Download BRATTS Redlining Workbook (deferred - use sample data for MVP)
+- [ ] Download Trailforks GPX for Belknap Range (deferred)
+- [ ] Create data conversion script (deferred)
+- [ ] Generate production `trails.json` (deferred)
 
 #### 1.3 Database Layer
-- [ ] Set up Dexie.js database (`src/services/database/db.ts`)
-- [ ] Define Completion table schema
-- [ ] Write tests for database operations
-- [ ] Implement CRUD operations
+- [x] Set up Dexie.js database (`src/services/database/db.ts`)
+- [x] Define Completion table schema
+- [x] Write tests for database operations
+- [x] Implement CRUD operations
 
 #### 1.4 Core Hooks
-- [ ] `useTrails` - load static trail data
-  - [ ] Write tests
-  - [ ] Implement hook
-- [ ] `useCompletions` - CRUD for completions
-  - [ ] Write tests
-  - [ ] Implement hook
-- [ ] `useProgress` - derived statistics
-  - [ ] Write tests
-  - [ ] Implement hook
+- [x] `useTrails` - load static trail data
+  - [x] Write tests
+  - [x] Implement hook
+- [x] `useCompletions` - CRUD for completions
+  - [x] Write tests
+  - [x] Implement hook
+- [x] `useProgress` - derived statistics
+  - [x] Write tests
+  - [x] Implement hook
 
 #### 1.5 Map View
 - [ ] `TrailMap` - MapLibre + OpenFreeMap container
@@ -254,11 +244,12 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 - [ ] Undo/remove completion
 
 #### 1.7 Progress Dashboard
-- [ ] `ProgressDashboard` - layout container
-- [ ] Completion percentage display
-- [ ] Total miles hiked
-- [ ] Recent completions list
-- [ ] Remaining trails count
+- [x] `ProgressDashboard` - layout container
+- [x] Completion percentage display (with progress ring)
+- [x] Total miles hiked
+- [x] Recent completions list
+- [x] Remaining trails count
+- [x] Stats cards row
 
 #### 1.8 Navigation & Layout
 - [ ] `Header` component
@@ -418,5 +409,9 @@ const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 | 2024-12-20 | Verified devcontainer builds and runs correctly | Done |
 | 2025-12-20 | Created UI-SPEC.md with design spec, color system, components | Done |
 | 2025-12-20 | Built 3 HTML/Tailwind prototypes (A: Map-Centric, B: Dashboard-First, C: List-Focused) | Done |
+| 2025-12-20 | Selected Prototype B (Dashboard-First) as design direction | Done |
+| 2025-12-20 | Phase 1.1: Project setup complete (Vite, Tailwind, Router, PWA, Vitest, paths) | Done |
+| 2025-12-20 | Phase 1.2-1.4: Trail data, database, and core hooks complete (24 tests passing) | Done |
+| 2025-12-20 | Phase 1.7-1.8: Progress Dashboard and Trails List pages complete | Done |
 
 <!-- Update this log after each work session -->

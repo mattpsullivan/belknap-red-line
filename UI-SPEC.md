@@ -432,9 +432,20 @@ Summary: 8 trails, 4 complete (50%), 20.4 total miles, ~10.5 miles hiked
 
 ---
 
-## Next Steps
+## Selected Design Direction
 
-1. Build HTML/Tailwind prototypes for variants A, B, C
-2. Review and select direction
-3. Document chosen variant with any modifications
-4. Proceed to Phase 1 implementation
+**Prototype B: Dashboard-First** was selected as the design direction.
+
+### Key Characteristics
+- Dashboard is home screen with large progress visualization
+- Card-based UI throughout
+- Map is a separate tab (not the primary view)
+- Bottom tab navigation with 4 tabs: Progress, Map, Trails, Settings
+- Achievement-style completed trails
+- Gamification and progress drive engagement
+
+### Implementation Notes
+- Progress page (`/`) is the landing page
+- Map page (`/map`) for spatial exploration
+- Trails page (`/trails`) for browsing/filtering
+- Settings page (`/settings`) for data management

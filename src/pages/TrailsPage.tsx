@@ -1,0 +1,213 @@
+import { useState } from 'react'
+import { useTrails, useCompletions } from '@/hooks'
+import type { Trail } from '@/types'
+
+type FilterStatus = 'all' | 'complete' | 'incomplete'
+type FilterDifficulty = 'all' | 'easy' | 'moderate' | 'difficult'
+
+export function TrailsPage() {
+  const { trails } = useTrails()
+  const { isTrailCompleted, addCompletion, getCompletionsForTrail } =
+    useCompletions()
+
+  const [statusFilter, setStatusFilter] = useState<FilterStatus>('all')
+  const [difficultyFilter, setDifficultyFilter] =
+    useState<FilterDifficulty>('all')
+  const [searchQuery, setSearchQuery] = useState('')
+
+  // Filter trails
+  const filteredTrails = trails.filter((trail) => {
+    // Status filter
+    if (statusFilter === 'complete' && !isTrailCompleted(trail.id)) return false
+    if (statusFilter === 'incomplete' && isTrailCompleted(trail.id)) return false
+
+    // Difficulty filter
+    if (difficultyFilter !== 'all' && trail.difficulty !== difficultyFilter)
+      return false
+
+    // Search filter
+    if (
+      searchQuery &&
+      !trail.name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+      return false
+
+    return true
+  })
+
+  const handleMarkComplete = async (trail: Trail) => {
+    await addCompletion({
+      trailId: trail.id,
+      completedAt: new Date(),
+      manualEntry: true,
+    })
+  }
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Search Bar */}
+      <div className="p-4 pb-2">
+        <input
+          type="search"
+          placeholder="Search trails..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full px-4 py-2 bg-surface border border-border rounded-xl text-primary placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-location"
+        />
+      </div>
+
+      {/* Filter Chips */}
+      <div className="px-4 pb-3 flex gap-2 overflow-x-auto">
+        <FilterChip
+          active={statusFilter === 'all'}
+          onClick={() => setStatusFilter('all')}
+        >
+          All
+        </FilterChip>
+        <FilterChip
+          active={statusFilter === 'complete'}
+          onClick={() => setStatusFilter('complete')}
+        >
+          Complete
+        </FilterChip>
+        <FilterChip
+          active={statusFilter === 'incomplete'}
+          onClick={() => setStatusFilter('incomplete')}
+        >
+          Incomplete
+        </FilterChip>
+        <span className="w-px bg-border" />
+        <FilterChip
+          active={difficultyFilter === 'easy'}
+          onClick={() =>
+            setDifficultyFilter(difficultyFilter === 'easy' ? 'all' : 'easy')
+          }
+        >
+          Easy
+        </FilterChip>
+        <FilterChip
+          active={difficultyFilter === 'moderate'}
+          onClick={() =>
+            setDifficultyFilter(
+              difficultyFilter === 'moderate' ? 'all' : 'moderate'
+            )
+          }
+        >
+          Moderate
+        </FilterChip>
+        <FilterChip
+          active={difficultyFilter === 'difficult'}
+          onClick={() =>
+            setDifficultyFilter(
+              difficultyFilter === 'difficult' ? 'all' : 'difficult'
+            )
+          }
+        >
+          Difficult
+        </FilterChip>
+      </div>
+
+      {/* Trail List */}
+      <div className="flex-1 overflow-auto px-4 pb-4">
+        <div className="space-y-2">
+          {filteredTrails.map((trail) => {
+            const completed = isTrailCompleted(trail.id)
+            const completions = getCompletionsForTrail(trail.id)
+            const lastCompletion = completions[completions.length - 1]
+
+            return (
+              <div
+                key={trail.id}
+                className="bg-surface rounded-xl p-4 flex items-start gap-3"
+              >
+                {/* Status Indicator */}
+                <div
+                  className={`w-3 h-3 rounded-full mt-1.5 shrink-0 ${
+                    completed ? 'bg-complete' : 'bg-incomplete'
+                  }`}
+                />
+
+                {/* Trail Info */}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-primary">{trail.name}</h3>
+                  <div className="flex items-center gap-2 mt-1 text-sm text-secondary">
+                    <span>{trail.distance} mi</span>
+                    <span>•</span>
+                    <DifficultyBadge difficulty={trail.difficulty} />
+                    {trail.elevationGain && (
+                      <>
+                        <span>•</span>
+                        <span>{trail.elevationGain} ft</span>
+                      </>
+                    )}
+                  </div>
+                  {completed && lastCompletion && (
+                    <p className="text-xs text-complete mt-1">
+                      ✓ Completed{' '}
+                      {new Date(lastCompletion.completedAt).toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
+
+                {/* Action Button */}
+                {!completed && (
+                  <button
+                    onClick={() => handleMarkComplete(trail)}
+                    className="shrink-0 px-3 py-1.5 bg-complete text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
+                  >
+                    Complete
+                  </button>
+                )}
+              </div>
+            )
+          })}
+
+          {filteredTrails.length === 0 && (
+            <div className="text-center py-8 text-secondary">
+              No trails match your filters.
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function FilterChip({
+  children,
+  active,
+  onClick,
+}: {
+  children: React.ReactNode
+  active: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+        active
+          ? 'bg-location text-white'
+          : 'bg-surface text-secondary hover:bg-border'
+      }`}
+    >
+      {children}
+    </button>
+  )
+}
+
+function DifficultyBadge({
+  difficulty,
+}: {
+  difficulty: 'easy' | 'moderate' | 'difficult'
+}) {
+  const colors = {
+    easy: 'text-easy',
+    moderate: 'text-moderate',
+    difficult: 'text-difficult',
+  }
+
+  return (
+    <span className={`capitalize ${colors[difficulty]}`}>{difficulty}</span>
+  )
+}

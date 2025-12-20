@@ -1,0 +1,1879 @@
+[
+  {
+    "id": "quarry-trail",
+    "name": "Quarry Trail",
+    "distance": 1.2,
+    "difficulty": "moderate",
+    "area": "Lockes Hill",
+    "trailhead": {
+      "lat": 43.535,
+      "lng": -71.41
+    },
+    "coordinates": [
+      {
+        "lat": 43.535,
+        "lng": -71.41
+      },
+      {
+        "lat": 43.53507472698776,
+        "lng": -71.41399930192375
+      },
+      {
+        "lat": 43.53514945397552,
+        "lng": -71.4179986038475
+      },
+      {
+        "lat": 43.53522418096328,
+        "lng": -71.42199790577125
+      }
+    ]
+  },
+  {
+    "id": "lakeview-trail",
+    "name": "Lakeview Trail",
+    "distance": 0.7,
+    "difficulty": "moderate",
+    "area": "Lockes Hill",
+    "trailhead": {
+      "lat": 43.535,
+      "lng": -71.41
+    },
+    "coordinates": [
+      {
+        "lat": 43.535,
+        "lng": -71.41
+      },
+      {
+        "lat": 43.535756077134856,
+        "lng": -71.41220744010351
+      },
+      {
+        "lat": 43.53651215426971,
+        "lng": -71.41441488020702
+      },
+      {
+        "lat": 43.53726823140457,
+        "lng": -71.41662232031054
+      }
+    ]
+  },
+  {
+    "id": "mt-rowe-trail",
+    "name": "Mt. Rowe Trail",
+    "distance": 1.8,
+    "difficulty": "difficult",
+    "area": "Mt. Rowe & Gunstock Mountain",
+    "trailhead": {
+      "lat": 43.5382,
+      "lng": -71.3672
+    },
+    "coordinates": [
+      {
+        "lat": 43.5382,
+        "lng": -71.3672
+      },
+      {
+        "lat": 43.540940804716456,
+        "lng": -71.36363096798749
+      },
+      {
+        "lat": 43.54368160943291,
+        "lng": -71.360061935975
+      },
+      {
+        "lat": 43.54642241414937,
+        "lng": -71.35649290396249
+      },
+      {
+        "lat": 43.54916321886582,
+        "lng": -71.35292387194998
+      }
+    ]
+  },
+  {
+    "id": "ges-nature-trail",
+    "name": "GES Nature Trail",
+    "distance": 0.5,
+    "difficulty": "easy",
+    "area": "Mt. Rowe & Gunstock Mountain",
+    "trailhead": {
+      "lat": 43.5382,
+      "lng": -71.3672
+    },
+    "coordinates": [
+      {
+        "lat": 43.5382,
+        "lng": -71.3672
+      },
+      {
+        "lat": 43.53925189359879,
+        "lng": -71.36849278677074
+      },
+      {
+        "lat": 43.540303787197566,
+        "lng": -71.36978557354149
+      },
+      {
+        "lat": 43.54135568079635,
+        "lng": -71.37107836031224
+      }
+    ]
+  },
+  {
+    "id": "benjamin-weeks-trail",
+    "name": "Benjamin Weeks Trail",
+    "distance": 1.8,
+    "difficulty": "difficult",
+    "area": "Mt. Rowe & Gunstock Mountain",
+    "trailhead": {
+      "lat": 43.5382,
+      "lng": -71.3672
+    },
+    "coordinates": [
+      {
+        "lat": 43.5382,
+        "lng": -71.3672
+      },
+      {
+        "lat": 43.53458677799456,
+        "lng": -71.36451771986187
+      },
+      {
+        "lat": 43.53097355598912,
+        "lng": -71.36183543972373
+      },
+      {
+        "lat": 43.52736033398368,
+        "lng": -71.35915315958562
+      },
+      {
+        "lat": 43.52374711197824,
+        "lng": -71.35647087944749
+      }
+    ]
+  },
+  {
+    "id": "yellow-trail",
+    "name": "Yellow Trail",
+    "distance": 0.6,
+    "difficulty": "moderate",
+    "area": "Mt. Rowe & Gunstock Mountain",
+    "trailhead": {
+      "lat": 43.5382,
+      "lng": -71.3672
+    },
+    "coordinates": [
+      {
+        "lat": 43.5382,
+        "lng": -71.3672
+      },
+      {
+        "lat": 43.53883434678398,
+        "lng": -71.36909673513112
+      },
+      {
+        "lat": 43.53946869356795,
+        "lng": -71.37099347026226
+      },
+      {
+        "lat": 43.54010304035192,
+        "lng": -71.37289020539339
+      }
+    ]
+  },
+  {
+    "id": "north-spur-trail",
+    "name": "North Spur Trail",
+    "distance": 0.2,
+    "difficulty": "easy",
+    "area": "Mt. Rowe & Gunstock Mountain",
+    "trailhead": {
+      "lat": 43.5382,
+      "lng": -71.3672
+    },
+    "coordinates": [
+      {
+        "lat": 43.5382,
+        "lng": -71.3672
+      },
+      {
+        "lat": 43.537799569072746,
+        "lng": -71.3677330098657
+      },
+      {
+        "lat": 43.537399138145496,
+        "lng": -71.36826601973141
+      },
+      {
+        "lat": 43.53699870721824,
+        "lng": -71.36879902959713
+      }
+    ]
+  },
+  {
+    "id": "ridge-trail",
+    "name": "Ridge Trail",
+    "distance": 2.8,
+    "difficulty": "difficult",
+    "area": "Mt. Rowe & Gunstock Mountain",
+    "trailhead": {
+      "lat": 43.5382,
+      "lng": -71.3672
+    },
+    "coordinates": [
+      {
+        "lat": 43.5382,
+        "lng": -71.3672
+      },
+      {
+        "lat": 43.53550260204815,
+        "lng": -71.36339187420545
+      },
+      {
+        "lat": 43.53280520409629,
+        "lng": -71.3595837484109
+      },
+      {
+        "lat": 43.530107806144436,
+        "lng": -71.35577562261635
+      },
+      {
+        "lat": 43.52741040819258,
+        "lng": -71.3519674968218
+      },
+      {
+        "lat": 43.524713010240724,
+        "lng": -71.34815937102725
+      },
+      {
+        "lat": 43.52201561228887,
+        "lng": -71.3443512452327
+      }
+    ]
+  },
+  {
+    "id": "ridge-trail-road-bypass",
+    "name": "Ridge Trail Road Bypass",
+    "distance": 0.8,
+    "difficulty": "moderate",
+    "area": "Mt. Rowe & Gunstock Mountain",
+    "trailhead": {
+      "lat": 43.5382,
+      "lng": -71.3672
+    },
+    "coordinates": [
+      {
+        "lat": 43.5382,
+        "lng": -71.3672
+      },
+      {
+        "lat": 43.53828122298525,
+        "lng": -71.36453457059035
+      },
+      {
+        "lat": 43.538362445970485,
+        "lng": -71.36186914118072
+      },
+      {
+        "lat": 43.53844366895573,
+        "lng": -71.35920371177107
+      }
+    ]
+  },
+  {
+    "id": "rowe-s-revenge",
+    "name": "Rowe's Revenge",
+    "distance": 1.3,
+    "difficulty": "moderate",
+    "area": "Mt. Rowe & Gunstock Mountain",
+    "trailhead": {
+      "lat": 43.5382,
+      "lng": -71.3672
+    },
+    "coordinates": [
+      {
+        "lat": 43.5382,
+        "lng": -71.3672
+      },
+      {
+        "lat": 43.539170311500534,
+        "lng": -71.3629766987593
+      },
+      {
+        "lat": 43.540140623001065,
+        "lng": -71.3587533975186
+      },
+      {
+        "lat": 43.54111093450159,
+        "lng": -71.35453009627788
+      }
+    ]
+  },
+  {
+    "id": "marge-s-trail",
+    "name": "Marge's Trail",
+    "distance": 0.5,
+    "difficulty": "easy",
+    "area": "Mt. Rowe & Gunstock Mountain",
+    "trailhead": {
+      "lat": 43.5382,
+      "lng": -71.3672
+    },
+    "coordinates": [
+      {
+        "lat": 43.5382,
+        "lng": -71.3672
+      },
+      {
+        "lat": 43.538737752346435,
+        "lng": -71.36562247022478
+      },
+      {
+        "lat": 43.539275504692874,
+        "lng": -71.36404494044957
+      },
+      {
+        "lat": 43.539813257039306,
+        "lng": -71.36246741067436
+      }
+    ]
+  },
+  {
+    "id": "ledges-iron-mine-trail",
+    "name": "Ledges-Iron Mine Trail",
+    "distance": 1,
+    "difficulty": "moderate",
+    "area": "Mt. Rowe & Gunstock Mountain",
+    "trailhead": {
+      "lat": 43.5382,
+      "lng": -71.3672
+    },
+    "coordinates": [
+      {
+        "lat": 43.5382,
+        "lng": -71.3672
+      },
+      {
+        "lat": 43.54070471737887,
+        "lng": -71.36939943219106
+      },
+      {
+        "lat": 43.54320943475775,
+        "lng": -71.37159886438212
+      },
+      {
+        "lat": 43.54571415213662,
+        "lng": -71.37379829657318
+      }
+    ]
+  },
+  {
+    "id": "gunstock-mountain-trail",
+    "name": "Gunstock Mountain Trail",
+    "distance": 1.1,
+    "difficulty": "moderate",
+    "area": "Mt. Rowe & Gunstock Mountain",
+    "trailhead": {
+      "lat": 43.5382,
+      "lng": -71.3672
+    },
+    "coordinates": [
+      {
+        "lat": 43.5382,
+        "lng": -71.3672
+      },
+      {
+        "lat": 43.54163499507835,
+        "lng": -71.36848267425958
+      },
+      {
+        "lat": 43.54506999015669,
+        "lng": -71.36976534851917
+      },
+      {
+        "lat": 43.548504985235034,
+        "lng": -71.37104802277875
+      }
+    ]
+  },
+  {
+    "id": "gunstock-winter-short-cut",
+    "name": "Gunstock Winter Short Cut",
+    "distance": 0.3,
+    "difficulty": "easy",
+    "area": "Mt. Rowe & Gunstock Mountain",
+    "trailhead": {
+      "lat": 43.5382,
+      "lng": -71.3672
+    },
+    "coordinates": [
+      {
+        "lat": 43.5382,
+        "lng": -71.3672
+      },
+      {
+        "lat": 43.537227244429786,
+        "lng": -71.36696816686903
+      },
+      {
+        "lat": 43.53625448885957,
+        "lng": -71.36673633373807
+      },
+      {
+        "lat": 43.53528173328935,
+        "lng": -71.3665045006071
+      }
+    ]
+  },
+  {
+    "id": "brook-trail",
+    "name": "Brook Trail",
+    "distance": 1.7,
+    "difficulty": "difficult",
+    "area": "Mt. Rowe & Gunstock Mountain",
+    "trailhead": {
+      "lat": 43.5382,
+      "lng": -71.3672
+    },
+    "coordinates": [
+      {
+        "lat": 43.5382,
+        "lng": -71.3672
+      },
+      {
+        "lat": 43.53600165595396,
+        "lng": -71.36356272307141
+      },
+      {
+        "lat": 43.53380331190792,
+        "lng": -71.35992544614282
+      },
+      {
+        "lat": 43.531604967861874,
+        "lng": -71.35628816921424
+      },
+      {
+        "lat": 43.52940662381583,
+        "lng": -71.35265089228565
+      }
+    ]
+  },
+  {
+    "id": "saddle-trail",
+    "name": "Saddle Trail",
+    "distance": 0.1,
+    "difficulty": "easy",
+    "area": "Mt. Rowe & Gunstock Mountain",
+    "trailhead": {
+      "lat": 43.5382,
+      "lng": -71.3672
+    },
+    "coordinates": [
+      {
+        "lat": 43.5382,
+        "lng": -71.3672
+      },
+      {
+        "lat": 43.537897730635166,
+        "lng": -71.36705948543778
+      },
+      {
+        "lat": 43.537595461270335,
+        "lng": -71.36691897087557
+      },
+      {
+        "lat": 43.5372931919055,
+        "lng": -71.36677845631336
+      }
+    ]
+  },
+  {
+    "id": "overlook-trail",
+    "name": "Overlook Trail",
+    "distance": 2,
+    "difficulty": "difficult",
+    "area": "Mt. Rowe & Gunstock Mountain",
+    "trailhead": {
+      "lat": 43.5382,
+      "lng": -71.3672
+    },
+    "coordinates": [
+      {
+        "lat": 43.5382,
+        "lng": -71.3672
+      },
+      {
+        "lat": 43.533337093566736,
+        "lng": -71.36836281598772
+      },
+      {
+        "lat": 43.528474187133476,
+        "lng": -71.36952563197545
+      },
+      {
+        "lat": 43.52361128070021,
+        "lng": -71.37068844796318
+      },
+      {
+        "lat": 43.51874837426694,
+        "lng": -71.3718512639509
+      }
+    ]
+  },
+  {
+    "id": "round-pond-trail",
+    "name": "Round Pond Trail",
+    "distance": 3,
+    "difficulty": "difficult",
+    "area": "Mt. Rowe & Gunstock Mountain",
+    "trailhead": {
+      "lat": 43.5382,
+      "lng": -71.3672
+    },
+    "coordinates": [
+      {
+        "lat": 43.5382,
+        "lng": -71.3672
+      },
+      {
+        "lat": 43.542906916211834,
+        "lng": -71.3688866949264
+      },
+      {
+        "lat": 43.54761383242367,
+        "lng": -71.37057338985282
+      },
+      {
+        "lat": 43.5523207486355,
+        "lng": -71.37226008477923
+      },
+      {
+        "lat": 43.55702766484733,
+        "lng": -71.37394677970565
+      },
+      {
+        "lat": 43.56173458105917,
+        "lng": -71.37563347463205
+      },
+      {
+        "lat": 43.566441497271,
+        "lng": -71.37732016955847
+      }
+    ]
+  },
+  {
+    "id": "blue-trail",
+    "name": "Blue Trail",
+    "distance": 1.1,
+    "difficulty": "moderate",
+    "area": "Belknap Mountain",
+    "trailhead": {
+      "lat": 43.5179,
+      "lng": -71.3692
+    },
+    "coordinates": [
+      {
+        "lat": 43.5179,
+        "lng": -71.3692
+      },
+      {
+        "lat": 43.51727499273907,
+        "lng": -71.36558699427509
+      },
+      {
+        "lat": 43.51664998547814,
+        "lng": -71.36197398855019
+      },
+      {
+        "lat": 43.51602497821721,
+        "lng": -71.35836098282527
+      }
+    ]
+  },
+  {
+    "id": "green-trail-warden-s-trail",
+    "name": "Green Trail (Warden's Trail)",
+    "distance": 0.8,
+    "difficulty": "moderate",
+    "area": "Belknap Mountain",
+    "trailhead": {
+      "lat": 43.5179,
+      "lng": -71.3692
+    },
+    "coordinates": [
+      {
+        "lat": 43.5179,
+        "lng": -71.3692
+      },
+      {
+        "lat": 43.51637890721831,
+        "lng": -71.37139029401237
+      },
+      {
+        "lat": 43.51485781443662,
+        "lng": -71.37358058802474
+      },
+      {
+        "lat": 43.51333672165493,
+        "lng": -71.3757708820371
+      }
+    ]
+  },
+  {
+    "id": "red-trail",
+    "name": "Red Trail",
+    "distance": 0.9,
+    "difficulty": "moderate",
+    "area": "Belknap Mountain",
+    "trailhead": {
+      "lat": 43.5179,
+      "lng": -71.3692
+    },
+    "coordinates": [
+      {
+        "lat": 43.5179,
+        "lng": -71.3692
+      },
+      {
+        "lat": 43.519244704161544,
+        "lng": -71.37188174769841
+      },
+      {
+        "lat": 43.52058940832309,
+        "lng": -71.37456349539683
+      },
+      {
+        "lat": 43.521934112484644,
+        "lng": -71.37724524309523
+      }
+    ]
+  },
+  {
+    "id": "wayne-s-way",
+    "name": "Wayne's Way",
+    "distance": 0.1,
+    "difficulty": "easy",
+    "area": "Belknap Mountain",
+    "trailhead": {
+      "lat": 43.5179,
+      "lng": -71.3692
+    },
+    "coordinates": [
+      {
+        "lat": 43.5179,
+        "lng": -71.3692
+      },
+      {
+        "lat": 43.5177924009802,
+        "lng": -71.36951548940085
+      },
+      {
+        "lat": 43.5176848019604,
+        "lng": -71.36983097880172
+      },
+      {
+        "lat": 43.5175772029406,
+        "lng": -71.37014646820256
+      }
+    ]
+  },
+  {
+    "id": "white-trail",
+    "name": "White Trail",
+    "distance": 1.3,
+    "difficulty": "moderate",
+    "area": "Belknap Mountain",
+    "trailhead": {
+      "lat": 43.5179,
+      "lng": -71.3692
+    },
+    "coordinates": [
+      {
+        "lat": 43.5179,
+        "lng": -71.3692
+      },
+      {
+        "lat": 43.52223330492456,
+        "lng": -71.36921569103403
+      },
+      {
+        "lat": 43.52656660984912,
+        "lng": -71.36923138206804
+      },
+      {
+        "lat": 43.530899914773684,
+        "lng": -71.36924707310206
+      }
+    ]
+  },
+  {
+    "id": "east-gilford-trail",
+    "name": "East Gilford Trail",
+    "distance": 1.9,
+    "difficulty": "difficult",
+    "area": "Belknap Mountain",
+    "trailhead": {
+      "lat": 43.5179,
+      "lng": -71.3692
+    },
+    "coordinates": [
+      {
+        "lat": 43.5179,
+        "lng": -71.3692
+      },
+      {
+        "lat": 43.521127057179584,
+        "lng": -71.37268548446556
+      },
+      {
+        "lat": 43.52435411435917,
+        "lng": -71.37617096893113
+      },
+      {
+        "lat": 43.527581171538756,
+        "lng": -71.37965645339669
+      },
+      {
+        "lat": 43.53080822871835,
+        "lng": -71.38314193786225
+      }
+    ]
+  },
+  {
+    "id": "east-gilford-fire-road",
+    "name": "East Gilford Fire Road",
+    "distance": 0.7,
+    "difficulty": "moderate",
+    "area": "Belknap Mountain",
+    "trailhead": {
+      "lat": 43.5179,
+      "lng": -71.3692
+    },
+    "coordinates": [
+      {
+        "lat": 43.5179,
+        "lng": -71.3692
+      },
+      {
+        "lat": 43.51988022308455,
+        "lng": -71.3679658359186
+      },
+      {
+        "lat": 43.5218604461691,
+        "lng": -71.36673167183717
+      },
+      {
+        "lat": 43.523840669253644,
+        "lng": -71.36549750775576
+      }
+    ]
+  },
+  {
+    "id": "boulder-trail",
+    "name": "Boulder Trail",
+    "distance": 0.4,
+    "difficulty": "easy",
+    "area": "Belknap Mountain",
+    "trailhead": {
+      "lat": 43.5179,
+      "lng": -71.3692
+    },
+    "coordinates": [
+      {
+        "lat": 43.5179,
+        "lng": -71.3692
+      },
+      {
+        "lat": 43.51820323453496,
+        "lng": -71.36790160614814
+      },
+      {
+        "lat": 43.51850646906992,
+        "lng": -71.36660321229625
+      },
+      {
+        "lat": 43.51880970360489,
+        "lng": -71.36530481844439
+      }
+    ]
+  },
+  {
+    "id": "piper-mountain-trail",
+    "name": "Piper Mountain Trail",
+    "distance": 1.3,
+    "difficulty": "moderate",
+    "area": "Piper, Whiteface & Swett Mountains",
+    "trailhead": {
+      "lat": 43.51,
+      "lng": -71.35
+    },
+    "coordinates": [
+      {
+        "lat": 43.51,
+        "lng": -71.35
+      },
+      {
+        "lat": 43.50705746656498,
+        "lng": -71.3531810807537
+      },
+      {
+        "lat": 43.50411493312997,
+        "lng": -71.3563621615074
+      },
+      {
+        "lat": 43.50117239969495,
+        "lng": -71.35954324226111
+      }
+    ]
+  },
+  {
+    "id": "old-piper-trail",
+    "name": "Old Piper Trail",
+    "distance": 0.5,
+    "difficulty": "easy",
+    "area": "Piper, Whiteface & Swett Mountains",
+    "trailhead": {
+      "lat": 43.51,
+      "lng": -71.35
+    },
+    "coordinates": [
+      {
+        "lat": 43.51,
+        "lng": -71.35
+      },
+      {
+        "lat": 43.510119355918185,
+        "lng": -71.34833761257747
+      },
+      {
+        "lat": 43.51023871183638,
+        "lng": -71.34667522515494
+      },
+      {
+        "lat": 43.51035806775457,
+        "lng": -71.34501283773241
+      }
+    ]
+  },
+  {
+    "id": "piper-round-pond-link",
+    "name": "Piper-Round Pond Link",
+    "distance": 2.3,
+    "difficulty": "difficult",
+    "area": "Piper, Whiteface & Swett Mountains",
+    "trailhead": {
+      "lat": 43.51,
+      "lng": -71.35
+    },
+    "coordinates": [
+      {
+        "lat": 43.51,
+        "lng": -71.35
+      },
+      {
+        "lat": 43.5054053578429,
+        "lng": -71.35022195370746
+      },
+      {
+        "lat": 43.50081071568581,
+        "lng": -71.35044390741491
+      },
+      {
+        "lat": 43.496216073528714,
+        "lng": -71.35066586112238
+      },
+      {
+        "lat": 43.49162143137162,
+        "lng": -71.35088781482983
+      },
+      {
+        "lat": 43.487026789214525,
+        "lng": -71.3511097685373
+      }
+    ]
+  },
+  {
+    "id": "whiteface-mountain-trail",
+    "name": "Whiteface Mountain Trail",
+    "distance": 1.6,
+    "difficulty": "difficult",
+    "area": "Piper, Whiteface & Swett Mountains",
+    "trailhead": {
+      "lat": 43.51,
+      "lng": -71.35
+    },
+    "coordinates": [
+      {
+        "lat": 43.51,
+        "lng": -71.35
+      },
+      {
+        "lat": 43.508199767406474,
+        "lng": -71.34642800299423
+      },
+      {
+        "lat": 43.50639953481295,
+        "lng": -71.34285600598847
+      },
+      {
+        "lat": 43.504599302219425,
+        "lng": -71.33928400898269
+      },
+      {
+        "lat": 43.5027990696259,
+        "lng": -71.33571201197692
+      }
+    ]
+  },
+  {
+    "id": "piper-whiteface-link",
+    "name": "Piper-Whiteface Link",
+    "distance": 0.8,
+    "difficulty": "moderate",
+    "area": "Piper, Whiteface & Swett Mountains",
+    "trailhead": {
+      "lat": 43.51,
+      "lng": -71.35
+    },
+    "coordinates": [
+      {
+        "lat": 43.51,
+        "lng": -71.35
+      },
+      {
+        "lat": 43.507659125209116,
+        "lng": -71.35127726908853
+      },
+      {
+        "lat": 43.50531825041824,
+        "lng": -71.35255453817707
+      },
+      {
+        "lat": 43.50297737562736,
+        "lng": -71.3538318072656
+      }
+    ]
+  },
+  {
+    "id": "vista-trail",
+    "name": "Vista Trail",
+    "distance": 1.1,
+    "difficulty": "moderate",
+    "area": "Piper, Whiteface & Swett Mountains",
+    "trailhead": {
+      "lat": 43.51,
+      "lng": -71.35
+    },
+    "coordinates": [
+      {
+        "lat": 43.51,
+        "lng": -71.35
+      },
+      {
+        "lat": 43.50692544846527,
+        "lng": -71.34800210678344
+      },
+      {
+        "lat": 43.50385089693054,
+        "lng": -71.34600421356689
+      },
+      {
+        "lat": 43.50077634539581,
+        "lng": -71.34400632035035
+      }
+    ]
+  },
+  {
+    "id": "klem-mack-loop",
+    "name": "Klem-Mack Loop",
+    "distance": 1.6,
+    "difficulty": "difficult",
+    "area": "Mt. Klem, Mt. Mack & Mt. Anna",
+    "trailhead": {
+      "lat": 43.505,
+      "lng": -71.32
+    },
+    "coordinates": [
+      {
+        "lat": 43.505,
+        "lng": -71.32
+      },
+      {
+        "lat": 43.50229875297242,
+        "lng": -71.32295012957273
+      },
+      {
+        "lat": 43.499597505944834,
+        "lng": -71.32590025914548
+      },
+      {
+        "lat": 43.49689625891725,
+        "lng": -71.32885038871822
+      },
+      {
+        "lat": 43.49419501188967,
+        "lng": -71.33180051829096
+      }
+    ]
+  },
+  {
+    "id": "klem-summit-spur",
+    "name": "Klem Summit Spur",
+    "distance": 0.1,
+    "difficulty": "easy",
+    "area": "Mt. Klem, Mt. Mack & Mt. Anna",
+    "trailhead": {
+      "lat": 43.505,
+      "lng": -71.32
+    },
+    "coordinates": [
+      {
+        "lat": 43.505,
+        "lng": -71.32
+      },
+      {
+        "lat": 43.50482270782058,
+        "lng": -71.32028227397015
+      },
+      {
+        "lat": 43.504645415641164,
+        "lng": -71.32056454794031
+      },
+      {
+        "lat": 43.50446812346174,
+        "lng": -71.32084682191046
+      }
+    ]
+  },
+  {
+    "id": "round-pond-mt-mack-trail",
+    "name": "Round Pond-Mt. Mack Trail",
+    "distance": 0.7,
+    "difficulty": "moderate",
+    "area": "Mt. Klem, Mt. Mack & Mt. Anna",
+    "trailhead": {
+      "lat": 43.505,
+      "lng": -71.32
+    },
+    "coordinates": [
+      {
+        "lat": 43.505,
+        "lng": -71.32
+      },
+      {
+        "lat": 43.504261059530215,
+        "lng": -71.31778676448913
+      },
+      {
+        "lat": 43.503522119060435,
+        "lng": -71.31557352897826
+      },
+      {
+        "lat": 43.50278317859065,
+        "lng": -71.3133602934674
+      }
+    ]
+  },
+  {
+    "id": "mack-ridge-trail",
+    "name": "Mack Ridge Trail",
+    "distance": 1.9,
+    "difficulty": "difficult",
+    "area": "Mt. Klem, Mt. Mack & Mt. Anna",
+    "trailhead": {
+      "lat": 43.505,
+      "lng": -71.32
+    },
+    "coordinates": [
+      {
+        "lat": 43.505,
+        "lng": -71.32
+      },
+      {
+        "lat": 43.50949279103143,
+        "lng": -71.32154185886122
+      },
+      {
+        "lat": 43.51398558206285,
+        "lng": -71.32308371772244
+      },
+      {
+        "lat": 43.51847837309428,
+        "lng": -71.32462557658367
+      },
+      {
+        "lat": 43.52297116412571,
+        "lng": -71.3261674354449
+      }
+    ]
+  },
+  {
+    "id": "round-pond-trail-south",
+    "name": "Round Pond Trail (South)",
+    "distance": 1.2,
+    "difficulty": "moderate",
+    "area": "Mt. Klem, Mt. Mack & Mt. Anna",
+    "trailhead": {
+      "lat": 43.505,
+      "lng": -71.32
+    },
+    "coordinates": [
+      {
+        "lat": 43.505,
+        "lng": -71.32
+      },
+      {
+        "lat": 43.50251015278701,
+        "lng": -71.31686939928193
+      },
+      {
+        "lat": 43.50002030557401,
+        "lng": -71.31373879856386
+      },
+      {
+        "lat": 43.49753045836102,
+        "lng": -71.3106081978458
+      }
+    ]
+  },
+  {
+    "id": "mack-anna-trail-belknap-range-trail",
+    "name": "Mack-Anna Trail (Belknap Range Trail)",
+    "distance": 1.4,
+    "difficulty": "moderate",
+    "area": "Mt. Klem, Mt. Mack & Mt. Anna",
+    "trailhead": {
+      "lat": 43.505,
+      "lng": -71.32
+    },
+    "coordinates": [
+      {
+        "lat": 43.505,
+        "lng": -71.32
+      },
+      {
+        "lat": 43.500352642373905,
+        "lng": -71.31957591878968
+      },
+      {
+        "lat": 43.49570528474781,
+        "lng": -71.31915183757938
+      },
+      {
+        "lat": 43.49105792712171,
+        "lng": -71.31872775636907
+      }
+    ]
+  },
+  {
+    "id": "anna-old-stage-road-link",
+    "name": "Anna-Old Stage Road Link",
+    "distance": 1,
+    "difficulty": "moderate",
+    "area": "Mt. Klem, Mt. Mack & Mt. Anna",
+    "trailhead": {
+      "lat": 43.505,
+      "lng": -71.32
+    },
+    "coordinates": [
+      {
+        "lat": 43.505,
+        "lng": -71.32
+      },
+      {
+        "lat": 43.50173152617445,
+        "lng": -71.32065436225655
+      },
+      {
+        "lat": 43.4984630523489,
+        "lng": -71.32130872451309
+      },
+      {
+        "lat": 43.495194578523346,
+        "lng": -71.32196308676964
+      }
+    ]
+  },
+  {
+    "id": "anna-goat-pasture-hill-trail",
+    "name": "Anna-Goat Pasture Hill Trail",
+    "distance": 1,
+    "difficulty": "moderate",
+    "area": "Mt. Klem, Mt. Mack & Mt. Anna",
+    "trailhead": {
+      "lat": 43.505,
+      "lng": -71.32
+    },
+    "coordinates": [
+      {
+        "lat": 43.505,
+        "lng": -71.32
+      },
+      {
+        "lat": 43.503520278181384,
+        "lng": -71.31701310622039
+      },
+      {
+        "lat": 43.502040556362765,
+        "lng": -71.3140262124408
+      },
+      {
+        "lat": 43.500560834544146,
+        "lng": -71.31103931866119
+      }
+    ]
+  },
+  {
+    "id": "dave-roberts-quarry-trail",
+    "name": "Dave Roberts Quarry Trail",
+    "distance": 3.3,
+    "difficulty": "difficult",
+    "area": "Rand, Quarry & Straightback Mountains",
+    "trailhead": {
+      "lat": 43.51,
+      "lng": -71.29
+    },
+    "coordinates": [
+      {
+        "lat": 43.51,
+        "lng": -71.29
+      },
+      {
+        "lat": 43.5086955896649,
+        "lng": -71.29453023216554
+      },
+      {
+        "lat": 43.5073911793298,
+        "lng": -71.29906046433106
+      },
+      {
+        "lat": 43.506086768994706,
+        "lng": -71.3035906964966
+      },
+      {
+        "lat": 43.504782358659604,
+        "lng": -71.30812092866213
+      },
+      {
+        "lat": 43.50347794832451,
+        "lng": -71.31265116082766
+      },
+      {
+        "lat": 43.502173537989414,
+        "lng": -71.31718139299319
+      },
+      {
+        "lat": 43.50086912765431,
+        "lng": -71.32171162515873
+      }
+    ]
+  },
+  {
+    "id": "reed-road-trail",
+    "name": "Reed Road Trail",
+    "distance": 1,
+    "difficulty": "moderate",
+    "area": "Rand, Quarry & Straightback Mountains",
+    "trailhead": {
+      "lat": 43.51,
+      "lng": -71.29
+    },
+    "coordinates": [
+      {
+        "lat": 43.51,
+        "lng": -71.29
+      },
+      {
+        "lat": 43.50699335909507,
+        "lng": -71.29143917392275
+      },
+      {
+        "lat": 43.50398671819015,
+        "lng": -71.29287834784552
+      },
+      {
+        "lat": 43.50098007728522,
+        "lng": -71.29431752176826
+      }
+    ]
+  },
+  {
+    "id": "north-straightback-link",
+    "name": "North Straightback Link",
+    "distance": 0.5,
+    "difficulty": "easy",
+    "area": "Rand, Quarry & Straightback Mountains",
+    "trailhead": {
+      "lat": 43.51,
+      "lng": -71.29
+    },
+    "coordinates": [
+      {
+        "lat": 43.51,
+        "lng": -71.29
+      },
+      {
+        "lat": 43.51150585891913,
+        "lng": -71.29071425954209
+      },
+      {
+        "lat": 43.51301171783826,
+        "lng": -71.29142851908416
+      },
+      {
+        "lat": 43.514517576757385,
+        "lng": -71.29214277862626
+      }
+    ]
+  },
+  {
+    "id": "quarry-spur-trail",
+    "name": "Quarry Spur Trail",
+    "distance": 0.3,
+    "difficulty": "easy",
+    "area": "Rand, Quarry & Straightback Mountains",
+    "trailhead": {
+      "lat": 43.51,
+      "lng": -71.29
+    },
+    "coordinates": [
+      {
+        "lat": 43.51,
+        "lng": -71.29
+      },
+      {
+        "lat": 43.50932670959946,
+        "lng": -71.2907393781418
+      },
+      {
+        "lat": 43.50865341919893,
+        "lng": -71.29147875628357
+      },
+      {
+        "lat": 43.50798012879839,
+        "lng": -71.29221813442535
+      }
+    ]
+  },
+  {
+    "id": "straightback-major-link-belknap-range-trail",
+    "name": "Straightback-Major Link (Belknap Range Trail)",
+    "distance": 0.7,
+    "difficulty": "moderate",
+    "area": "Rand, Quarry & Straightback Mountains",
+    "trailhead": {
+      "lat": 43.51,
+      "lng": -71.29
+    },
+    "coordinates": [
+      {
+        "lat": 43.51,
+        "lng": -71.29
+      },
+      {
+        "lat": 43.50858374105275,
+        "lng": -71.28814563891359
+      },
+      {
+        "lat": 43.50716748210551,
+        "lng": -71.28629127782719
+      },
+      {
+        "lat": 43.50575122315826,
+        "lng": -71.28443691674077
+      }
+    ]
+  },
+  {
+    "id": "anna-straightback-link-belknap-range-trail",
+    "name": "Anna-Straightback Link (Belknap Range Trail)",
+    "distance": 1.1,
+    "difficulty": "moderate",
+    "area": "Rand, Quarry & Straightback Mountains",
+    "trailhead": {
+      "lat": 43.51,
+      "lng": -71.29
+    },
+    "coordinates": [
+      {
+        "lat": 43.51,
+        "lng": -71.29
+      },
+      {
+        "lat": 43.51355007026634,
+        "lng": -71.28908269658866
+      },
+      {
+        "lat": 43.51710014053269,
+        "lng": -71.28816539317734
+      },
+      {
+        "lat": 43.52065021079903,
+        "lng": -71.287248089766
+      }
+    ]
+  },
+  {
+    "id": "marsh-crossing",
+    "name": "Marsh Crossing",
+    "distance": 0.4,
+    "difficulty": "easy",
+    "area": "Rand, Quarry & Straightback Mountains",
+    "trailhead": {
+      "lat": 43.51,
+      "lng": -71.29
+    },
+    "coordinates": [
+      {
+        "lat": 43.51,
+        "lng": -71.29
+      },
+      {
+        "lat": 43.50894028672205,
+        "lng": -71.29080918820205
+      },
+      {
+        "lat": 43.5078805734441,
+        "lng": -71.29161837640407
+      },
+      {
+        "lat": 43.50682086016615,
+        "lng": -71.29242756460611
+      }
+    ]
+  },
+  {
+    "id": "precipice-path",
+    "name": "Precipice Path",
+    "distance": 2,
+    "difficulty": "difficult",
+    "area": "Rand, Quarry & Straightback Mountains",
+    "trailhead": {
+      "lat": 43.51,
+      "lng": -71.29
+    },
+    "coordinates": [
+      {
+        "lat": 43.51,
+        "lng": -71.29
+      },
+      {
+        "lat": 43.51409560035243,
+        "lng": -71.28713188951518
+      },
+      {
+        "lat": 43.518191200704855,
+        "lng": -71.28426377903035
+      },
+      {
+        "lat": 43.52228680105729,
+        "lng": -71.28139566854553
+      },
+      {
+        "lat": 43.52638240140972,
+        "lng": -71.2785275580607
+      }
+    ]
+  },
+  {
+    "id": "straightback-mountain-trail",
+    "name": "Straightback Mountain Trail",
+    "distance": 0.9,
+    "difficulty": "moderate",
+    "area": "Rand, Quarry & Straightback Mountains",
+    "trailhead": {
+      "lat": 43.51,
+      "lng": -71.29
+    },
+    "coordinates": [
+      {
+        "lat": 43.51,
+        "lng": -71.29
+      },
+      {
+        "lat": 43.5120248971418,
+        "lng": -71.29221354728098
+      },
+      {
+        "lat": 43.5140497942836,
+        "lng": -71.29442709456197
+      },
+      {
+        "lat": 43.5160746914254,
+        "lng": -71.29664064184294
+      }
+    ]
+  },
+  {
+    "id": "blueberry-pasture-trail",
+    "name": "Blueberry Pasture Trail",
+    "distance": 1.2,
+    "difficulty": "moderate",
+    "area": "Rand, Quarry & Straightback Mountains",
+    "trailhead": {
+      "lat": 43.51,
+      "lng": -71.29
+    },
+    "coordinates": [
+      {
+        "lat": 43.51,
+        "lng": -71.29
+      },
+      {
+        "lat": 43.51346226933442,
+        "lng": -71.29200317025136
+      },
+      {
+        "lat": 43.51692453866884,
+        "lng": -71.29400634050272
+      },
+      {
+        "lat": 43.52038680800326,
+        "lng": -71.29600951075409
+      }
+    ]
+  },
+  {
+    "id": "brook-trail",
+    "name": "Brook Trail",
+    "distance": 1.7,
+    "difficulty": "difficult",
+    "area": "Mt. Major",
+    "trailhead": {
+      "lat": 43.5197,
+      "lng": -71.2728
+    },
+    "coordinates": [
+      {
+        "lat": 43.5197,
+        "lng": -71.2728
+      },
+      {
+        "lat": 43.523883151722096,
+        "lng": -71.27204917267635
+      },
+      {
+        "lat": 43.528066303444184,
+        "lng": -71.27129834535269
+      },
+      {
+        "lat": 43.53224945516628,
+        "lng": -71.27054751802905
+      },
+      {
+        "lat": 43.536432606888376,
+        "lng": -71.26979669070539
+      }
+    ]
+  },
+  {
+    "id": "mt-major-trail",
+    "name": "Mt. Major Trail",
+    "distance": 1.5,
+    "difficulty": "moderate",
+    "area": "Mt. Major",
+    "trailhead": {
+      "lat": 43.5197,
+      "lng": -71.2728
+    },
+    "coordinates": [
+      {
+        "lat": 43.5197,
+        "lng": -71.2728
+      },
+      {
+        "lat": 43.523223815499854,
+        "lng": -71.26925278640016
+      },
+      {
+        "lat": 43.526747630999715,
+        "lng": -71.2657055728003
+      },
+      {
+        "lat": 43.53027144649957,
+        "lng": -71.26215835920046
+      }
+    ]
+  },
+  {
+    "id": "boulder-loop-trail",
+    "name": "Boulder Loop Trail",
+    "distance": 1.6,
+    "difficulty": "difficult",
+    "area": "Mt. Major",
+    "trailhead": {
+      "lat": 43.5197,
+      "lng": -71.2728
+    },
+    "coordinates": [
+      {
+        "lat": 43.5197,
+        "lng": -71.2728
+      },
+      {
+        "lat": 43.515749018384,
+        "lng": -71.27342429501843
+      },
+      {
+        "lat": 43.511798036768,
+        "lng": -71.27404859003686
+      },
+      {
+        "lat": 43.507847055152,
+        "lng": -71.27467288505528
+      },
+      {
+        "lat": 43.503896073536005,
+        "lng": -71.27529718007371
+      }
+    ]
+  },
+  {
+    "id": "jesus-valley-beaver-pond-trail",
+    "name": "Jesus Valley-Beaver Pond Trail",
+    "distance": 2.6,
+    "difficulty": "difficult",
+    "area": "Mt. Major",
+    "trailhead": {
+      "lat": 43.5197,
+      "lng": -71.2728
+    },
+    "coordinates": [
+      {
+        "lat": 43.5197,
+        "lng": -71.2728
+      },
+      {
+        "lat": 43.523663037226406,
+        "lng": -71.27104725537517
+      },
+      {
+        "lat": 43.52762607445282,
+        "lng": -71.26929451075034
+      },
+      {
+        "lat": 43.531589111679224,
+        "lng": -71.2675417661255
+      },
+      {
+        "lat": 43.53555214890564,
+        "lng": -71.26578902150068
+      },
+      {
+        "lat": 43.53951518613204,
+        "lng": -71.26403627687584
+      },
+      {
+        "lat": 43.543478223358456,
+        "lng": -71.26228353225102
+      }
+    ]
+  },
+  {
+    "id": "mack-ridge-trail-south",
+    "name": "Mack Ridge Trail (South)",
+    "distance": 0.7,
+    "difficulty": "moderate",
+    "area": "Mt. Shannon, Goat Pasture Hill & Pine Mountain",
+    "trailhead": {
+      "lat": 43.49,
+      "lng": -71.31
+    },
+    "coordinates": [
+      {
+        "lat": 43.49,
+        "lng": -71.31
+      },
+      {
+        "lat": 43.49029405524024,
+        "lng": -71.30768526978675
+      },
+      {
+        "lat": 43.49058811048047,
+        "lng": -71.3053705395735
+      },
+      {
+        "lat": 43.49088216572071,
+        "lng": -71.30305580936025
+      }
+    ]
+  },
+  {
+    "id": "yellow-trail",
+    "name": "Yellow Trail",
+    "distance": 1,
+    "difficulty": "moderate",
+    "area": "Mt. Shannon, Goat Pasture Hill & Pine Mountain",
+    "trailhead": {
+      "lat": 43.49,
+      "lng": -71.31
+    },
+    "coordinates": [
+      {
+        "lat": 43.49,
+        "lng": -71.31
+      },
+      {
+        "lat": 43.4930129845644,
+        "lng": -71.3085741545926
+      },
+      {
+        "lat": 43.496025969128794,
+        "lng": -71.3071483091852
+      },
+      {
+        "lat": 43.499038953693194,
+        "lng": -71.3057224637778
+      }
+    ]
+  },
+  {
+    "id": "blue-trail",
+    "name": "Blue Trail",
+    "distance": 1.1,
+    "difficulty": "moderate",
+    "area": "Mt. Shannon, Goat Pasture Hill & Pine Mountain",
+    "trailhead": {
+      "lat": 43.49,
+      "lng": -71.31
+    },
+    "coordinates": [
+      {
+        "lat": 43.49,
+        "lng": -71.31
+      },
+      {
+        "lat": 43.4866223116787,
+        "lng": -71.31142676769258
+      },
+      {
+        "lat": 43.4832446233574,
+        "lng": -71.31285353538516
+      },
+      {
+        "lat": 43.4798669350361,
+        "lng": -71.31428030307774
+      }
+    ]
+  },
+  {
+    "id": "red-trail-anna-goat-pasture-hill-trail-south",
+    "name": "Red Trail (Anna-Goat Pasture Hill Trail South)",
+    "distance": 1.8,
+    "difficulty": "difficult",
+    "area": "Mt. Shannon, Goat Pasture Hill & Pine Mountain",
+    "trailhead": {
+      "lat": 43.49,
+      "lng": -71.31
+    },
+    "coordinates": [
+      {
+        "lat": 43.49,
+        "lng": -71.31
+      },
+      {
+        "lat": 43.49301029221383,
+        "lng": -71.30665513217191
+      },
+      {
+        "lat": 43.49602058442766,
+        "lng": -71.30331026434384
+      },
+      {
+        "lat": 43.49903087664149,
+        "lng": -71.29996539651574
+      },
+      {
+        "lat": 43.50204116885532,
+        "lng": -71.29662052868767
+      }
+    ]
+  },
+  {
+    "id": "mary-jane-morse-greenwood-trail",
+    "name": "Mary Jane Morse Greenwood Trail",
+    "distance": 0.75,
+    "difficulty": "moderate",
+    "area": "Mt. Shannon, Goat Pasture Hill & Pine Mountain",
+    "trailhead": {
+      "lat": 43.49,
+      "lng": -71.31
+    },
+    "coordinates": [
+      {
+        "lat": 43.49,
+        "lng": -71.31
+      },
+      {
+        "lat": 43.48950131124617,
+        "lng": -71.31244975703424
+      },
+      {
+        "lat": 43.489002622492336,
+        "lng": -71.31489951406849
+      },
+      {
+        "lat": 43.48850393373851,
+        "lng": -71.31734927110271
+      }
+    ]
+  },
+  {
+    "id": "arlene-frances-morse-trail",
+    "name": "Arlene Frances Morse Trail",
+    "distance": 0.7,
+    "difficulty": "moderate",
+    "area": "Mt. Shannon, Goat Pasture Hill & Pine Mountain",
+    "trailhead": {
+      "lat": 43.49,
+      "lng": -71.31
+    },
+    "coordinates": [
+      {
+        "lat": 43.49,
+        "lng": -71.31
+      },
+      {
+        "lat": 43.48794670500425,
+        "lng": -71.30889165704546
+      },
+      {
+        "lat": 43.4858934100085,
+        "lng": -71.30778331409094
+      },
+      {
+        "lat": 43.48384011501275,
+        "lng": -71.3066749711364
+      }
+    ]
+  },
+  {
+    "id": "robert-a-greenwood-sr-loop",
+    "name": "Robert A. Greenwood Sr. Loop",
+    "distance": 0.5,
+    "difficulty": "easy",
+    "area": "Mt. Shannon, Goat Pasture Hill & Pine Mountain",
+    "trailhead": {
+      "lat": 43.49,
+      "lng": -71.31
+    },
+    "coordinates": [
+      {
+        "lat": 43.49,
+        "lng": -71.31
+      },
+      {
+        "lat": 43.49163776471185,
+        "lng": -71.3103090380663
+      },
+      {
+        "lat": 43.49327552942369,
+        "lng": -71.31061807613258
+      },
+      {
+        "lat": 43.494913294135536,
+        "lng": -71.31092711419888
+      }
+    ]
+  }
+]

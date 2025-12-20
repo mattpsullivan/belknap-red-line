@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTrails, useCompletions } from '@/hooks'
-import type { Trail } from '@/types'
+import { CompletionModal } from '@/components/trails'
+import type { Trail, Completion } from '@/types'
 
 type FilterStatus = 'all' | 'complete' | 'incomplete'
 type FilterDifficulty = 'all' | 'easy' | 'moderate' | 'difficult'
@@ -14,6 +15,7 @@ export function TrailsPage() {
   const [difficultyFilter, setDifficultyFilter] =
     useState<FilterDifficulty>('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const [selectedTrail, setSelectedTrail] = useState<Trail | null>(null)
 
   // Filter trails
   const filteredTrails = trails.filter((trail) => {
@@ -35,12 +37,13 @@ export function TrailsPage() {
     return true
   })
 
-  const handleMarkComplete = async (trail: Trail) => {
-    await addCompletion({
-      trailId: trail.id,
-      completedAt: new Date(),
-      manualEntry: true,
-    })
+  const handleMarkComplete = (trail: Trail) => {
+    setSelectedTrail(trail)
+  }
+
+  const handleSaveCompletion = async (completion: Omit<Completion, 'id'>) => {
+    await addCompletion(completion)
+    setSelectedTrail(null)
   }
 
   return (
@@ -169,6 +172,16 @@ export function TrailsPage() {
           )}
         </div>
       </div>
+
+      {/* Completion Modal */}
+      {selectedTrail && (
+        <CompletionModal
+          trail={selectedTrail}
+          isOpen={true}
+          onSave={handleSaveCompletion}
+          onClose={() => setSelectedTrail(null)}
+        />
+      )}
     </div>
   )
 }

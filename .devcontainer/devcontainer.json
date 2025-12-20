@@ -1,0 +1,67 @@
+{
+  "name": "Belknap Red-Line Tracker",
+
+  // Use docker-compose
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspace",
+
+  // Features to add to the dev container
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "moby": false
+    }
+  },
+
+  // VS Code customizations
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        // Core development
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "biomejs.biome",
+
+        // TypeScript/JavaScript
+        "ms-vscode.vscode-typescript-next",
+
+        // React
+        "dsznajder.es7-react-js-snippets",
+
+        // Testing
+        "vitest.explorer",
+
+        // Git
+        "eamodio.gitlens",
+
+        // Mapping/GeoJSON
+        "mapbox.vscode-mapbox",
+
+        // Database (if using postgres)
+        "mtxr.sqltools",
+        "mtxr.sqltools-driver-pg"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit"
+        },
+        "typescript.preferences.importModuleSpecifier": "relative"
+      }
+    }
+  },
+
+  // Run after container is created
+  "postCreateCommand": "npm install || true",
+
+  // Run after container starts
+  "postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
+
+  // Container user
+  "remoteUser": "node",
+
+  // Shutdown behavior
+  "shutdownAction": "stopCompose"
+}

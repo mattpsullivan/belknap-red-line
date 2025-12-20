@@ -1,0 +1,56 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      # Mount the project folder
+      - ..:/workspace:cached
+      # Persist command history
+      - command-history:/commandhistory
+      # Persist npm cache
+      - npm-cache:/home/node/.npm
+      # Use delegated for node_modules for better performance
+      - node-modules:/workspace/node_modules
+    environment:
+      # Forward API keys from host
+      - ANTHROPIC_API_KEY
+      - GOOGLE_API_KEY
+      - GEMINI_API_KEY
+    command: sleep infinity
+    network_mode: service:services
+
+  services:
+    image: alpine:3.19
+    command: sleep infinity
+    ports:
+      - "3000:3000"   # React/CRA
+      - "5173:5173"   # Vite
+      - "8080:8080"   # Generic dev server
+      - "4173:4173"   # Vite preview
+
+  # Uncomment if you need a database
+  # postgres:
+  #   image: postgres:16-alpine
+  #   restart: unless-stopped
+  #   volumes:
+  #     - postgres-data:/var/lib/postgresql/data
+  #   environment:
+  #     POSTGRES_USER: dev
+  #     POSTGRES_PASSWORD: dev
+  #     POSTGRES_DB: belknap
+  #   ports:
+  #     - "5432:5432"
+
+  # Uncomment if you need Redis for caching
+  # redis:
+  #   image: redis:7-alpine
+  #   restart: unless-stopped
+  #   ports:
+  #     - "6379:6379"
+
+volumes:
+  command-history:
+  npm-cache:
+  node-modules:
+  # postgres-data:

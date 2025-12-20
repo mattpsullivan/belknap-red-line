@@ -1,3 +1,5 @@
 export { useTrails } from './useTrails'
 export { useCompletions } from './useCompletions'
 export { useProgress } from './useProgress'
+export { useGeolocation } from './useGeolocation'
+export type { GeoPosition, UseGeolocationOptions } from './useGeolocation'

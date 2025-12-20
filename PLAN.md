@@ -270,18 +270,18 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 ### Phase 2: GPS Tracking
 
 #### 2.0 Detailed Trail Coordinates
-- [ ] Download Trailforks GPX data for Belknap Range trails
-- [ ] Cross-reference GPX trails with BRATTS trail names
-- [ ] Create script to convert GPX to JSON coordinates
-- [ ] Update `trails.json` with accurate trail polylines
-- [ ] Verify trail paths render correctly on map
+- [x] Query OpenStreetMap Overpass API for Belknap Range trails
+- [x] Cross-reference OSM trails with BRATTS trail names (48/61 matched)
+- [x] Create `scripts/match-osm-trails.js` conversion script
+- [x] Update `trails.json` with 3,541 real coordinate points
+- [ ] Manually add remaining 13 unmatched trails (optional refinement)
 
 #### 2.1 Geolocation
-- [ ] `useGeolocation` hook
-  - [ ] Write tests (with mocked geolocation)
-  - [ ] Implement with 5s throttle
-  - [ ] Handle permission denied
-  - [ ] Handle GPS errors gracefully
+- [x] `useGeolocation` hook
+  - [x] Write tests (8 tests with mocked geolocation)
+  - [x] Implement with configurable throttle (default 5s)
+  - [x] Handle permission denied
+  - [x] Handle GPS errors gracefully
 
 #### 2.2 Live Position Display
 - [ ] User location marker on map

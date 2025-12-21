@@ -167,9 +167,9 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 
 ---
 
-### ✅ CURRENT STATE: Phase 2 GPS Tracking Complete
+### ✅ CURRENT STATE: Phase 3 In Progress
 
-**Status:** Phase 2 GPS tracking implementation complete with 59 passing tests.
+**Status:** Phase 3 offline + polish implementation in progress with 59 passing tests.
 
 **What's Working:**
 - Progress Dashboard with animated progress ring
@@ -184,8 +184,10 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 - Trail detection using Turf.js (50m buffer, 80% coverage threshold)
 - Auto-completion when GPS track matches trails
 - Battery optimization (5s throttle, 5m minimum distance filter)
+- **PMTiles provider for offline map tiles** (new)
+- **Offline mode toggle in Settings** (new)
 
-**Next:** Phase 3 (Full Offline + Polish) or Phase 4 (Future Enhancements)
+**Next:** Complete Phase 3.1 PMTiles testing, then 3.2 Trail Coordinate Improvement or 3.3 Export/Import
 
 ---
 
@@ -332,24 +334,30 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 ### Phase 3: Full Offline + Polish
 
 #### 3.1 PMTiles Offline Maps
-- [ ] Generate Belknap Range PMTiles extract
-- [ ] Configure PMTiles protocol in MapLibre
-- [ ] Bundle tiles with app (or download option)
+- [x] Configure PMTiles protocol in MapLibre (PMTilesProvider.tsx)
+- [x] Add offline mode toggle in Settings
+- [ ] Generate Belknap Range PMTiles extract (currently using tiles.openfreemap.org extract)
 - [ ] Test fully offline map display
 
-#### 3.2 Export/Import
+#### 3.2 Trail Coordinate Improvement
+- [ ] Use recorded GPS tracks to refine trail coordinates
+- [ ] Match GPS tracks to trails with low coordinate counts
+- [ ] Update trails.json with improved coordinate paths
+- [ ] Prioritize 13 unmatched trails from OSM import
+
+#### 3.3 Export/Import
 - [ ] Export completions to JSON
 - [ ] Export to CSV format
 - [ ] Import from JSON backup
 - [ ] Data validation on import
 
-#### 3.3 Enhanced Statistics
+#### 3.4 Enhanced Statistics
 - [ ] Progress over time chart
 - [ ] Filter by difficulty
 - [ ] Filter by area
 - [ ] Timeline view of completions
 
-#### 3.4 Performance
+#### 3.5 Performance
 - [ ] Bundle size optimization
 - [ ] Lazy load routes
 - [ ] Image optimization
@@ -445,5 +453,6 @@ const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 | 2025-12-21 | Phase 2.5: Auto-completion with confirmation modal | Done |
 | 2025-12-21 | Phase 2.6: Battery optimization (throttle + distance filter) | Done |
 | 2025-12-21 | **Phase 2 GPS Tracking Complete** (59 tests passing) | Done |
+| 2025-12-21 | Phase 3.1: PMTiles provider and offline mode toggle | Done |
 
 <!-- Update this log after each work session -->

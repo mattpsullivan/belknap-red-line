@@ -299,12 +299,14 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 - [x] Recording status indicator
 
 #### 2.4 Trail Detection
-- [ ] `trailMatcher` service
-  - [ ] Write tests with sample data
-  - [ ] Implement 50m buffer algorithm
-  - [ ] Implement 80% coverage check
-- [ ] Real-time "current trail" detection
-- [ ] Coverage progress indicator
+- [x] `trailMatcher` service (11 tests)
+  - [x] Turf.js for spatial operations
+  - [x] 50m buffer around GPS track
+  - [x] 80% coverage threshold for completion
+  - [x] Sample points along trail for accuracy
+- [x] `calculateCoverage` - trail coverage percentage
+- [x] `findMatchingTrails` - find trails matching track
+- [x] `trailMatcher` - current trail + completed trails
 
 #### 2.5 Auto-Completion
 - [ ] Detect completed trails from track

@@ -44,12 +44,12 @@ export function useCompletions() {
   const completedTrailIds = useMemo(() => {
     const ids = new Set<string>()
     completions.forEach((c) => ids.add(c.trailId))
-    return Array.from(ids)
+    return ids
   }, [completions])
 
   const isTrailCompleted = useCallback(
     (trailId: string): boolean => {
-      return completedTrailIds.includes(trailId)
+      return completedTrailIds.has(trailId)
     },
     [completedTrailIds]
   )

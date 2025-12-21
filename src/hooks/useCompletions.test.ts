@@ -122,9 +122,9 @@ describe('useCompletions', () => {
     })
 
     await waitFor(() => {
-      expect(result.current.completedTrailIds).toContain('belknap-east')
-      expect(result.current.completedTrailIds).toContain('major-main')
-      expect(result.current.completedTrailIds).toHaveLength(2)
+      expect(result.current.completedTrailIds.has('belknap-east')).toBe(true)
+      expect(result.current.completedTrailIds.has('major-main')).toBe(true)
+      expect(result.current.completedTrailIds.size).toBe(2)
     })
   })
 })

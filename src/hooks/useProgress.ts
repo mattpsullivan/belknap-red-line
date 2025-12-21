@@ -6,11 +6,11 @@ export function useProgress() {
   const { trails, totalTrails, totalDistance } = useTrails()
   const { completedTrailIds } = useCompletions()
 
-  const completedCount = completedTrailIds.length
+  const completedCount = completedTrailIds.size
 
   const completedMiles = useMemo(() => {
     return trails
-      .filter((t) => completedTrailIds.includes(t.id))
+      .filter((t) => completedTrailIds.has(t.id))
       .reduce((sum, t) => sum + t.distance, 0)
   }, [trails, completedTrailIds])
 

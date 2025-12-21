@@ -161,12 +161,144 @@ This document tracks research questions, sources investigated, and findings rela
 
 ---
 
+### Q6: What are the best sources for trail elevation data?
+
+**Date Researched**: 2025-12-21
+
+**Context**:
+The app needs elevation profile data for trail visualization. Current trail data has coordinates but no per-point elevation. Options include runtime API calls or pre-computing elevation data for offline support.
+
+**Sources Investigated**:
+
+#### Free Elevation APIs
+
+1. **Open Topo Data** ⭐ RECOMMENDED
+   - URL: https://www.opentopodata.org/
+   - API Docs: https://www.opentopodata.org/api/
+   - GitHub: https://github.com/ajnisbet/opentopodata
+   - **Features**:
+     - REST API compatible with Google Maps Elevation API
+     - Multiple datasets: SRTM (90m), ASTER (30m), NED (10m for US), EU-DEM, etc.
+     - Can self-host with Docker for unlimited requests
+     - Public API: 100 locations/request, 1 req/sec, 1000 calls/day
+   - **Data Quality**: 10m resolution for US via NED dataset
+   - **Assessment**: Best option for pre-computing elevation - can self-host for batch processing
+
+2. **Open-Elevation**
+   - URL: https://open-elevation.com/
+   - Wiki: https://wiki.openstreetmap.org/wiki/Open-Elevation
+   - **Features**:
+     - Free public API based on SRTM dataset
+     - Open source (GPLv2), Docker image available
+     - Simple REST API: POST array of lat/lng, get elevations
+   - **Limits**: 1,000 requests/month on public API
+   - **Assessment**: Good for small batch jobs; SRTM resolution (~30m) may be sufficient
+
+3. **GPXZ Elevation API**
+   - URL: https://www.gpxz.io/
+   - **Features**:
+     - High-resolution data (Copernicus 30m base + LiDAR where available)
+     - Batch location queries and elevation profiles
+     - Ocean depth from GEBCO 2023
+   - **Pricing**: Free tier available, paid plans for higher volume
+   - **Assessment**: Good quality, but may have usage limits
+
+4. **OpenTopography**
+   - URL: https://opentopography.org/developers
+   - **Features**:
+     - Access to global DEMs: SRTM, ALOS World 3D, Copernicus Global DSM
+     - REST API with OpenAPI specification
+     - High-resolution LiDAR data for some regions
+   - **Limits**: API key required
+   - **Assessment**: Academic/research focused; good data quality
+
+#### Downloadable Elevation Datasets (For Pre-Processing)
+
+5. **USGS 3DEP / National Elevation Dataset (NED)** ⭐ BEST FOR NH
+   - Download: https://apps.nationalmap.gov/downloader/
+   - **Features**:
+     - 1/3 arc-second (~10m) resolution for continental US
+     - 1/9 arc-second (~3m) in some areas
+     - Cloud Optimized GeoTIFF (COG) format
+     - Public domain, free to use
+   - **Coverage**: Complete US coverage including New Hampshire
+   - **Assessment**: Best resolution for Belknap Range; can download NH tiles and process locally
+
+6. **Copernicus Global DEM**
+   - URL: https://spacedata.copernicus.eu/
+   - **Features**:
+     - 30m resolution global coverage
+     - Free for research and commercial use
+   - **Assessment**: Good backup option; slightly lower resolution than NED for US
+
+7. **SRTM (Shuttle Radar Topography Mission)**
+   - **Features**:
+     - 30m (1 arc-second) for US, 90m (3 arc-second) globally
+     - Well-established, widely used dataset
+     - ~18GB for complete US coverage
+   - **Assessment**: Adequate resolution; very well-documented
+
+**Findings Summary**:
+
+✅ **For Offline-First App (Recommended)**:
+Pre-compute elevation data and embed in trails.json:
+1. Download USGS NED tiles for Belknap Range area (~43.4°N to 43.6°N, -71.5°W to -71.2°W)
+2. Use GDAL or Python (rasterio) to sample elevation at each trail coordinate
+3. Add `elevation` field to each coordinate in trails.json
+
+✅ **For Runtime API (If Needed)**:
+Use Open Topo Data public API or self-hosted instance:
+```
+GET https://api.opentopodata.org/v1/ned10m?locations=43.52,-71.34|43.53,-71.35
+```
+
+**Recommended Approach**:
+
+1. **Phase 1 - Data Acquisition**:
+   - Download NED 1/3 arc-second tiles for NH from USGS National Map
+   - Tiles needed: Approximately 4 tiles covering Belknap Range
+
+2. **Phase 2 - Processing Script**:
+   ```python
+   # Pseudocode for elevation enrichment
+   import rasterio
+   import json
+
+   dem = rasterio.open('ned_nh.tif')
+   trails = json.load('trails.json')
+
+   for trail in trails:
+       for coord in trail['coordinates']:
+           coord['elevation'] = sample_elevation(dem, coord['lat'], coord['lng'])
+
+       # Calculate elevation gain
+       trail['elevationGain'] = calculate_gain(trail['coordinates'])
+   ```
+
+3. **Phase 3 - Data Enhancement**:
+   - Add `elevation` (feet) to each coordinate point
+   - Calculate and store `elevationGain` and `elevationLoss` per trail
+   - Generate elevation profile data for visualization
+
+**Data Size Estimate**:
+- Current trails.json: ~200KB
+- With elevation per point: ~250KB (+25%)
+- Acceptable for offline PWA
+
+**Next Steps**:
+- [ ] Download NED tiles from USGS National Map Downloader
+- [ ] Create Python script to sample elevation at trail coordinates
+- [ ] Update trails.json schema to include elevation data
+- [ ] Add elevation profile visualization component
+
+---
+
 ## Research Log
 
 | Date | Question | Status | Outcome |
 |------|----------|--------|---------|
 | 2025-10-24 | GPS coordinates acquisition | ✅ Complete | Found Trailforks, official PDF, and OSM sources |
-| | | | |
+| 2025-12-21 | Trail elevation data sources | ✅ Complete | Recommend USGS NED for pre-processing, Open Topo Data API for runtime |
 
 ---
 
@@ -190,6 +322,14 @@ This document tracks research questions, sources investigated, and findings rela
 - GeoJSON Specification: https://geojson.org/
 - Leaflet.js Documentation: https://leafletjs.com/
 - Mapbox Documentation: https://docs.mapbox.com/
+
+### Elevation Data Sources
+- Open Topo Data (API): https://www.opentopodata.org/
+- Open-Elevation (API): https://open-elevation.com/
+- USGS National Map Downloader: https://apps.nationalmap.gov/downloader/
+- OpenTopography: https://opentopography.org/
+- GPXZ Elevation API: https://www.gpxz.io/
+- Copernicus DEM: https://spacedata.copernicus.eu/
 
 ---
 

@@ -12,7 +12,7 @@ describe('Database', () => {
     it('should add a completion', async () => {
       const completion: Omit<Completion, 'id'> = {
         trailId: 'belknap-east',
-        completedAt: new Date('2024-12-15'),
+        completedAt: new Date('2025-12-15'),
         manualEntry: true,
         notes: 'Great views!',
       }
@@ -28,12 +28,12 @@ describe('Database', () => {
     it('should get all completions', async () => {
       await db.completions.add({
         trailId: 'belknap-east',
-        completedAt: new Date('2024-12-15'),
+        completedAt: new Date('2025-12-15'),
         manualEntry: true,
       })
       await db.completions.add({
         trailId: 'major-main',
-        completedAt: new Date('2024-12-10'),
+        completedAt: new Date('2025-12-10'),
         manualEntry: true,
       })
 
@@ -44,17 +44,17 @@ describe('Database', () => {
     it('should get completions by trail ID', async () => {
       await db.completions.add({
         trailId: 'belknap-east',
-        completedAt: new Date('2024-12-15'),
+        completedAt: new Date('2025-12-15'),
         manualEntry: true,
       })
       await db.completions.add({
         trailId: 'belknap-east',
-        completedAt: new Date('2024-12-20'),
+        completedAt: new Date('2025-12-20'),
         manualEntry: true,
       })
       await db.completions.add({
         trailId: 'major-main',
-        completedAt: new Date('2024-12-10'),
+        completedAt: new Date('2025-12-10'),
         manualEntry: true,
       })
 
@@ -69,7 +69,7 @@ describe('Database', () => {
     it('should delete a completion', async () => {
       const id = await db.completions.add({
         trailId: 'belknap-east',
-        completedAt: new Date('2024-12-15'),
+        completedAt: new Date('2025-12-15'),
         manualEntry: true,
       })
 
@@ -82,7 +82,7 @@ describe('Database', () => {
     it('should update a completion', async () => {
       const id = await db.completions.add({
         trailId: 'belknap-east',
-        completedAt: new Date('2024-12-15'),
+        completedAt: new Date('2025-12-15'),
         manualEntry: true,
       })
 

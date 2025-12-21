@@ -18,7 +18,7 @@ describe('completionImport', () => {
     it('validates a valid completion object', () => {
       const completion = {
         trailId: 'trail-1',
-        completedAt: '2024-12-15',
+        completedAt: '2025-12-15',
         manualEntry: true,
         notes: 'Great hike!',
       }
@@ -35,7 +35,7 @@ describe('completionImport', () => {
 
     it('requires trailId', () => {
       const completion = {
-        completedAt: '2024-12-15',
+        completedAt: '2025-12-15',
         manualEntry: true,
       }
 
@@ -46,7 +46,7 @@ describe('completionImport', () => {
     it('rejects unknown trailId', () => {
       const completion = {
         trailId: 'unknown-trail',
-        completedAt: '2024-12-15',
+        completedAt: '2025-12-15',
       }
 
       const errors = validateCompletion(completion, 0, validTrailIds)
@@ -75,7 +75,7 @@ describe('completionImport', () => {
     it('rejects non-boolean manualEntry', () => {
       const completion = {
         trailId: 'trail-1',
-        completedAt: '2024-12-15',
+        completedAt: '2025-12-15',
         manualEntry: 'yes',
       }
 
@@ -86,7 +86,7 @@ describe('completionImport', () => {
     it('rejects non-string notes', () => {
       const completion = {
         trailId: 'trail-1',
-        completedAt: '2024-12-15',
+        completedAt: '2025-12-15',
         notes: 123,
       }
 
@@ -98,8 +98,8 @@ describe('completionImport', () => {
   describe('validateCompletions', () => {
     it('validates an array of completions', () => {
       const data = [
-        { trailId: 'trail-1', completedAt: '2024-12-10' },
-        { trailId: 'trail-2', completedAt: '2024-12-15' },
+        { trailId: 'trail-1', completedAt: '2025-12-10' },
+        { trailId: 'trail-2', completedAt: '2025-12-15' },
       ]
 
       const { valid, errors } = validateCompletions(data, validTrailIds)
@@ -116,9 +116,9 @@ describe('completionImport', () => {
 
     it('filters out invalid items and collects errors', () => {
       const data = [
-        { trailId: 'trail-1', completedAt: '2024-12-10' }, // valid
-        { trailId: 'unknown', completedAt: '2024-12-15' }, // invalid trailId
-        { trailId: 'trail-2', completedAt: '2024-12-20' }, // valid
+        { trailId: 'trail-1', completedAt: '2025-12-10' }, // valid
+        { trailId: 'unknown', completedAt: '2025-12-15' }, // invalid trailId
+        { trailId: 'trail-2', completedAt: '2025-12-20' }, // valid
       ]
 
       const { valid, errors } = validateCompletions(data, validTrailIds)
@@ -127,7 +127,7 @@ describe('completionImport', () => {
     })
 
     it('defaults manualEntry to true if not provided', () => {
-      const data = [{ trailId: 'trail-1', completedAt: '2024-12-10' }]
+      const data = [{ trailId: 'trail-1', completedAt: '2025-12-10' }]
 
       const { valid } = validateCompletions(data, validTrailIds)
       expect(valid[0].manualEntry).toBe(true)
@@ -139,12 +139,12 @@ describe('completionImport', () => {
       const completions = [
         {
           trailId: 'trail-1',
-          completedAt: new Date('2024-12-10'),
+          completedAt: new Date('2025-12-10'),
           manualEntry: true,
         },
         {
           trailId: 'trail-2',
-          completedAt: new Date('2024-12-15'),
+          completedAt: new Date('2025-12-15'),
           manualEntry: false,
         },
       ]
@@ -162,7 +162,7 @@ describe('completionImport', () => {
       // Add initial completion
       await db.completions.add({
         trailId: 'trail-1',
-        completedAt: new Date('2024-12-10'),
+        completedAt: new Date('2025-12-10'),
         manualEntry: true,
       })
 
@@ -170,7 +170,7 @@ describe('completionImport', () => {
       const completions = [
         {
           trailId: 'trail-1',
-          completedAt: new Date('2024-12-10'),
+          completedAt: new Date('2025-12-10'),
           manualEntry: true,
         },
       ]
@@ -187,12 +187,12 @@ describe('completionImport', () => {
       // Add initial completions
       await db.completions.add({
         trailId: 'trail-1',
-        completedAt: new Date('2024-12-05'),
+        completedAt: new Date('2025-12-05'),
         manualEntry: true,
       })
       await db.completions.add({
         trailId: 'trail-2',
-        completedAt: new Date('2024-12-06'),
+        completedAt: new Date('2025-12-06'),
         manualEntry: true,
       })
 
@@ -200,7 +200,7 @@ describe('completionImport', () => {
       const completions = [
         {
           trailId: 'trail-3',
-          completedAt: new Date('2024-12-15'),
+          completedAt: new Date('2025-12-15'),
           manualEntry: true,
         },
       ]
@@ -218,8 +218,8 @@ describe('completionImport', () => {
   describe('importFromJSON', () => {
     it('parses and imports valid JSON', async () => {
       const json = JSON.stringify([
-        { trailId: 'trail-1', completedAt: '2024-12-10' },
-        { trailId: 'trail-2', completedAt: '2024-12-15' },
+        { trailId: 'trail-1', completedAt: '2025-12-10' },
+        { trailId: 'trail-2', completedAt: '2025-12-15' },
       ])
 
       const result = await importFromJSON(json, validTrailIds)
@@ -235,7 +235,7 @@ describe('completionImport', () => {
 
     it('reports validation errors', async () => {
       const json = JSON.stringify([
-        { trailId: 'unknown-trail', completedAt: '2024-12-10' },
+        { trailId: 'unknown-trail', completedAt: '2025-12-10' },
       ])
 
       const result = await importFromJSON(json, validTrailIds)
@@ -245,8 +245,8 @@ describe('completionImport', () => {
 
     it('imports valid items even with some errors', async () => {
       const json = JSON.stringify([
-        { trailId: 'trail-1', completedAt: '2024-12-10' }, // valid
-        { trailId: 'unknown', completedAt: '2024-12-15' }, // invalid
+        { trailId: 'trail-1', completedAt: '2025-12-10' }, // valid
+        { trailId: 'unknown', completedAt: '2025-12-15' }, // invalid
       ])
 
       const result = await importFromJSON(json, validTrailIds)

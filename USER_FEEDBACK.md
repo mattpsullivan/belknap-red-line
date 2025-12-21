@@ -534,12 +534,12 @@ Building on the "scavenger hunt" concept from feedback #5:
 
 | Date | Source | Summary | Status |
 |------|--------|---------|--------|
-| Dec 2024 | User | Trail area/region organization | Open |
-| Dec 2024 | User | Red-line color scheme for completed trails | Open |
-| Dec 2024 | User | Trail info/labels on map | Open |
-| Dec 2024 | User | Trail detail page with map, elevation, loops | Open |
-| Dec 2024 | User | Multi-trail-system / white-label support | Open |
-| Dec 2024 | User | Multi-trail trip planning & loops | Open |
+| Dec 2025 | User | Trail area/region organization | Open |
+| Dec 2025 | User | Red-line color scheme for completed trails | Open |
+| Dec 2025 | User | Trail info/labels on map | Open |
+| Dec 2025 | User | Trail detail page with map, elevation, loops | Open |
+| Dec 2025 | User | Multi-trail-system / white-label support | Open |
+| Dec 2025 | User | Multi-trail trip planning & loops | Open |
 
 ---
 

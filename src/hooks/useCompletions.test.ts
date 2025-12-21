@@ -22,7 +22,7 @@ describe('useCompletions', () => {
     await act(async () => {
       await result.current.addCompletion({
         trailId: 'belknap-east',
-        completedAt: new Date('2024-12-15'),
+        completedAt: new Date('2025-12-15'),
         manualEntry: true,
         notes: 'Great hike!',
       })
@@ -42,7 +42,7 @@ describe('useCompletions', () => {
     await act(async () => {
       completionId = await result.current.addCompletion({
         trailId: 'belknap-east',
-        completedAt: new Date('2024-12-15'),
+        completedAt: new Date('2025-12-15'),
         manualEntry: true,
       })
     })
@@ -66,7 +66,7 @@ describe('useCompletions', () => {
     await act(async () => {
       await result.current.addCompletion({
         trailId: 'belknap-east',
-        completedAt: new Date('2024-12-15'),
+        completedAt: new Date('2025-12-15'),
         manualEntry: true,
       })
     })
@@ -83,17 +83,17 @@ describe('useCompletions', () => {
     await act(async () => {
       await result.current.addCompletion({
         trailId: 'belknap-east',
-        completedAt: new Date('2024-12-15'),
+        completedAt: new Date('2025-12-15'),
         manualEntry: true,
       })
       await result.current.addCompletion({
         trailId: 'belknap-east',
-        completedAt: new Date('2024-12-20'),
+        completedAt: new Date('2025-12-20'),
         manualEntry: true,
       })
       await result.current.addCompletion({
         trailId: 'major-main',
-        completedAt: new Date('2024-12-10'),
+        completedAt: new Date('2025-12-10'),
         manualEntry: true,
       })
     })
@@ -111,12 +111,12 @@ describe('useCompletions', () => {
     await act(async () => {
       await result.current.addCompletion({
         trailId: 'belknap-east',
-        completedAt: new Date('2024-12-15'),
+        completedAt: new Date('2025-12-15'),
         manualEntry: true,
       })
       await result.current.addCompletion({
         trailId: 'major-main',
-        completedAt: new Date('2024-12-10'),
+        completedAt: new Date('2025-12-10'),
         manualEntry: true,
       })
     })

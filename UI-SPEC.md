@@ -154,7 +154,7 @@ Primary actions placed in bottom 2/3 of screen for one-handed use:
 ┌─────────────────────────────────────┐
 │ ● Mount Belknap via East Trail      │
 │   2.4 mi  •  Moderate  •  1,200 ft  │
-│   ✓ Completed Dec 15, 2024          │
+│   ✓ Completed Dec 15, 2025          │
 └─────────────────────────────────────┘
 ```
 
@@ -222,7 +222,7 @@ Primary actions placed in bottom 2/3 of screen for one-handed use:
 │                                     │
 │  Date Completed                     │
 │  ┌─────────────────────────────┐    │
-│  │ December 20, 2024        📅 │    │
+│  │ December 20, 2025        📅 │    │
 │  └─────────────────────────────┘    │
 │                                     │
 │  Notes (optional)                   │
@@ -417,14 +417,14 @@ Sample trails for prototypes:
 
 ```json
 [
-  {"id": "1", "name": "Mount Belknap via East Trail", "distance": 2.4, "difficulty": "moderate", "elevation": 1200, "complete": true, "date": "2024-12-15"},
-  {"id": "2", "name": "Mount Major via Main Trail", "distance": 2.8, "difficulty": "easy", "elevation": 1100, "complete": true, "date": "2024-12-10"},
+  {"id": "1", "name": "Mount Belknap via East Trail", "distance": 2.4, "difficulty": "moderate", "elevation": 1200, "complete": true, "date": "2025-12-15"},
+  {"id": "2", "name": "Mount Major via Main Trail", "distance": 2.8, "difficulty": "easy", "elevation": 1100, "complete": true, "date": "2025-12-10"},
   {"id": "3", "name": "Gunstock Mountain", "distance": 3.2, "difficulty": "moderate", "elevation": 1400, "complete": false},
   {"id": "4", "name": "Piper Mountain", "distance": 2.0, "difficulty": "easy", "elevation": 800, "complete": false},
-  {"id": "5", "name": "Mount Klem", "distance": 1.8, "difficulty": "easy", "elevation": 600, "complete": true, "date": "2024-11-28"},
+  {"id": "5", "name": "Mount Klem", "distance": 1.8, "difficulty": "easy", "elevation": 600, "complete": true, "date": "2025-11-28"},
   {"id": "6", "name": "Whiteface Mountain", "distance": 4.5, "difficulty": "difficult", "elevation": 1800, "complete": false},
   {"id": "7", "name": "Mount Mack", "distance": 2.2, "difficulty": "moderate", "elevation": 950, "complete": false},
-  {"id": "8", "name": "Round Pond Trail", "distance": 1.5, "difficulty": "easy", "elevation": 400, "complete": true, "date": "2024-12-01"}
+  {"id": "8", "name": "Round Pond Trail", "distance": 1.5, "difficulty": "easy", "elevation": 400, "complete": true, "date": "2025-12-01"}
 ]
 ```
 

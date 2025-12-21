@@ -21,12 +21,12 @@ describe('useProgress', () => {
   it('calculates completed count correctly', async () => {
     await db.completions.add({
       trailId: 'quarry-trail',
-      completedAt: new Date('2024-12-15'),
+      completedAt: new Date('2025-12-15'),
       manualEntry: true,
     })
     await db.completions.add({
       trailId: 'lakeview-trail',
-      completedAt: new Date('2024-12-10'),
+      completedAt: new Date('2025-12-10'),
       manualEntry: true,
     })
 
@@ -41,7 +41,7 @@ describe('useProgress', () => {
     // quarry-trail is 1.2 miles
     await db.completions.add({
       trailId: 'quarry-trail',
-      completedAt: new Date('2024-12-15'),
+      completedAt: new Date('2025-12-15'),
       manualEntry: true,
     })
 
@@ -56,12 +56,12 @@ describe('useProgress', () => {
     // Add 2 of 61 trails (about 3%)
     await db.completions.add({
       trailId: 'quarry-trail',
-      completedAt: new Date('2024-12-15'),
+      completedAt: new Date('2025-12-15'),
       manualEntry: true,
     })
     await db.completions.add({
       trailId: 'lakeview-trail',
-      completedAt: new Date('2024-12-10'),
+      completedAt: new Date('2025-12-10'),
       manualEntry: true,
     })
 
@@ -75,7 +75,7 @@ describe('useProgress', () => {
   it('returns remaining count correctly', async () => {
     await db.completions.add({
       trailId: 'quarry-trail',
-      completedAt: new Date('2024-12-15'),
+      completedAt: new Date('2025-12-15'),
       manualEntry: true,
     })
 
@@ -90,12 +90,12 @@ describe('useProgress', () => {
     // Complete same trail twice
     await db.completions.add({
       trailId: 'quarry-trail',
-      completedAt: new Date('2024-12-15'),
+      completedAt: new Date('2025-12-15'),
       manualEntry: true,
     })
     await db.completions.add({
       trailId: 'quarry-trail',
-      completedAt: new Date('2024-12-20'),
+      completedAt: new Date('2025-12-20'),
       manualEntry: true,
     })
 

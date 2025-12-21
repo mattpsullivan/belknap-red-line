@@ -20,14 +20,14 @@ describe('useTrackHistory', () => {
 
   it('returns tracks ordered by startedAt descending', async () => {
     const track1 = {
-      startedAt: new Date('2024-12-10'),
-      endedAt: new Date('2024-12-10'),
+      startedAt: new Date('2025-12-10'),
+      endedAt: new Date('2025-12-10'),
       points: [],
       distance: 1000,
     }
     const track2 = {
-      startedAt: new Date('2024-12-15'),
-      endedAt: new Date('2024-12-15'),
+      startedAt: new Date('2025-12-15'),
+      endedAt: new Date('2025-12-15'),
       points: [],
       distance: 2000,
     }

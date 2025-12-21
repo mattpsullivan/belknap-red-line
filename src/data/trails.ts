@@ -1,7 +1,7 @@
 import type { Trail } from '@/types/trail'
 import trailsData from './trails.json'
 
-// Import real trail data from BRATTS workbook (61 trails, 70.45 miles)
+// Import real trail data from BRATTS workbook (59 trails, 67.65 miles)
 export const trails: Trail[] = trailsData as Trail[]
 
 // Calculate total distance

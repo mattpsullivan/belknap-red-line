@@ -82,7 +82,7 @@ describe('useProgress', () => {
     const { result } = renderHook(() => useProgress())
 
     await waitFor(() => {
-      expect(result.current.remainingCount).toBe(60) // 61 - 1 = 60
+      expect(result.current.remainingCount).toBe(58) // 59 - 1 = 58
     })
   })
 

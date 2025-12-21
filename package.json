@@ -9,7 +9,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "clean": "rm -rf node_modules dist .vite",
+    "reinstall": "npm run clean && npm install"
   },
   "dependencies": {
     "@protomaps/basemaps": "^5.7.0",

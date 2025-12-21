@@ -194,4 +194,55 @@ describe('useGeolocation', () => {
     expect(result.current.error).toBe('Geolocation not supported')
     expect(result.current.isWatching).toBe(false)
   })
+
+  it('should skip updates when moved less than minDistanceMeters', () => {
+    let successCallback: (pos: GeolocationPosition) => void
+
+    mockGeolocation.watchPosition.mockImplementation((success) => {
+      successCallback = success
+      return 1
+    })
+
+    const { result } = renderHook(() =>
+      useGeolocation({ throttleMs: 0, minDistanceMeters: 10 })
+    )
+
+    act(() => {
+      result.current.startWatching()
+    })
+
+    // First position update should go through
+    act(() => {
+      successCallback(mockPosition)
+    })
+
+    expect(result.current.position?.lat).toBe(43.5179)
+
+    // Second update only ~5m away should be skipped
+    // ~0.00005 degrees latitude ≈ 5.5 meters
+    const closePosition = {
+      ...mockPosition,
+      coords: { ...mockPosition.coords, latitude: 43.51795 },
+    }
+
+    act(() => {
+      successCallback(closePosition)
+    })
+
+    // Position should still be the first one (distance filtered)
+    expect(result.current.position?.lat).toBe(43.5179)
+
+    // Third update ~15m away should go through
+    // ~0.00015 degrees latitude ≈ 16.7 meters
+    const farPosition = {
+      ...mockPosition,
+      coords: { ...mockPosition.coords, latitude: 43.5181 },
+    }
+
+    act(() => {
+      successCallback(farPosition)
+    })
+
+    expect(result.current.position?.lat).toBe(43.5181)
+  })
 })

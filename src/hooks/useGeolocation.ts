@@ -10,6 +10,7 @@ export interface GeoPosition {
 export interface UseGeolocationOptions {
   throttleMs?: number
   enableHighAccuracy?: boolean
+  minDistanceMeters?: number // Skip updates if moved less than this distance
 }
 
 export interface UseGeolocationReturn {
@@ -26,10 +27,30 @@ const ERROR_MESSAGES: Record<number, string> = {
   3: 'Timeout',
 }
 
+// Calculate distance between two points in meters using Haversine formula
+function calculateDistance(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+): number {
+  const R = 6371000 // Earth's radius in meters
+  const dLat = ((lat2 - lat1) * Math.PI) / 180
+  const dLon = ((lon2 - lon1) * Math.PI) / 180
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2)
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  return R * c
+}
+
 export function useGeolocation(
   options: UseGeolocationOptions = {}
 ): UseGeolocationReturn {
-  const { throttleMs = 5000, enableHighAccuracy = true } = options
+  const { throttleMs = 5000, enableHighAccuracy = true, minDistanceMeters = 5 } = options
 
   const [position, setPosition] = useState<GeoPosition | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -37,6 +58,7 @@ export function useGeolocation(
 
   const watchIdRef = useRef<number | null>(null)
   const lastUpdateRef = useRef<number>(0)
+  const lastPositionRef = useRef<GeoPosition | null>(null)
 
   const handleSuccess = useCallback(
     (pos: GeolocationPosition) => {
@@ -47,17 +69,33 @@ export function useGeolocation(
         return
       }
 
+      // Skip if moved less than minimum distance
+      if (lastPositionRef.current) {
+        const distance = calculateDistance(
+          lastPositionRef.current.lat,
+          lastPositionRef.current.lng,
+          pos.coords.latitude,
+          pos.coords.longitude
+        )
+        if (distance < minDistanceMeters) {
+          return
+        }
+      }
+
       lastUpdateRef.current = now
 
-      setPosition({
+      const newPosition: GeoPosition = {
         lat: pos.coords.latitude,
         lng: pos.coords.longitude,
         accuracy: pos.coords.accuracy,
         timestamp: pos.timestamp,
-      })
+      }
+
+      lastPositionRef.current = newPosition
+      setPosition(newPosition)
       setError(null)
     },
-    [throttleMs]
+    [throttleMs, minDistanceMeters]
   )
 
   const handleError = useCallback((err: GeolocationPositionError) => {
@@ -83,6 +121,7 @@ export function useGeolocation(
     setError(null)
     setIsWatching(true)
     lastUpdateRef.current = 0 // Reset throttle on start
+    lastPositionRef.current = null // Reset distance check on start
 
     watchIdRef.current = navigator.geolocation.watchPosition(
       handleSuccess,

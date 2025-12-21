@@ -167,14 +167,15 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 
 ---
 
-### ✅ CURRENT STATE: Phase 3 Complete
+### ✅ CURRENT STATE: Phase 4 Complete
 
-**Status:** Phase 3 offline + polish implementation complete with 91 passing tests.
+**Status:** Phase 4 user feedback implementation complete with 91 passing tests.
 
 **What's Working:**
 - Progress Dashboard with animated progress ring
 - Trail list with search, difficulty, and area filtering
-- Map view with trail polylines (green=complete, red=incomplete)
+- Map view with trail polylines (**red=complete "red-lined"**, gray=incomplete)
+- **Trail tap/click popup** with info and mark complete button
 - Completion modal with date picker and notes
 - PWA configured with service worker and offline caching
 - IndexedDB for persistent offline storage
@@ -189,12 +190,17 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 - Track history UI (list view, detail page with map and stats)
 - BRATTS Redline CSV export (workbook format with progress summary)
 - JSON import/export (backup, restore, validation, clear data)
-- **Progress over time chart** (monthly bar chart with cumulative progress)
-- **Timeline view** (dedicated page showing all completions chronologically)
-- **Lazy loading** (code-split pages for faster initial load)
-- **Optimized bundles** (vendor chunks for caching)
+- Progress over time chart (monthly bar chart with cumulative progress)
+- Timeline view (dedicated page showing all completions chronologically)
+- Lazy loading (code-split pages for faster initial load)
+- Optimized bundles (vendor chunks for caching)
+- **TrailDetailPage** (/trails/:id) with stats, completion history, nearby trails
+- **Progress by Area** section on ProgressPage
+- **12 pre-built loops** with LoopsPage and LoopDetailPage
+- **Connected trails** detection (100m endpoint threshold)
+- **Area badges** on trail cards
 
-**Next:** Phase 4 Future Enhancements (optional) or deployment
+**Next:** Phase 5 Elevation Data Enhancement
 
 ---
 
@@ -380,7 +386,126 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 
 ---
 
-### Phase 4: Future Enhancements
+### Phase 4: User Feedback Implementation (Complete)
+
+#### 4.1 Phase 1 Quick Wins ✅
+- [x] Swap trail colors (completed=red "red-lined", incomplete=gray)
+- [x] Add area badges to trail cards in TrailsPage
+
+#### 4.2 Phase 2 Core Enhancements ✅
+- [x] Trail tap/click on map with info popup
+- [x] TrailDetailPage (/trails/:id) with stats, history, nearby trails
+- [x] Progress by Area section on ProgressPage
+
+#### 4.3 Phase 3 Trip Planning ✅
+- [x] Pre-built loops/itineraries data (12 loops in loops.json)
+- [x] LoopsPage with filtering and LoopDetailPage
+- [x] useLoops hook with completion tracking
+- [x] Connected trails detection (100m endpoint threshold)
+- [x] "Connects To" section on TrailDetailPage
+
+---
+
+### Phase 5: Elevation Data Enhancement
+
+#### 5.1 Data Acquisition
+- [ ] Download USGS NED 1/3 arc-second tiles for Belknap Range
+  - Bounding box: ~43.4°N to 43.6°N, -71.5°W to -71.2°W
+  - Source: https://apps.nationalmap.gov/downloader/
+  - Format: Cloud Optimized GeoTIFF (COG)
+  - Resolution: ~10m
+
+#### 5.2 Processing Script
+- [ ] Create `scripts/enrich-elevation.py`
+  - Use rasterio to read NED GeoTIFF
+  - Sample elevation at each trail coordinate
+  - Calculate elevation gain/loss per trail
+  - Output enriched trails.json
+
+```python
+# Pseudocode for scripts/enrich-elevation.py
+import rasterio
+import json
+
+def sample_elevation(dem, lat, lng):
+    """Sample elevation from DEM at given coordinates."""
+    row, col = dem.index(lng, lat)
+    return float(dem.read(1)[row, col]) * 3.28084  # meters to feet
+
+def calculate_elevation_stats(coords):
+    """Calculate gain and loss from elevation profile."""
+    gain, loss = 0, 0
+    for i in range(1, len(coords)):
+        delta = coords[i]['elevation'] - coords[i-1]['elevation']
+        if delta > 0:
+            gain += delta
+        else:
+            loss += abs(delta)
+    return round(gain), round(loss)
+
+# Main processing
+dem = rasterio.open('data/ned_belknap.tif')
+trails = json.load(open('src/data/trails.json'))
+
+for trail in trails:
+    for coord in trail['coordinates']:
+        coord['elevation'] = sample_elevation(dem, coord['lat'], coord['lng'])
+
+    gain, loss = calculate_elevation_stats(trail['coordinates'])
+    trail['elevationGain'] = gain
+    trail['elevationLoss'] = loss
+
+json.dump(trails, open('src/data/trails.json', 'w'), indent=2)
+```
+
+#### 5.3 Data Schema Update
+- [ ] Update Trail type to include elevation per coordinate
+  ```typescript
+  interface Coordinate {
+    lat: number
+    lng: number
+    elevation?: number  // feet
+  }
+
+  interface Trail {
+    // ... existing fields
+    elevationGain: number   // total feet gained
+    elevationLoss: number   // total feet lost
+    coordinates: Coordinate[]
+  }
+  ```
+
+#### 5.4 Elevation Profile Component
+- [ ] Create `ElevationProfile` component
+  - SVG-based chart showing elevation vs distance
+  - Hover/tap to show elevation at point
+  - Min/max elevation markers
+  - Gradient fill under line
+
+- [ ] Add to TrailDetailPage
+  - Show profile between stats and completion history
+  - Display elevation gain/loss in stats grid
+
+#### 5.5 Integration
+- [ ] Update useTrails to expose elevation data
+- [ ] Add elevation to trail popup on map
+- [ ] Add elevation filter to TrailsPage (optional)
+
+**Estimated Data Impact:**
+- Current trails.json: ~200KB
+- With elevation: ~250KB (+25%)
+- Acceptable for offline PWA
+
+**Alternative: Runtime API (Not Recommended)**
+If pre-processing isn't feasible, use Open Topo Data API:
+```
+GET https://api.opentopodata.org/v1/ned10m?locations=43.52,-71.34
+```
+Drawback: Requires network, breaks offline-first design.
+
+---
+
+### Phase 6: Future Enhancements
 - [ ] Social features
 - [ ] Photo attachments
 - [ ] Weather integration
@@ -484,5 +609,11 @@ const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 | 2025-12-21 | feat: Lazy loading routes, optimized vendor chunks | Done |
 | 2025-12-21 | **Phase 3.5 Performance Complete** | Done |
 | 2025-12-21 | **PHASE 3 COMPLETE** - Full offline + polish (91 tests) | Done |
+| 2025-12-21 | Phase 4.1: Red-line colors, area badges | Done |
+| 2025-12-21 | Phase 4.2: Trail popup, TrailDetailPage, Progress by Area | Done |
+| 2025-12-21 | Phase 4.3: Loops data, LoopsPage, connected trails | Done |
+| 2025-12-21 | **PHASE 4 COMPLETE** - User feedback implementation (91 tests) | Done |
+| 2025-12-21 | Research: Elevation data sources (USGS NED, Open Topo Data) | Done |
+| 2025-12-21 | Plan: Phase 5 Elevation Data Enhancement | Done |
 
 <!-- Update this log after each work session -->

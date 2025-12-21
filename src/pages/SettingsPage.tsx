@@ -1,8 +1,10 @@
-import { useCompletions } from '@/hooks'
+import { Link } from 'react-router-dom'
+import { useCompletions, useTrackHistory } from '@/hooks'
 import { usePMTiles } from '@/providers/PMTilesProvider'
 
 export function SettingsPage() {
   const { completions } = useCompletions()
+  const { tracks } = useTrackHistory()
   const { isOfflineReady, isOfflineMode, setOfflineMode, error: offlineError } = usePMTiles()
 
   const handleExport = () => {
@@ -58,6 +60,40 @@ export function SettingsPage() {
             </p>
           )}
         </div>
+      </section>
+
+      {/* GPS Tracks */}
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold text-primary">GPS Tracks</h2>
+        <Link
+          to="/tracks"
+          className="block bg-surface rounded-xl p-4 hover:bg-gray-100 transition-colors"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium text-primary">Track History</p>
+              <p className="text-xs text-secondary">
+                View and manage your recorded hikes
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-secondary">{tracks.length} tracks</span>
+              <svg
+                className="w-5 h-5 text-secondary"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </div>
+          </div>
+        </Link>
       </section>
 
       {/* Data Management */}

@@ -1,6 +1,6 @@
 import { useMemo, useRef, useCallback, useEffect, useState } from 'react'
-import Map, { Source, Layer, Marker } from 'react-map-gl/maplibre'
-import type { MapRef } from 'react-map-gl/maplibre'
+import Map, { Source, Layer, Marker, Popup } from 'react-map-gl/maplibre'
+import type { MapRef, MapLayerMouseEvent } from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import {
   useTrails,
@@ -30,6 +30,11 @@ export function TrailMap() {
     useGeolocation()
   const [showCompletionPrompt, setShowCompletionPrompt] = useState(false)
   const [pendingCompletions, setPendingCompletions] = useState<Trail[]>([])
+  const [selectedTrail, setSelectedTrail] = useState<{
+    trail: Trail
+    lng: number
+    lat: number
+  } | null>(null)
   const {
     isRecording,
     trackPoints,
@@ -120,6 +125,26 @@ export function TrailMap() {
     setShowCompletionPrompt(false)
   }, [])
 
+  // Handle trail click
+  const handleMapClick = useCallback(
+    (e: MapLayerMouseEvent) => {
+      const features = e.features
+      if (features && features.length > 0) {
+        const feature = features[0]
+        const trailId = feature.properties?.id
+        const trail = trails.find((t) => t.id === trailId)
+        if (trail) {
+          setSelectedTrail({
+            trail,
+            lng: e.lngLat.lng,
+            lat: e.lngLat.lat,
+          })
+        }
+      }
+    },
+    [trails]
+  )
+
   // Convert trails to GeoJSON for MapLibre
   const trailsGeoJSON = useMemo(() => {
     const features = trails.map((trail) => ({
@@ -209,27 +234,30 @@ export function TrailMap() {
         initialViewState={INITIAL_VIEW}
         style={{ width: '100%', height: '100%' }}
         mapStyle={isOfflineMode && offlineStyle ? offlineStyle : ONLINE_MAP_STYLE}
+        onClick={handleMapClick}
+        interactiveLayerIds={['incomplete-trails-layer', 'completed-trails-layer']}
+        cursor="pointer"
       >
-        {/* Incomplete trails (red) */}
+        {/* Incomplete trails (gray - yet to be hiked) */}
         <Source id="incomplete-trails" type="geojson" data={incompleteTrails}>
           <Layer
             id="incomplete-trails-layer"
             type="line"
             paint={{
-              'line-color': '#EF4444',
+              'line-color': '#9CA3AF',
               'line-width': 4,
               'line-opacity': 0.8,
             }}
           />
         </Source>
 
-        {/* Completed trails (green) */}
+        {/* Completed trails (red - "red-lined") */}
         <Source id="completed-trails" type="geojson" data={completedTrails}>
           <Layer
             id="completed-trails-layer"
             type="line"
             paint={{
-              'line-color': '#22C55E',
+              'line-color': '#EF4444',
               'line-width': 4,
               'line-opacity': 0.8,
             }}
@@ -282,6 +310,80 @@ export function TrailMap() {
               <div className="absolute inset-0 w-4 h-4 bg-location rounded-full animate-ping opacity-75" />
             </div>
           </Marker>
+        )}
+
+        {/* Trail info popup */}
+        {selectedTrail && (
+          <Popup
+            latitude={selectedTrail.lat}
+            longitude={selectedTrail.lng}
+            anchor="bottom"
+            onClose={() => setSelectedTrail(null)}
+            closeOnClick={false}
+            className="trail-popup"
+          >
+            <div className="p-1 min-w-[180px]">
+              <div className="flex items-center gap-2 mb-2">
+                <div
+                  className={`w-2.5 h-2.5 rounded-full ${
+                    isTrailCompleted(selectedTrail.trail.id)
+                      ? 'bg-red-500'
+                      : 'bg-gray-400'
+                  }`}
+                />
+                <h3 className="font-semibold text-primary text-sm">
+                  {selectedTrail.trail.name}
+                </h3>
+              </div>
+              <div className="text-xs text-secondary space-y-1">
+                <div className="flex justify-between">
+                  <span>Distance:</span>
+                  <span className="font-medium">{selectedTrail.trail.distance} mi</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Difficulty:</span>
+                  <span className={`font-medium capitalize ${
+                    selectedTrail.trail.difficulty === 'easy' ? 'text-easy' :
+                    selectedTrail.trail.difficulty === 'moderate' ? 'text-moderate' :
+                    'text-difficult'
+                  }`}>
+                    {selectedTrail.trail.difficulty}
+                  </span>
+                </div>
+                {selectedTrail.trail.elevationGain && (
+                  <div className="flex justify-between">
+                    <span>Elevation:</span>
+                    <span className="font-medium">{selectedTrail.trail.elevationGain} ft</span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span>Status:</span>
+                  <span className={`font-medium ${
+                    isTrailCompleted(selectedTrail.trail.id)
+                      ? 'text-red-500'
+                      : 'text-gray-500'
+                  }`}>
+                    {isTrailCompleted(selectedTrail.trail.id) ? 'Completed' : 'Not hiked'}
+                  </span>
+                </div>
+              </div>
+              {!isTrailCompleted(selectedTrail.trail.id) && (
+                <button
+                  onClick={() => {
+                    addCompletion({
+                      trailId: selectedTrail.trail.id,
+                      completedAt: new Date(),
+                      manualEntry: true,
+                    })
+                    setSelectedTrail(null)
+                  }}
+                  className="mt-3 w-full px-3 py-1.5 bg-red-500 text-white text-xs font-medium rounded-lg hover:bg-red-600 transition-colors"
+                >
+                  Mark Complete
+                </button>
+              )}
+            </div>
+          </Popup>
         )}
       </Map>
 

@@ -1,1 +1,1 @@
-export { TrailMap, TrailheadMarkers } from './TrailMap'
+export { TrailMap } from './TrailMap'

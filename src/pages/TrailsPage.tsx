@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useTrails, useCompletions } from '@/hooks'
 import { CompletionModal } from '@/components/trails'
 import type { Trail, Completion } from '@/types'
@@ -163,7 +164,17 @@ export function TrailsPage() {
 
                 {/* Trail Info */}
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-primary">{trail.name}</h3>
+                  <div className="flex items-center gap-2">
+                    <Link
+                      to={`/trails/${trail.id}`}
+                      className="font-medium text-primary hover:text-location transition-colors"
+                    >
+                      {trail.name}
+                    </Link>
+                    {trail.area && (
+                      <AreaBadge area={trail.area} />
+                    )}
+                  </div>
                   <div className="flex items-center gap-2 mt-1 text-sm text-secondary">
                     <span>{trail.distance} mi</span>
                     <span>•</span>
@@ -253,5 +264,14 @@ function DifficultyBadge({
 
   return (
     <span className={`capitalize ${colors[difficulty]}`}>{difficulty}</span>
+  )
+}
+
+function AreaBadge({ area }: { area: string }) {
+  const shortName = AREA_SHORT_NAMES[area] || area
+  return (
+    <span className="px-2 py-0.5 text-xs font-medium bg-border text-secondary rounded-full truncate max-w-[100px]">
+      {shortName}
+    </span>
   )
 }

@@ -1,8 +1,17 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { useProgress } from '@/hooks'
-import { useCompletions } from '@/hooks'
-import { useTrails } from '@/hooks'
+import { useProgress, useCompletions, useTrails } from '@/hooks'
+
+const AREA_SHORT_NAMES: Record<string, string> = {
+  'Lockes Hill': 'Lockes Hill',
+  'Mt. Rowe & Gunstock Mountain': 'Rowe/Gunstock',
+  'Belknap Mountain': 'Belknap',
+  'Piper, Whiteface & Swett Mountains': 'Piper/Whiteface',
+  'Mt. Klem, Mt. Mack & Mt. Anna': 'Klem/Mack/Anna',
+  'Rand, Quarry & Straightback Mountains': 'Rand/Quarry',
+  'Mt. Major': 'Mt. Major',
+  'Mt. Shannon, Goat Pasture Hill & Pine Mountain': 'Shannon/Goat',
+}
 
 export function ProgressPage() {
   const {
@@ -14,8 +23,36 @@ export function ProgressPage() {
     totalDistance,
   } = useProgress()
 
-  const { completions } = useCompletions()
-  const { getTrailById } = useTrails()
+  const { completions, isTrailCompleted } = useCompletions()
+  const { getTrailById, trails } = useTrails()
+
+  // Calculate progress by area
+  const areaProgress = useMemo(() => {
+    const areaMap = new Map<string, { total: number; completed: number; miles: number; completedMiles: number }>()
+
+    trails.forEach((trail) => {
+      const area = trail.area || 'Unknown'
+      if (!areaMap.has(area)) {
+        areaMap.set(area, { total: 0, completed: 0, miles: 0, completedMiles: 0 })
+      }
+      const entry = areaMap.get(area)!
+      entry.total++
+      entry.miles += trail.distance
+      if (isTrailCompleted(trail.id)) {
+        entry.completed++
+        entry.completedMiles += trail.distance
+      }
+    })
+
+    return Array.from(areaMap.entries())
+      .map(([area, stats]) => ({
+        area,
+        shortName: AREA_SHORT_NAMES[area] || area,
+        ...stats,
+        percent: stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0,
+      }))
+      .sort((a, b) => b.percent - a.percent || a.shortName.localeCompare(b.shortName))
+  }, [trails, isTrailCompleted])
 
   // Get recent completions (last 5, sorted by date)
   const recentCompletions = [...completions]
@@ -137,6 +174,53 @@ export function ProgressPage() {
           </h2>
           <div className="bg-surface rounded-xl p-4">
             <ProgressChart data={progressData} total={totalTrails} />
+          </div>
+        </div>
+      )}
+
+      {/* Progress by Area */}
+      {areaProgress.length > 0 && (
+        <div>
+          <h2 className="text-lg font-semibold text-primary mb-3">
+            Progress by Area
+          </h2>
+          <div className="space-y-2">
+            {areaProgress.map((area) => (
+              <Link
+                key={area.area}
+                to={`/trails?area=${encodeURIComponent(area.area)}`}
+                className="block bg-surface rounded-xl p-3 hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium text-primary text-sm">
+                    {area.shortName}
+                  </span>
+                  <span className="text-xs text-secondary">
+                    {area.completed}/{area.total} trails
+                  </span>
+                </div>
+                <div className="w-full bg-border rounded-full h-2">
+                  <div
+                    className={`h-2 rounded-full transition-all duration-500 ${
+                      area.percent === 100 ? 'bg-red-500' : 'bg-location'
+                    }`}
+                    style={{ width: `${area.percent}%` }}
+                  />
+                </div>
+                <div className="flex items-center justify-between mt-1">
+                  <span className="text-xs text-secondary">
+                    {area.completedMiles.toFixed(1)} / {area.miles.toFixed(1)} mi
+                  </span>
+                  <span
+                    className={`text-xs font-medium ${
+                      area.percent === 100 ? 'text-red-500' : 'text-location'
+                    }`}
+                  >
+                    {area.percent}%
+                  </span>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
       )}

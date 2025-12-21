@@ -21,7 +21,8 @@ describe('App', () => {
 
     // Wait for lazy-loaded progress page to render
     await waitFor(() => {
-      expect(screen.getByText('0%')).toBeInTheDocument()
+      // Use getAllByText since there are multiple percentage displays (main + per-area)
+      expect(screen.getAllByText('0%').length).toBeGreaterThan(0)
     })
     expect(screen.getByText('Find Your Next Hike →')).toBeInTheDocument()
   })

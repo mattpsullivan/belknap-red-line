@@ -9,18 +9,37 @@ const mockGeolocation = {
   clearWatch: vi.fn(),
 }
 
-const mockPosition: GeolocationPosition = {
-  coords: {
-    latitude: 43.5179,
-    longitude: -71.3692,
-    accuracy: 10,
-    altitude: null,
-    altitudeAccuracy: null,
-    heading: null,
-    speed: null,
+const mockCoords = {
+  latitude: 43.5179,
+  longitude: -71.3692,
+  accuracy: 10,
+  altitude: null,
+  altitudeAccuracy: null,
+  heading: null,
+  speed: null,
+  toJSON() {
+    return {
+      latitude: this.latitude,
+      longitude: this.longitude,
+      accuracy: this.accuracy,
+      altitude: this.altitude,
+      altitudeAccuracy: this.altitudeAccuracy,
+      heading: this.heading,
+      speed: this.speed,
+    }
   },
-  timestamp: Date.now(),
 }
+
+const mockPosition = {
+  coords: mockCoords,
+  timestamp: Date.now(),
+  toJSON() {
+    return {
+      coords: this.coords.toJSON(),
+      timestamp: this.timestamp,
+    }
+  },
+} as GeolocationPosition
 
 describe('useGeolocation', () => {
   beforeEach(() => {

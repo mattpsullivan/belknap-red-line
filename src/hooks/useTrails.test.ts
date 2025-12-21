@@ -13,9 +13,9 @@ describe('useTrails', () => {
   it('returns trail by ID', () => {
     const { result } = renderHook(() => useTrails())
 
-    const trail = result.current.getTrailById('belknap-east')
+    const trail = result.current.getTrailById('quarry-trail')
     expect(trail).toBeDefined()
-    expect(trail?.name).toBe('Mount Belknap via East Trail')
+    expect(trail?.name).toBe('Quarry Trail')
   })
 
   it('returns undefined for unknown trail ID', () => {

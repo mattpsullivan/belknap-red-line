@@ -20,12 +20,12 @@ describe('useProgress', () => {
 
   it('calculates completed count correctly', async () => {
     await db.completions.add({
-      trailId: 'belknap-east',
+      trailId: 'quarry-trail',
       completedAt: new Date('2024-12-15'),
       manualEntry: true,
     })
     await db.completions.add({
-      trailId: 'major-main',
+      trailId: 'lakeview-trail',
       completedAt: new Date('2024-12-10'),
       manualEntry: true,
     })
@@ -38,9 +38,9 @@ describe('useProgress', () => {
   })
 
   it('calculates completed miles correctly', async () => {
-    // belknap-east is 2.4 miles
+    // quarry-trail is 1.2 miles
     await db.completions.add({
-      trailId: 'belknap-east',
+      trailId: 'quarry-trail',
       completedAt: new Date('2024-12-15'),
       manualEntry: true,
     })
@@ -48,19 +48,19 @@ describe('useProgress', () => {
     const { result } = renderHook(() => useProgress())
 
     await waitFor(() => {
-      expect(result.current.completedMiles).toBe(2.4)
+      expect(result.current.completedMiles).toBe(1.2)
     })
   })
 
   it('calculates percent complete correctly', async () => {
-    // Add 2 of 8 trails (25%)
+    // Add 2 of 61 trails (about 3%)
     await db.completions.add({
-      trailId: 'belknap-east',
+      trailId: 'quarry-trail',
       completedAt: new Date('2024-12-15'),
       manualEntry: true,
     })
     await db.completions.add({
-      trailId: 'major-main',
+      trailId: 'lakeview-trail',
       completedAt: new Date('2024-12-10'),
       manualEntry: true,
     })
@@ -68,13 +68,13 @@ describe('useProgress', () => {
     const { result } = renderHook(() => useProgress())
 
     await waitFor(() => {
-      expect(result.current.percentComplete).toBe(25) // 2/8 = 25%
+      expect(result.current.percentComplete).toBe(3) // 2/61 ≈ 3%
     })
   })
 
   it('returns remaining count correctly', async () => {
     await db.completions.add({
-      trailId: 'belknap-east',
+      trailId: 'quarry-trail',
       completedAt: new Date('2024-12-15'),
       manualEntry: true,
     })
@@ -82,19 +82,19 @@ describe('useProgress', () => {
     const { result } = renderHook(() => useProgress())
 
     await waitFor(() => {
-      expect(result.current.remainingCount).toBe(7) // 8 - 1 = 7
+      expect(result.current.remainingCount).toBe(60) // 61 - 1 = 60
     })
   })
 
   it('counts unique trails only (no duplicates)', async () => {
     // Complete same trail twice
     await db.completions.add({
-      trailId: 'belknap-east',
+      trailId: 'quarry-trail',
       completedAt: new Date('2024-12-15'),
       manualEntry: true,
     })
     await db.completions.add({
-      trailId: 'belknap-east',
+      trailId: 'quarry-trail',
       completedAt: new Date('2024-12-20'),
       manualEntry: true,
     })
@@ -103,7 +103,7 @@ describe('useProgress', () => {
 
     await waitFor(() => {
       expect(result.current.completedCount).toBe(1) // Only 1 unique trail
-      expect(result.current.completedMiles).toBe(2.4) // Only count once
+      expect(result.current.completedMiles).toBe(1.2) // Only count once
     })
   })
 })

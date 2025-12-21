@@ -9,21 +9,23 @@ import {
   useTrackRecording,
   useTrailDetection,
 } from '@/hooks'
+import { usePMTiles } from '@/providers/PMTilesProvider'
 import type { Trail } from '@/types'
 
-const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty'
+const ONLINE_MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty'
 
-// Center of Belknap Range
+// Center of Belknap Range (based on trail coordinate bounds)
 const INITIAL_VIEW = {
   latitude: 43.52,
-  longitude: -71.43,
-  zoom: 11,
+  longitude: -71.34,
+  zoom: 12,
 }
 
 export function TrailMap() {
   const mapRef = useRef<MapRef>(null)
   const { trails } = useTrails()
   const { isTrailCompleted, addCompletion, completedTrailIds } = useCompletions()
+  const { isOfflineMode, offlineStyle } = usePMTiles()
   const { position, error, isWatching, startWatching, stopWatching } =
     useGeolocation()
   const [showCompletionPrompt, setShowCompletionPrompt] = useState(false)
@@ -201,7 +203,7 @@ export function TrailMap() {
         ref={mapRef}
         initialViewState={INITIAL_VIEW}
         style={{ width: '100%', height: '100%' }}
-        mapStyle={MAP_STYLE}
+        mapStyle={isOfflineMode && offlineStyle ? offlineStyle : ONLINE_MAP_STYLE}
       >
         {/* Incomplete trails (red) */}
         <Source id="incomplete-trails" type="geojson" data={incompleteTrails}>

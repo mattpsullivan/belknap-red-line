@@ -1,7 +1,9 @@
 import { useCompletions } from '@/hooks'
+import { usePMTiles } from '@/providers/PMTilesProvider'
 
 export function SettingsPage() {
   const { completions } = useCompletions()
+  const { isOfflineReady, isOfflineMode, setOfflineMode, error: offlineError } = usePMTiles()
 
   const handleExport = () => {
     const data = JSON.stringify(completions, null, 2)
@@ -17,6 +19,46 @@ export function SettingsPage() {
   return (
     <div className="p-4 space-y-6">
       <h1 className="text-2xl font-bold text-primary">Settings</h1>
+
+      {/* Offline Mode */}
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold text-primary">Offline Maps</h2>
+        <div className="bg-surface rounded-xl p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium text-primary">Use Offline Maps</p>
+              <p className="text-xs text-secondary">
+                {isOfflineReady
+                  ? 'Local map tiles available (1.8 MB)'
+                  : 'Downloading map tiles...'}
+              </p>
+            </div>
+            <button
+              onClick={() => setOfflineMode(!isOfflineMode)}
+              disabled={!isOfflineReady}
+              className={`relative w-12 h-6 rounded-full transition-colors ${
+                isOfflineMode ? 'bg-complete' : 'bg-gray-300'
+              } ${!isOfflineReady ? 'opacity-50 cursor-not-allowed' : ''}`}
+              role="switch"
+              aria-checked={isOfflineMode}
+            >
+              <span
+                className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+                  isOfflineMode ? 'translate-x-7' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+          {offlineError && (
+            <p className="text-xs text-incomplete">{offlineError}</p>
+          )}
+          {isOfflineMode && (
+            <p className="text-xs text-complete">
+              Map tiles are cached locally for offline use
+            </p>
+          )}
+        </div>
+      </section>
 
       {/* Data Management */}
       <section className="space-y-3">

@@ -1,3 +1,4 @@
+export { calculateDistance } from './distance'
 export {
   trailMatcher,
   calculateCoverage,

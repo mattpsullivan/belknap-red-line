@@ -415,48 +415,18 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
   - Format: Cloud Optimized GeoTIFF (COG)
   - Resolution: ~10m
 
-#### 5.2 Processing Script
-- [ ] Create `scripts/enrich-elevation.py`
+#### 5.2 Processing Scripts ✅
+- [x] Create `scripts/enrich-elevation.py` (local DEM processing)
   - Use rasterio to read NED GeoTIFF
   - Sample elevation at each trail coordinate
   - Calculate elevation gain/loss per trail
-  - Output enriched trails.json
-
-```python
-# Pseudocode for scripts/enrich-elevation.py
-import rasterio
-import json
-
-def sample_elevation(dem, lat, lng):
-    """Sample elevation from DEM at given coordinates."""
-    row, col = dem.index(lng, lat)
-    return float(dem.read(1)[row, col]) * 3.28084  # meters to feet
-
-def calculate_elevation_stats(coords):
-    """Calculate gain and loss from elevation profile."""
-    gain, loss = 0, 0
-    for i in range(1, len(coords)):
-        delta = coords[i]['elevation'] - coords[i-1]['elevation']
-        if delta > 0:
-            gain += delta
-        else:
-            loss += abs(delta)
-    return round(gain), round(loss)
-
-# Main processing
-dem = rasterio.open('data/ned_belknap.tif')
-trails = json.load(open('src/data/trails.json'))
-
-for trail in trails:
-    for coord in trail['coordinates']:
-        coord['elevation'] = sample_elevation(dem, coord['lat'], coord['lng'])
-
-    gain, loss = calculate_elevation_stats(trail['coordinates'])
-    trail['elevationGain'] = gain
-    trail['elevationLoss'] = loss
-
-json.dump(trails, open('src/data/trails.json', 'w'), indent=2)
-```
+  - Support multiple tiles (auto-merge)
+- [x] Create `scripts/enrich-elevation-api.py` (API fallback)
+  - Use Open Topo Data API
+  - Rate limiting (100 locations/req, 1 req/sec)
+  - Multiple datasets (ned10m, srtm30m, etc.)
+- [x] Create `scripts/requirements.txt` (Python dependencies)
+- [x] Create `scripts/README.md` (documentation)
 
 #### 5.3 Data Schema Update
 - [ ] Update Trail type to include elevation per coordinate
@@ -615,5 +585,6 @@ const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 | 2025-12-21 | **PHASE 4 COMPLETE** - User feedback implementation (91 tests) | Done |
 | 2025-12-21 | Research: Elevation data sources (USGS NED, Open Topo Data) | Done |
 | 2025-12-21 | Plan: Phase 5 Elevation Data Enhancement | Done |
+| 2025-12-21 | Phase 5.2: Elevation enrichment scripts (local DEM + API fallback) | Done |
 
 <!-- Update this log after each work session -->

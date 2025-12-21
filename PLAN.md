@@ -462,5 +462,6 @@ const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 | 2025-12-21 | Phase 3.1: PMTiles testing complete (67 tests total) | Done |
 | 2025-12-21 | **Phase 3.1 PMTiles Complete** - fully offline maps working | Done |
 | 2025-12-21 | Phase 3.2: Fix duplicate trails, improve coordinates from GPX | Done |
+| 2025-12-21 | feat: Track History UI with list and detail views (72 tests) | Done |
 
 <!-- Update this log after each work session -->

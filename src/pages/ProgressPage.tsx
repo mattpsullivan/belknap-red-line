@@ -71,7 +71,14 @@ export function ProgressPage() {
       <div className="bg-surface rounded-2xl p-6 text-center">
         <div className="relative inline-flex items-center justify-center">
           {/* Progress Ring */}
-          <svg className="w-32 h-32 transform -rotate-90">
+          <svg
+            className="w-32 h-32 transform -rotate-90"
+            role="progressbar"
+            aria-valuenow={percentComplete}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label={`Trail completion progress: ${percentComplete}%`}
+          >
             <circle
               cx="64"
               cy="64"

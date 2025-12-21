@@ -117,6 +117,7 @@ export function SettingsPage() {
               } ${!isOfflineReady ? 'opacity-50 cursor-not-allowed' : ''}`}
               role="switch"
               aria-checked={isOfflineMode}
+              aria-label="Toggle offline maps"
             >
               <span
                 className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${

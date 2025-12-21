@@ -466,39 +466,3 @@ export function TrailMap() {
     </div>
   )
 }
-
-// Trailhead markers component (for later use)
-export function TrailheadMarkers({ trails }: { trails: Trail[] }) {
-  const markersGeoJSON = useMemo(
-    () => ({
-      type: 'FeatureCollection' as const,
-      features: trails.map((trail) => ({
-        type: 'Feature' as const,
-        properties: {
-          id: trail.id,
-          name: trail.name,
-        },
-        geometry: {
-          type: 'Point' as const,
-          coordinates: [trail.trailhead.lng, trail.trailhead.lat],
-        },
-      })),
-    }),
-    [trails]
-  )
-
-  return (
-    <Source id="trailheads" type="geojson" data={markersGeoJSON}>
-      <Layer
-        id="trailheads-layer"
-        type="circle"
-        paint={{
-          'circle-radius': 6,
-          'circle-color': '#3B82F6',
-          'circle-stroke-width': 2,
-          'circle-stroke-color': '#ffffff',
-        }}
-      />
-    </Source>
-  )
-}

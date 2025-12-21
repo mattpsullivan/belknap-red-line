@@ -284,9 +284,11 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
   - [x] Handle GPS errors gracefully
 
 #### 2.2 Live Position Display
-- [ ] User location marker on map
-- [ ] Accuracy circle visualization
-- [ ] Center-on-user button
+- [x] User location marker on map (blue pulsing dot)
+- [x] Accuracy circle visualization (translucent blue)
+- [x] Center-on-user button (flyTo animation)
+- [x] Toggle tracking button with active state
+- [x] Error message display
 
 #### 2.3 Track Recording
 - [ ] GPSTrack table in Dexie

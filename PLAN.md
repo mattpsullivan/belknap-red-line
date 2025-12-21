@@ -376,6 +376,9 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 - [ ] Weather integration
 - [ ] Trail condition reports
 - [ ] BRATTS patch application helper
+- [ ] Track replay animation (playback recorded hikes on map)
+- [ ] Side-by-side track comparison (compare multiple hikes)
+- [ ] Export tracks to GPX format
 
 ---
 

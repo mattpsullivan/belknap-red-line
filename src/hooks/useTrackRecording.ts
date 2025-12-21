@@ -40,6 +40,7 @@ export function useTrackRecording(): UseTrackRecordingReturn {
   const [totalDistance, setTotalDistance] = useState(0)
 
   const trackIdRef = useRef<number | null>(null)
+  const lastPointRef = useRef<TrackPoint | null>(null)
 
   const startRecording = useCallback(async () => {
     const newTrack: GPSTrack = {
@@ -57,6 +58,7 @@ export function useTrackRecording(): UseTrackRecordingReturn {
     setTrackPoints([])
     setTotalDistance(0)
     setIsRecording(true)
+    lastPointRef.current = null
   }, [])
 
   const addPoint = useCallback(
@@ -65,23 +67,22 @@ export function useTrackRecording(): UseTrackRecordingReturn {
         return
       }
 
-      setTrackPoints((prev) => {
-        const newPoints = [...prev, point]
+      // Calculate distance from previous point before updating state
+      if (lastPointRef.current) {
+        const distance = calculateDistance(
+          lastPointRef.current.lat,
+          lastPointRef.current.lng,
+          point.lat,
+          point.lng
+        )
+        setTotalDistance((d) => d + distance)
+      }
 
-        // Calculate distance from previous point
-        if (prev.length > 0) {
-          const lastPoint = prev[prev.length - 1]
-          const distance = calculateDistance(
-            lastPoint.lat,
-            lastPoint.lng,
-            point.lat,
-            point.lng
-          )
-          setTotalDistance((d) => d + distance)
-        }
+      // Update the last point ref
+      lastPointRef.current = point
 
-        return newPoints
-      })
+      // Add point to track
+      setTrackPoints((prev) => [...prev, point])
     },
     [isRecording]
   )
@@ -117,6 +118,7 @@ export function useTrackRecording(): UseTrackRecordingReturn {
     setTrackPoints([])
     setTotalDistance(0)
     trackIdRef.current = null
+    lastPointRef.current = null
   }, [])
 
   return {

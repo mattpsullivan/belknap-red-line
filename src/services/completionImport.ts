@@ -42,13 +42,24 @@ export function validateCompletion(
     })
   }
 
-  // completedAt is required and must be a valid date
+  // completedAt is required and must be a valid date within reasonable range
   if (!obj.completedAt) {
     errors.push({ index, field: 'completedAt', message: 'completedAt is required' })
   } else {
     const date = new Date(obj.completedAt as string | number | Date)
     if (isNaN(date.getTime())) {
       errors.push({ index, field: 'completedAt', message: 'Invalid date format' })
+    } else {
+      // Validate date range: must be between year 2000 and tomorrow
+      const minDate = new Date('2000-01-01')
+      const maxDate = new Date()
+      maxDate.setDate(maxDate.getDate() + 1) // Allow up to tomorrow (timezone tolerance)
+
+      if (date < minDate) {
+        errors.push({ index, field: 'completedAt', message: 'Date cannot be before year 2000' })
+      } else if (date > maxDate) {
+        errors.push({ index, field: 'completedAt', message: 'Date cannot be in the future' })
+      }
     }
   }
 

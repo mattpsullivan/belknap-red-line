@@ -1,13 +1,20 @@
 import { Link } from 'react-router-dom'
-import { useCompletions, useTrackHistory } from '@/hooks'
+import { useCompletions, useTrackHistory, useTrails } from '@/hooks'
 import { usePMTiles } from '@/providers/PMTilesProvider'
+import {
+  generateRedlineExportData,
+  downloadRedlineCSV,
+} from '@/services/redlineExport'
 
 export function SettingsPage() {
   const { completions } = useCompletions()
+  const { trails } = useTrails()
   const { tracks } = useTrackHistory()
   const { isOfflineReady, isOfflineMode, setOfflineMode, error: offlineError } = usePMTiles()
 
-  const handleExport = () => {
+  const exportData = generateRedlineExportData(trails, completions)
+
+  const handleExportJSON = () => {
     const data = JSON.stringify(completions, null, 2)
     const blob = new Blob([data], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
@@ -16,6 +23,11 @@ export function SettingsPage() {
     a.download = 'belknap-completions.json'
     a.click()
     URL.revokeObjectURL(url)
+  }
+
+  const handleExportRedline = () => {
+    const date = new Date().toISOString().split('T')[0]
+    downloadRedlineCSV(exportData, `belknap-redline-${date}.csv`)
   }
 
   return (
@@ -96,15 +108,48 @@ export function SettingsPage() {
         </Link>
       </section>
 
+      {/* Patch Submission */}
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold text-primary">Patch Submission</h2>
+        <div className="bg-surface rounded-xl p-4 space-y-4">
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm font-medium text-primary">Progress</span>
+              <span className="text-sm text-secondary">
+                {exportData.totals.completedTrails}/{exportData.totals.totalTrails} trails
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div
+                className="bg-complete h-2 rounded-full transition-all"
+                style={{ width: `${exportData.totals.percentComplete}%` }}
+              />
+            </div>
+            <p className="text-xs text-secondary mt-1">
+              {exportData.totals.completedMiles} of {exportData.totals.totalMiles} miles ({exportData.totals.percentComplete}%)
+            </p>
+          </div>
+          <button
+            onClick={handleExportRedline}
+            className="w-full py-2 px-4 bg-complete text-white font-medium rounded-lg hover:opacity-90 transition-opacity"
+          >
+            Export Redline Report (CSV)
+          </button>
+          <p className="text-xs text-secondary text-center">
+            Download your progress in BRATTS workbook format
+          </p>
+        </div>
+      </section>
+
       {/* Data Management */}
       <section className="space-y-3">
         <h2 className="text-lg font-semibold text-primary">Data Management</h2>
         <div className="bg-surface rounded-xl p-4 space-y-3">
           <button
-            onClick={handleExport}
+            onClick={handleExportJSON}
             className="w-full py-2 px-4 bg-location text-white font-medium rounded-lg hover:opacity-90 transition-opacity"
           >
-            Export Data (JSON)
+            Export Raw Data (JSON)
           </button>
           <p className="text-xs text-secondary text-center">
             {completions.length} completion records

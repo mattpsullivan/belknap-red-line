@@ -351,8 +351,9 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 - [ ] Continue improving sparse trails from GPX data
 
 #### 3.3 Export/Import
-- [ ] Export completions to JSON
-- [ ] Export to CSV format
+- [x] Export completions to JSON (raw data backup)
+- [x] Export Redline Report to CSV (BRATTS workbook format)
+- [x] Download official BRATTS workbook (data/Belknap_Range_Redlining_2023v1.xls)
 - [ ] Import from JSON backup
 - [ ] Data validation on import
 

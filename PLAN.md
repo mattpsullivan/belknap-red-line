@@ -342,10 +342,13 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 - [x] Remove font dependency (protomaps basemaps only uses fill/line layers, no text)
 
 #### 3.2 Trail Coordinate Improvement
-- [ ] Use recorded GPS tracks to refine trail coordinates
-- [ ] Match GPS tracks to trails with low coordinate counts
-- [ ] Update trails.json with improved coordinate paths
-- [ ] Prioritize 13 unmatched trails from OSM import
+- [x] Analyze trail data quality (59 trails, 67.65 miles)
+- [x] Fix duplicate trail entries (removed Brook Trail, Blue Trail duplicates)
+- [x] Assign unique IDs to Yellow Trail variants
+- [x] Import GPX files from AllTrails (15 hike recordings)
+- [x] Create import script to match GPX segments to trails
+- [x] Improve Yellow Trail (Rowe) coordinates (15 → 89 points)
+- [ ] Continue improving sparse trails from GPX data
 
 #### 3.3 Export/Import
 - [ ] Export completions to JSON
@@ -458,5 +461,6 @@ const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 | 2025-12-21 | Phase 3.1: PMTiles provider and offline mode toggle | Done |
 | 2025-12-21 | Phase 3.1: PMTiles testing complete (67 tests total) | Done |
 | 2025-12-21 | **Phase 3.1 PMTiles Complete** - fully offline maps working | Done |
+| 2025-12-21 | Phase 3.2: Fix duplicate trails, improve coordinates from GPX | Done |
 
 <!-- Update this log after each work session -->

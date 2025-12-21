@@ -191,12 +191,12 @@ export function ProgressPage() {
 
       {/* Call to Action */}
       {remainingCount > 0 && (
-        <a
-          href="/trails"
+        <Link
+          to="/trails"
           className="block w-full bg-location text-white font-semibold py-3 px-4 rounded-xl text-center hover:opacity-90 transition-opacity"
         >
           Find Your Next Hike →
-        </a>
+        </Link>
       )}
     </div>
   )

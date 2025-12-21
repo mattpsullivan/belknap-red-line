@@ -291,10 +291,12 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 - [x] Error message display
 
 #### 2.3 Track Recording
-- [ ] GPSTrack table in Dexie
-- [ ] Start/stop tracking controls
-- [ ] Store points with timestamps
-- [ ] Display recorded track on map
+- [x] GPSTrack table in Dexie (version 2 migration)
+- [x] Start/stop/cancel recording controls
+- [x] Store points with timestamps and accuracy
+- [x] Display recorded track on map (orange line)
+- [x] Live distance calculation (Haversine formula)
+- [x] Recording status indicator
 
 #### 2.4 Trail Detection
 - [ ] `trailMatcher` service

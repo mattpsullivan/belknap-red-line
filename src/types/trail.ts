@@ -17,3 +17,18 @@ export interface Completion {
   notes?: string
   trackId?: number // Phase 2
 }
+
+export interface TrackPoint {
+  lat: number
+  lng: number
+  accuracy: number
+  timestamp: number
+}
+
+export interface GPSTrack {
+  id?: number
+  startedAt: Date
+  endedAt?: Date
+  points: TrackPoint[]
+  distance: number // meters, calculated from points
+}

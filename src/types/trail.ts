@@ -32,3 +32,13 @@ export interface GPSTrack {
   points: TrackPoint[]
   distance: number // meters, calculated from points
 }
+
+export interface Loop {
+  id: string
+  name: string
+  description: string
+  trailIds: string[]
+  difficulty: 'easy' | 'moderate' | 'difficult'
+  estimatedTime: string
+  highlights: string[]
+}

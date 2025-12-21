@@ -1,0 +1,110 @@
+[
+  {
+    "id": "belknap-summit-loop",
+    "name": "Belknap Summit Loop",
+    "description": "Classic loop to Belknap Mountain summit via Blue Trail, returning via Green Trail (Warden's Trail)",
+    "trailIds": ["blue-trail", "green-trail-warden-s-trail"],
+    "difficulty": "moderate",
+    "estimatedTime": "2-2.5 hours",
+    "highlights": ["Summit views", "Fire tower", "Historic warden's cabin site"]
+  },
+  {
+    "id": "belknap-grand-loop",
+    "name": "Belknap Grand Loop",
+    "description": "Extended summit loop combining multiple color trails for a comprehensive Belknap experience",
+    "trailIds": ["blue-trail", "red-trail", "white-trail", "green-trail-warden-s-trail"],
+    "difficulty": "moderate",
+    "estimatedTime": "3-4 hours",
+    "highlights": ["Multiple viewpoints", "Summit fire tower", "Varied terrain"]
+  },
+  {
+    "id": "mt-major-boulder-loop",
+    "name": "Mt. Major Boulder Loop",
+    "description": "Popular loop to Mt. Major summit featuring impressive boulder formations",
+    "trailIds": ["mt-major-trail", "boulder-loop-trail"],
+    "difficulty": "moderate",
+    "estimatedTime": "2.5-3 hours",
+    "highlights": ["Lake Winnipesaukee views", "Boulder scrambles", "Summit ledges"]
+  },
+  {
+    "id": "klem-mack-circuit",
+    "name": "Klem-Mack Circuit",
+    "description": "Loop over Mt. Klem and Mt. Mack with excellent ridge walking",
+    "trailIds": ["klem-mack-loop", "klem-summit-spur", "round-pond-mt-mack-trail"],
+    "difficulty": "moderate",
+    "estimatedTime": "2-2.5 hours",
+    "highlights": ["Two summits", "Ridge views", "Round Pond access"]
+  },
+  {
+    "id": "gunstock-ridge-traverse",
+    "name": "Gunstock Ridge Traverse",
+    "description": "Traverse the ridge between Mt. Rowe and Gunstock Mountain",
+    "trailIds": ["mt-rowe-trail", "ridge-trail", "gunstock-mountain-trail"],
+    "difficulty": "difficult",
+    "estimatedTime": "4-5 hours",
+    "highlights": ["Ridge walking", "Multiple viewpoints", "Gunstock ski area views"]
+  },
+  {
+    "id": "rowe-revenge-loop",
+    "name": "Rowe's Revenge Loop",
+    "description": "Challenging loop featuring the steep Rowe's Revenge trail",
+    "trailIds": ["mt-rowe-trail", "rowe-s-revenge", "marge-s-trail"],
+    "difficulty": "difficult",
+    "estimatedTime": "2.5-3 hours",
+    "highlights": ["Steep terrain", "Summit views", "Quieter trails"]
+  },
+  {
+    "id": "piper-whiteface-traverse",
+    "name": "Piper-Whiteface Traverse",
+    "description": "Connect Piper and Whiteface Mountains via the linking trail",
+    "trailIds": ["piper-mountain-trail", "piper-whiteface-link", "whiteface-mountain-trail"],
+    "difficulty": "moderate",
+    "estimatedTime": "3-3.5 hours",
+    "highlights": ["Two summits", "Vista views", "Remote terrain"]
+  },
+  {
+    "id": "round-pond-explorer",
+    "name": "Round Pond Explorer",
+    "description": "Loop around Round Pond area with options for multiple peaks",
+    "trailIds": ["round-pond-trail", "piper-round-pond-link", "round-pond-trail-south"],
+    "difficulty": "moderate",
+    "estimatedTime": "4-5 hours",
+    "highlights": ["Round Pond views", "Remote hiking", "Wildlife viewing"]
+  },
+  {
+    "id": "straightback-circuit",
+    "name": "Straightback Circuit",
+    "description": "Loop over Straightback Mountain with quarry views",
+    "trailIds": ["straightback-mountain-trail", "dave-roberts-quarry-trail", "quarry-spur-trail"],
+    "difficulty": "moderate",
+    "estimatedTime": "3-4 hours",
+    "highlights": ["Historic quarry", "Mountain views", "Diverse forest"]
+  },
+  {
+    "id": "belknap-range-traverse",
+    "name": "Belknap Range Traverse",
+    "description": "Epic traverse along the Belknap Range Trail connecting multiple peaks",
+    "trailIds": ["mack-anna-trail-belknap-range-trail", "anna-straightback-link-belknap-range-trail", "straightback-major-link-belknap-range-trail"],
+    "difficulty": "difficult",
+    "estimatedTime": "5-6 hours",
+    "highlights": ["Range traverse", "Multiple summits", "Remote backcountry"]
+  },
+  {
+    "id": "shannon-greenwood-loop",
+    "name": "Shannon-Greenwood Memorial Loop",
+    "description": "Scenic loop featuring trails named for local hiking advocates",
+    "trailIds": ["yellow-trail-shannon", "mary-jane-morse-greenwood-trail", "robert-a-greenwood-sr-loop"],
+    "difficulty": "easy",
+    "estimatedTime": "1.5-2 hours",
+    "highlights": ["Memorial trails", "Easy terrain", "Family-friendly"]
+  },
+  {
+    "id": "lockes-hill-sampler",
+    "name": "Lockes Hill Sampler",
+    "description": "Quick loop to experience the Lockes Hill area",
+    "trailIds": ["quarry-trail", "lakeview-trail"],
+    "difficulty": "easy",
+    "estimatedTime": "1-1.5 hours",
+    "highlights": ["Lake views", "Quarry history", "Good intro hike"]
+  }
+]

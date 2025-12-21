@@ -12,6 +12,8 @@ const SettingsPage = lazy(() => import('@/pages/SettingsPage').then(m => ({ defa
 const TrackHistoryPage = lazy(() => import('@/pages/TrackHistoryPage').then(m => ({ default: m.TrackHistoryPage })))
 const TrackDetailPage = lazy(() => import('@/pages/TrackDetailPage').then(m => ({ default: m.TrackDetailPage })))
 const TrailDetailPage = lazy(() => import('@/pages/TrailDetailPage').then(m => ({ default: m.TrailDetailPage })))
+const LoopsPage = lazy(() => import('@/pages/LoopsPage').then(m => ({ default: m.LoopsPage })))
+const LoopDetailPage = lazy(() => import('@/pages/LoopDetailPage').then(m => ({ default: m.LoopDetailPage })))
 const TimelinePage = lazy(() => import('@/pages/TimelinePage').then(m => ({ default: m.TimelinePage })))
 
 // Loading fallback component
@@ -42,6 +44,8 @@ function App() {
             <Route path="map" element={<LazyPage><MapPage /></LazyPage>} />
             <Route path="trails" element={<LazyPage><TrailsPage /></LazyPage>} />
             <Route path="trails/:id" element={<LazyPage><TrailDetailPage /></LazyPage>} />
+            <Route path="loops" element={<LazyPage><LoopsPage /></LazyPage>} />
+            <Route path="loops/:id" element={<LazyPage><LoopDetailPage /></LazyPage>} />
             <Route path="tracks" element={<LazyPage><TrackHistoryPage /></LazyPage>} />
             <Route path="tracks/:id" element={<LazyPage><TrackDetailPage /></LazyPage>} />
             <Route path="timeline" element={<LazyPage><TimelinePage /></LazyPage>} />

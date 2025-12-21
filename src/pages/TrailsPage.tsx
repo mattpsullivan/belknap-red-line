@@ -68,6 +68,31 @@ export function TrailsPage() {
 
   return (
     <div className="flex flex-col h-full">
+      {/* Loops Banner */}
+      <Link
+        to="/loops"
+        className="mx-4 mt-4 mb-2 p-3 bg-gradient-to-r from-location to-blue-500 rounded-xl flex items-center justify-between text-white hover:opacity-90 transition-opacity"
+      >
+        <div>
+          <p className="font-semibold">Suggested Loops</p>
+          <p className="text-sm opacity-90">Pre-planned multi-trail itineraries</p>
+        </div>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 5l7 7-7 7"
+          />
+        </svg>
+      </Link>
+
       {/* Search Bar and Area Filter */}
       <div className="p-4 pb-2 flex gap-2">
         <input

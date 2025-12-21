@@ -1,8 +1,7 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { useTrails, useCompletions } from '@/hooks'
+import { useTrails, useCompletions, useLoops } from '@/hooks'
 import { CompletionModal } from '@/components/trails'
-import { useState } from 'react'
 import type { Completion } from '@/types'
 
 const AREA_SHORT_NAMES: Record<string, string> = {
@@ -19,13 +18,16 @@ const AREA_SHORT_NAMES: Record<string, string> = {
 export function TrailDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { getTrailById, trails } = useTrails()
+  const { getTrailById, trails, getConnectedTrails } = useTrails()
   const { isTrailCompleted, getCompletionsForTrail, addCompletion } = useCompletions()
+  const { getLoopsForTrail } = useLoops()
   const [showCompletionModal, setShowCompletionModal] = useState(false)
 
   const trail = id ? getTrailById(id) : null
   const completions = id ? getCompletionsForTrail(id) : []
   const isCompleted = id ? isTrailCompleted(id) : false
+  const trailLoops = id ? getLoopsForTrail(id) : []
+  const connectedTrails = id ? getConnectedTrails(id) : []
 
   // Find nearby trails (same area)
   const nearbyTrails = useMemo(() => {
@@ -216,6 +218,117 @@ export function TrailDetailPage() {
                     </p>
                   </div>
                 </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Part of these loops */}
+        {trailLoops.length > 0 && (
+          <div className="bg-surface rounded-xl p-4">
+            <h2 className="font-semibold text-primary mb-3">Part of These Loops</h2>
+            <div className="space-y-2">
+              {trailLoops.map((loop) => (
+                <Link
+                  key={loop.id}
+                  to={`/loops/${loop.id}`}
+                  className="flex items-center gap-3 p-2 -mx-2 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <div className="relative w-8 h-8 shrink-0">
+                    <svg className="w-8 h-8 transform -rotate-90">
+                      <circle
+                        cx="16"
+                        cy="16"
+                        r="12"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        fill="none"
+                        className="text-border"
+                      />
+                      <circle
+                        cx="16"
+                        cy="16"
+                        r="12"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        fill="none"
+                        strokeDasharray={2 * Math.PI * 12}
+                        strokeDashoffset={2 * Math.PI * 12 * (1 - loop.percentComplete / 100)}
+                        strokeLinecap="round"
+                        className={loop.isComplete ? 'text-red-500' : 'text-location'}
+                      />
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-primary truncate">
+                      {loop.name}
+                    </p>
+                    <p className="text-xs text-secondary">
+                      {loop.totalDistance} mi • {loop.trails.length} trails
+                    </p>
+                  </div>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 text-secondary"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Connected Trails */}
+        {connectedTrails.length > 0 && (
+          <div className="bg-surface rounded-xl p-4">
+            <h2 className="font-semibold text-primary mb-3">Connects To</h2>
+            <p className="text-xs text-secondary mb-3">
+              Trails that share an endpoint - combine for longer hikes
+            </p>
+            <div className="space-y-2">
+              {connectedTrails.map((connectedTrail) => (
+                <Link
+                  key={connectedTrail.id}
+                  to={`/trails/${connectedTrail.id}`}
+                  className="flex items-center gap-3 p-2 -mx-2 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      isTrailCompleted(connectedTrail.id) ? 'bg-red-500' : 'bg-gray-400'
+                    }`}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-primary truncate">
+                      {connectedTrail.name}
+                    </p>
+                    <p className="text-xs text-secondary">
+                      {connectedTrail.distance} mi • {connectedTrail.difficulty}
+                    </p>
+                  </div>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 text-secondary"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </Link>
               ))}
             </div>
           </div>

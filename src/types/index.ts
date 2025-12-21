@@ -1,1 +1,1 @@
-export type { Trail, Completion, TrackPoint, GPSTrack } from './trail'
+export type { Trail, Completion, TrackPoint, GPSTrack, Loop } from './trail'

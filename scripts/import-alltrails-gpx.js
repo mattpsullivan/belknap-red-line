@@ -103,7 +103,7 @@ function extractTrailSegment(trail, gpxPoints, bufferMeters = 50) {
 }
 
 // Load and parse all GPX files
-const gpxDir = path.join(__dirname, '../gpx');
+const gpxDir = path.join(__dirname, '../data/gpx');
 const gpxFiles = fs.readdirSync(gpxDir).filter(f => f.endsWith('.gpx') && !f.includes('(1)'));
 
 console.log('Loading GPX files...\n');

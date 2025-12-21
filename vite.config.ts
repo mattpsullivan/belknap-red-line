@@ -12,6 +12,29 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          // Split vendor chunks by package path
+          if (id.includes('node_modules')) {
+            if (id.includes('react-dom')) {
+              return 'react-vendor'
+            }
+            if (id.includes('maplibre-gl')) {
+              return 'map-vendor'
+            }
+            if (id.includes('@turf')) {
+              return 'geo-vendor'
+            }
+            if (id.includes('dexie')) {
+              return 'db-vendor'
+            }
+          }
+        },
+      },
+    },
+  },
   plugins: [
     react(),
     tailwindcss(),

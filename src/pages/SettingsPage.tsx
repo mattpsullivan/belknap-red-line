@@ -1,3 +1,4 @@
+import { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useCompletions, useTrackHistory, useTrails } from '@/hooks'
 import { usePMTiles } from '@/providers/PMTilesProvider'
@@ -7,10 +8,17 @@ import {
 } from '@/services/redlineExport'
 
 export function SettingsPage() {
-  const { completions } = useCompletions()
+  const { completions, importCompletions, clearCompletions } = useCompletions()
   const { trails } = useTrails()
   const { tracks } = useTrackHistory()
   const { isOfflineReady, isOfflineMode, setOfflineMode, error: offlineError } = usePMTiles()
+  const [importStatus, setImportStatus] = useState<{
+    type: 'success' | 'error' | 'warning' | null
+    message: string
+  }>({ type: null, message: '' })
+  const [isImporting, setIsImporting] = useState(false)
+  const [showClearConfirm, setShowClearConfirm] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const exportData = generateRedlineExportData(trails, completions)
 
@@ -28,6 +36,60 @@ export function SettingsPage() {
   const handleExportRedline = () => {
     const date = new Date().toISOString().split('T')[0]
     downloadRedlineCSV(exportData, `belknap-redline-${date}.csv`)
+  }
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleImportJSON = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    setIsImporting(true)
+    setImportStatus({ type: null, message: '' })
+
+    try {
+      const jsonString = await file.text()
+      const validTrailIds = new Set(trails.map((t) => t.id))
+      const result = await importCompletions(jsonString, validTrailIds, {
+        replace: false,
+        skipDuplicates: true,
+      })
+
+      if (result.success && result.errors.length === 0) {
+        setImportStatus({
+          type: 'success',
+          message: `Imported ${result.imported} completion${result.imported !== 1 ? 's' : ''}${result.skipped > 0 ? `, skipped ${result.skipped} duplicate${result.skipped !== 1 ? 's' : ''}` : ''}`,
+        })
+      } else if (result.imported > 0) {
+        setImportStatus({
+          type: 'warning',
+          message: `Imported ${result.imported}, but ${result.errors.length} error${result.errors.length !== 1 ? 's' : ''}: ${result.errors[0]}`,
+        })
+      } else {
+        setImportStatus({
+          type: 'error',
+          message: result.errors[0] || 'Import failed',
+        })
+      }
+    } catch {
+      setImportStatus({
+        type: 'error',
+        message: 'Failed to read file',
+      })
+    } finally {
+      setIsImporting(false)
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
+  }
+
+  const handleClearData = async () => {
+    await clearCompletions()
+    setShowClearConfirm(false)
   }
 
   return (
@@ -154,6 +216,70 @@ export function SettingsPage() {
           <p className="text-xs text-secondary text-center">
             {completions.length} completion records
           </p>
+
+          <div className="border-t border-gray-200 pt-3">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json,application/json"
+              onChange={handleImportJSON}
+              className="hidden"
+            />
+            <button
+              onClick={handleImportClick}
+              disabled={isImporting}
+              className="w-full py-2 px-4 bg-gray-600 text-white font-medium rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
+            >
+              {isImporting ? 'Importing...' : 'Import from JSON'}
+            </button>
+            <p className="text-xs text-secondary text-center mt-1">
+              Restore from a previous backup
+            </p>
+            {importStatus.type && (
+              <p
+                className={`text-xs text-center mt-2 ${
+                  importStatus.type === 'success'
+                    ? 'text-complete'
+                    : importStatus.type === 'warning'
+                      ? 'text-yellow-600'
+                      : 'text-incomplete'
+                }`}
+              >
+                {importStatus.message}
+              </p>
+            )}
+          </div>
+
+          <div className="border-t border-gray-200 pt-3">
+            {!showClearConfirm ? (
+              <button
+                onClick={() => setShowClearConfirm(true)}
+                className="w-full py-2 px-4 bg-incomplete text-white font-medium rounded-lg hover:opacity-90 transition-opacity"
+              >
+                Clear All Data
+              </button>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-sm text-center text-incomplete font-medium">
+                  Delete all {completions.length} completion records?
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setShowClearConfirm(false)}
+                    className="flex-1 py-2 px-4 bg-gray-300 text-gray-700 font-medium rounded-lg hover:opacity-90 transition-opacity"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleClearData}
+                    className="flex-1 py-2 px-4 bg-incomplete text-white font-medium rounded-lg hover:opacity-90 transition-opacity"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </section>
 

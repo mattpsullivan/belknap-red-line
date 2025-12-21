@@ -1,9 +1,9 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import App from './App'
 
 describe('App', () => {
-  it('renders the app with navigation', () => {
+  it('renders the app with navigation', async () => {
     render(<App />)
 
     // Check that the header is present
@@ -16,11 +16,13 @@ describe('App', () => {
     expect(screen.getByText('Settings')).toBeInTheDocument()
   })
 
-  it('shows progress page by default', () => {
+  it('shows progress page by default', async () => {
     render(<App />)
 
-    // Progress page shows the percentage display
-    expect(screen.getByText('0%')).toBeInTheDocument()
+    // Wait for lazy-loaded progress page to render
+    await waitFor(() => {
+      expect(screen.getByText('0%')).toBeInTheDocument()
+    })
     expect(screen.getByText('Find Your Next Hike →')).toBeInTheDocument()
   })
 })

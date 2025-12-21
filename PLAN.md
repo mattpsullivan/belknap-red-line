@@ -167,13 +167,13 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 
 ---
 
-### ✅ CURRENT STATE: Phase 3 In Progress
+### ✅ CURRENT STATE: Phase 3 Complete
 
-**Status:** Phase 3 offline + polish implementation in progress with 59 passing tests.
+**Status:** Phase 3 offline + polish implementation complete with 91 passing tests.
 
 **What's Working:**
 - Progress Dashboard with animated progress ring
-- Trail list with search and filtering
+- Trail list with search, difficulty, and area filtering
 - Map view with trail polylines (green=complete, red=incomplete)
 - Completion modal with date picker and notes
 - PWA configured with service worker and offline caching
@@ -184,10 +184,17 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 - Trail detection using Turf.js (50m buffer, 80% coverage threshold)
 - Auto-completion when GPS track matches trails
 - Battery optimization (5s throttle, 5m minimum distance filter)
-- **PMTiles provider for offline map tiles** (new)
-- **Offline mode toggle in Settings** (new)
+- PMTiles provider for offline map tiles
+- Offline mode toggle in Settings
+- Track history UI (list view, detail page with map and stats)
+- BRATTS Redline CSV export (workbook format with progress summary)
+- JSON import/export (backup, restore, validation, clear data)
+- **Progress over time chart** (monthly bar chart with cumulative progress)
+- **Timeline view** (dedicated page showing all completions chronologically)
+- **Lazy loading** (code-split pages for faster initial load)
+- **Optimized bundles** (vendor chunks for caching)
 
-**Next:** Phase 3.2 Trail Coordinate Improvement, 3.3 Export/Import, or 3.4 Enhanced Statistics
+**Next:** Phase 4 Future Enhancements (optional) or deployment
 
 ---
 
@@ -350,24 +357,26 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 - [x] Improve Yellow Trail (Rowe) coordinates (15 → 89 points)
 - [ ] Continue improving sparse trails from GPX data
 
-#### 3.3 Export/Import
+#### 3.3 Export/Import ✅
 - [x] Export completions to JSON (raw data backup)
 - [x] Export Redline Report to CSV (BRATTS workbook format)
 - [x] Download official BRATTS workbook (data/Belknap_Range_Redlining_2023v1.xls)
-- [ ] Import from JSON backup
-- [ ] Data validation on import
+- [x] Import from JSON backup (completionImport service, 19 tests)
+- [x] Data validation on import (trail ID validation, date parsing, type checking)
+- [x] Clear all data functionality with confirmation
 
-#### 3.4 Enhanced Statistics
-- [ ] Progress over time chart
-- [ ] Filter by difficulty
-- [ ] Filter by area
-- [ ] Timeline view of completions
+#### 3.4 Enhanced Statistics ✅
+- [x] Progress over time chart (monthly bar chart with cumulative progress)
+- [x] Filter by difficulty (already existed)
+- [x] Filter by area (dropdown with 8 mountain areas)
+- [x] Timeline view of completions (dedicated page at /timeline)
 
-#### 3.5 Performance
-- [ ] Bundle size optimization
-- [ ] Lazy load routes
-- [ ] Image optimization
-- [ ] Lighthouse audit (target: 90+)
+#### 3.5 Performance ✅
+- [x] Bundle size optimization (manual chunks for vendors)
+- [x] Lazy load routes (React.lazy + Suspense for all pages)
+- [x] Bundle analysis: Initial 29KB gzip, pages 1-4KB each
+- [ ] Image optimization (not needed - SVG icons only)
+- [ ] Lighthouse audit (requires deployment)
 
 ---
 
@@ -467,5 +476,13 @@ const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 | 2025-12-21 | **Phase 3.1 PMTiles Complete** - fully offline maps working | Done |
 | 2025-12-21 | Phase 3.2: Fix duplicate trails, improve coordinates from GPX | Done |
 | 2025-12-21 | feat: Track History UI with list and detail views (72 tests) | Done |
+| 2025-12-21 | feat: BRATTS Redline CSV export with progress display | Done |
+| 2025-12-21 | feat: JSON import/export with validation and clear data (91 tests) | Done |
+| 2025-12-21 | **Phase 3.3 Export/Import Complete** | Done |
+| 2025-12-21 | feat: Area filter dropdown, progress chart, timeline view | Done |
+| 2025-12-21 | **Phase 3.4 Enhanced Statistics Complete** | Done |
+| 2025-12-21 | feat: Lazy loading routes, optimized vendor chunks | Done |
+| 2025-12-21 | **Phase 3.5 Performance Complete** | Done |
+| 2025-12-21 | **PHASE 3 COMPLETE** - Full offline + polish (91 tests) | Done |
 
 <!-- Update this log after each work session -->

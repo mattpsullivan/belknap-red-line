@@ -6,6 +6,18 @@ import type { Trail, Completion } from '@/types'
 type FilterStatus = 'all' | 'complete' | 'incomplete'
 type FilterDifficulty = 'all' | 'easy' | 'moderate' | 'difficult'
 
+// Short names for area filter dropdown
+const AREA_SHORT_NAMES: Record<string, string> = {
+  'Lockes Hill': 'Lockes Hill',
+  'Mt. Rowe & Gunstock Mountain': 'Rowe/Gunstock',
+  'Belknap Mountain': 'Belknap',
+  'Piper, Whiteface & Swett Mountains': 'Piper/Whiteface',
+  'Mt. Klem, Mt. Mack & Mt. Anna': 'Klem/Mack/Anna',
+  'Rand, Quarry & Straightback Mountains': 'Rand/Quarry',
+  'Mt. Major': 'Mt. Major',
+  'Mt. Shannon, Goat Pasture Hill & Pine Mountain': 'Shannon/Goat',
+}
+
 export function TrailsPage() {
   const { trails } = useTrails()
   const { isTrailCompleted, addCompletion, getCompletionsForTrail } =
@@ -14,8 +26,12 @@ export function TrailsPage() {
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all')
   const [difficultyFilter, setDifficultyFilter] =
     useState<FilterDifficulty>('all')
+  const [areaFilter, setAreaFilter] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTrail, setSelectedTrail] = useState<Trail | null>(null)
+
+  // Get unique areas from trails
+  const areas = [...new Set(trails.map((t) => t.area).filter(Boolean))] as string[]
 
   // Filter trails
   const filteredTrails = trails.filter((trail) => {
@@ -26,6 +42,9 @@ export function TrailsPage() {
     // Difficulty filter
     if (difficultyFilter !== 'all' && trail.difficulty !== difficultyFilter)
       return false
+
+    // Area filter
+    if (areaFilter !== 'all' && trail.area !== areaFilter) return false
 
     // Search filter
     if (
@@ -48,15 +67,27 @@ export function TrailsPage() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Search Bar */}
-      <div className="p-4 pb-2">
+      {/* Search Bar and Area Filter */}
+      <div className="p-4 pb-2 flex gap-2">
         <input
           type="search"
           placeholder="Search trails..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full px-4 py-2 bg-surface border border-border rounded-xl text-primary placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-location"
+          className="flex-1 px-4 py-2 bg-surface border border-border rounded-xl text-primary placeholder:text-secondary focus:outline-none focus:ring-2 focus:ring-location"
         />
+        <select
+          value={areaFilter}
+          onChange={(e) => setAreaFilter(e.target.value)}
+          className="px-3 py-2 bg-surface border border-border rounded-xl text-primary focus:outline-none focus:ring-2 focus:ring-location"
+        >
+          <option value="all">All Areas</option>
+          {areas.map((area) => (
+            <option key={area} value={area}>
+              {AREA_SHORT_NAMES[area] || area}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Filter Chips */}

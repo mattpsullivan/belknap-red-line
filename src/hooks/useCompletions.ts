@@ -1,6 +1,7 @@
 import { useMemo, useCallback } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '@/services/database'
+import { importFromJSON, type ImportResult } from '@/services/completionImport'
 import type { Completion } from '@/types'
 
 export function useCompletions() {
@@ -10,6 +11,21 @@ export function useCompletions() {
     async (completion: Omit<Completion, 'id'>): Promise<number> => {
       const id = await db.completions.add(completion)
       return id as number
+    },
+    []
+  )
+
+  const clearCompletions = useCallback(async (): Promise<void> => {
+    await db.completions.clear()
+  }, [])
+
+  const importCompletions = useCallback(
+    async (
+      jsonString: string,
+      validTrailIds: Set<string>,
+      options?: { replace?: boolean; skipDuplicates?: boolean }
+    ): Promise<ImportResult> => {
+      return importFromJSON(jsonString, validTrailIds, options)
     },
     []
   )
@@ -51,6 +67,8 @@ export function useCompletions() {
     addCompletion,
     removeCompletion,
     updateCompletion,
+    clearCompletions,
+    importCompletions,
     isTrailCompleted,
     getCompletionsForTrail,
   }

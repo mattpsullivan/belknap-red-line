@@ -1,8 +1,14 @@
-import { useMemo, useRef, useCallback, useEffect } from 'react'
+import { useMemo, useRef, useCallback, useEffect, useState } from 'react'
 import Map, { Source, Layer, Marker } from 'react-map-gl/maplibre'
 import type { MapRef } from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { useTrails, useCompletions, useGeolocation, useTrackRecording } from '@/hooks'
+import {
+  useTrails,
+  useCompletions,
+  useGeolocation,
+  useTrackRecording,
+  useTrailDetection,
+} from '@/hooks'
 import type { Trail } from '@/types'
 
 const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty'
@@ -17,9 +23,11 @@ const INITIAL_VIEW = {
 export function TrailMap() {
   const mapRef = useRef<MapRef>(null)
   const { trails } = useTrails()
-  const { isTrailCompleted } = useCompletions()
+  const { isTrailCompleted, addCompletion, completedTrailIds } = useCompletions()
   const { position, error, isWatching, startWatching, stopWatching } =
     useGeolocation()
+  const [showCompletionPrompt, setShowCompletionPrompt] = useState(false)
+  const [pendingCompletions, setPendingCompletions] = useState<Trail[]>([])
   const {
     isRecording,
     trackPoints,
@@ -29,6 +37,13 @@ export function TrailMap() {
     cancelRecording,
     addPoint,
   } = useTrackRecording()
+
+  // Trail detection based on recorded track
+  const { currentTrail, currentCoverage, newlyCompletedTrails } = useTrailDetection(
+    trails,
+    trackPoints,
+    completedTrailIds
+  )
 
   // Add position to track when recording
   useEffect(() => {
@@ -65,6 +80,11 @@ export function TrailMap() {
   // Toggle track recording
   const toggleRecording = useCallback(async () => {
     if (isRecording) {
+      // Check for completed trails before stopping
+      if (newlyCompletedTrails.length > 0) {
+        setPendingCompletions(newlyCompletedTrails)
+        setShowCompletionPrompt(true)
+      }
       await stopRecording()
     } else {
       if (!isWatching) {
@@ -72,7 +92,26 @@ export function TrailMap() {
       }
       await startRecording()
     }
-  }, [isRecording, isWatching, startWatching, startRecording, stopRecording])
+  }, [isRecording, isWatching, startWatching, startRecording, stopRecording, newlyCompletedTrails])
+
+  // Confirm trail completions
+  const confirmCompletions = useCallback(async () => {
+    for (const trail of pendingCompletions) {
+      await addCompletion({
+        trailId: trail.id,
+        completedAt: new Date(),
+        manualEntry: false,
+      })
+    }
+    setPendingCompletions([])
+    setShowCompletionPrompt(false)
+  }, [pendingCompletions, addCompletion])
+
+  // Dismiss completion prompt
+  const dismissCompletions = useCallback(() => {
+    setPendingCompletions([])
+    setShowCompletionPrompt(false)
+  }, [])
 
   // Convert trails to GeoJSON for MapLibre
   const trailsGeoJSON = useMemo(() => {
@@ -362,6 +401,56 @@ export function TrailMap() {
           </div>
           <div className="text-xs text-secondary mt-1">
             {(totalDistance / 1000).toFixed(2)} km • {trackPoints.length} points
+          </div>
+          {/* Current trail detection */}
+          {currentTrail && (
+            <div className="text-xs mt-2 pt-2 border-t border-gray-200">
+              <span className="text-secondary">On trail: </span>
+              <span className="font-medium text-primary">{currentTrail.name}</span>
+              <div className="text-secondary">
+                {Math.round(currentCoverage * 100)}% covered
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Auto-completion prompt */}
+      {showCompletionPrompt && pendingCompletions.length > 0 && (
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6">
+            <h3 className="text-lg font-semibold text-primary mb-2">
+              Trails Completed!
+            </h3>
+            <p className="text-secondary text-sm mb-4">
+              Based on your GPS track, you completed:
+            </p>
+            <ul className="space-y-2 mb-6">
+              {pendingCompletions.map((trail) => (
+                <li
+                  key={trail.id}
+                  className="flex items-center gap-2 text-sm"
+                >
+                  <div className="w-2 h-2 rounded-full bg-complete" />
+                  <span className="font-medium">{trail.name}</span>
+                  <span className="text-secondary">({trail.distance} mi)</span>
+                </li>
+              ))}
+            </ul>
+            <div className="flex gap-3">
+              <button
+                onClick={dismissCompletions}
+                className="flex-1 px-4 py-2 text-secondary border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Not Now
+              </button>
+              <button
+                onClick={confirmCompletions}
+                className="flex-1 px-4 py-2 bg-complete text-white rounded-lg hover:opacity-90 transition-opacity"
+              >
+                Mark Complete
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -309,10 +309,11 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 - [x] `trailMatcher` - current trail + completed trails
 
 #### 2.5 Auto-Completion
-- [ ] Detect completed trails from track
-- [ ] Prompt user to confirm completion
-- [ ] Link completion to track record
-- [ ] Show detection confidence
+- [x] `useTrailDetection` hook for real-time trail matching
+- [x] Current trail indicator while recording (name + coverage %)
+- [x] Detect newly completed trails when recording stops
+- [x] Completion confirmation modal with trail list
+- [x] Mark trails as completed (manualEntry: false)
 
 #### 2.6 Battery Optimization
 - [ ] Throttle to 5s intervals

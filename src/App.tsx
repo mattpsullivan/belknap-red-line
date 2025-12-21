@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Layout } from '@/components/layout/Layout'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { PMTilesProvider } from '@/providers/PMTilesProvider'
 
 // Lazy load pages for better initial bundle size
@@ -21,9 +22,13 @@ function PageLoader() {
   )
 }
 
-// Wrapper to add Suspense to lazy-loaded pages
+// Wrapper to add Suspense and ErrorBoundary to lazy-loaded pages
 function LazyPage({ children }: { children: React.ReactNode }) {
-  return <Suspense fallback={<PageLoader />}>{children}</Suspense>
+  return (
+    <ErrorBoundary>
+      <Suspense fallback={<PageLoader />}>{children}</Suspense>
+    </ErrorBoundary>
+  )
 }
 
 function App() {

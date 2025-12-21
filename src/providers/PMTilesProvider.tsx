@@ -9,11 +9,12 @@ const PMTILES_URL = '/tiles/belknap-range.pmtiles'
 // Generate map style with PMTiles source
 function createOfflineStyle() {
   // Use LIGHT theme from protomaps basemaps
+  // Note: basemaps layers() only includes background, fill, and line layers
+  // (no symbol/text layers), so glyphs URL is not needed
   const baseLayers = layers('protomaps', LIGHT)
 
   return {
     version: 8 as const,
-    glyphs: 'https://protomaps.github.io/basemaps-assets/fonts/{fontstack}/{range}.pbf',
     sources: {
       protomaps: {
         type: 'vector' as const,

@@ -187,7 +187,7 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 - **PMTiles provider for offline map tiles** (new)
 - **Offline mode toggle in Settings** (new)
 
-**Next:** Complete Phase 3.1 PMTiles testing, then 3.2 Trail Coordinate Improvement or 3.3 Export/Import
+**Next:** Phase 3.2 Trail Coordinate Improvement, 3.3 Export/Import, or 3.4 Enhanced Statistics
 
 ---
 
@@ -333,13 +333,13 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 
 ### Phase 3: Full Offline + Polish
 
-#### 3.1 PMTiles Offline Maps
+#### 3.1 PMTiles Offline Maps ✅
 - [x] Configure PMTiles protocol in MapLibre (PMTilesProvider.tsx)
 - [x] Add offline mode toggle in Settings
 - [x] Bundle PMTiles file (1.7MB belknap-range.pmtiles)
 - [x] Add PMTilesProvider tests (8 tests)
 - [x] Verify build includes tiles correctly
-- [ ] Bundle fonts for fully offline operation (currently requires internet for protomaps fonts)
+- [x] Remove font dependency (protomaps basemaps only uses fill/line layers, no text)
 
 #### 3.2 Trail Coordinate Improvement
 - [ ] Use recorded GPS tracks to refine trail coordinates
@@ -457,5 +457,6 @@ const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 | 2025-12-21 | **Phase 2 GPS Tracking Complete** (59 tests passing) | Done |
 | 2025-12-21 | Phase 3.1: PMTiles provider and offline mode toggle | Done |
 | 2025-12-21 | Phase 3.1: PMTiles testing complete (67 tests total) | Done |
+| 2025-12-21 | **Phase 3.1 PMTiles Complete** - fully offline maps working | Done |
 
 <!-- Update this log after each work session -->

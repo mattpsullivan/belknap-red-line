@@ -82,12 +82,17 @@ export function TrailMap() {
   // Toggle track recording
   const toggleRecording = useCallback(async () => {
     if (isRecording) {
-      // Check for completed trails before stopping
-      if (newlyCompletedTrails.length > 0) {
-        setPendingCompletions(newlyCompletedTrails)
+      // Capture completed trails before any async operations to avoid race conditions
+      const completedTrails = [...newlyCompletedTrails]
+
+      // Stop recording first to finalize the track
+      await stopRecording()
+
+      // Then show the completion prompt if trails were completed
+      if (completedTrails.length > 0) {
+        setPendingCompletions(completedTrails)
         setShowCompletionPrompt(true)
       }
-      await stopRecording()
     } else {
       if (!isWatching) {
         startWatching()

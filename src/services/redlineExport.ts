@@ -1,5 +1,26 @@
 import type { Trail, Completion } from '@/types'
 
+/**
+ * Sanitize a string for safe CSV export.
+ * Prevents CSV injection by escaping formula-triggering characters
+ * and handling special characters.
+ */
+function sanitizeCSVValue(value: string): string {
+  // First, escape double quotes by doubling them
+  let sanitized = value.replace(/"/g, '""')
+
+  // Replace newlines and carriage returns with spaces
+  sanitized = sanitized.replace(/[\r\n]+/g, ' ')
+
+  // If the value starts with formula-triggering characters, prefix with single quote
+  // This prevents spreadsheet applications from interpreting the value as a formula
+  if (/^[=+\-@\t\r]/.test(sanitized)) {
+    sanitized = "'" + sanitized
+  }
+
+  return sanitized
+}
+
 // Map our area names to BRATTS workbook section names
 const AREA_TO_SECTION: Record<string, string> = {
   'Lockes Hill': 'Lockes',
@@ -164,8 +185,9 @@ export function generateCSVExport(data: RedlineExportData): string {
       const dateStr = trail.completedAt
         ? trail.completedAt.toLocaleDateString()
         : ''
-      const notes = trail.notes.replace(/"/g, '""')
-      lines.push(`"${trail.name}",${trail.distance},${dateStr},"${notes}"`)
+      const name = sanitizeCSVValue(trail.name)
+      const notes = sanitizeCSVValue(trail.notes)
+      lines.push(`"${name}",${trail.distance},${dateStr},"${notes}"`)
     })
     lines.push('')
   })

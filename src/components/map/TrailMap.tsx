@@ -9,6 +9,7 @@ import {
   useGeolocation,
   useTrackRecording,
   useTrailDetection,
+  useLoops,
 } from '@/hooks'
 import { usePMTiles } from '@/providers/PMTilesProvider'
 import { styleConfig } from '@/config/styles'
@@ -42,6 +43,11 @@ export function TrailMap() {
   // Get highlighted trail from URL param (e.g., /map?trail=xyz)
   const highlightedTrailId = searchParams.get('trail')
   const highlightedTrail = highlightedTrailId ? getTrailById(highlightedTrailId) : null
+
+  // Get highlighted loop from URL param (e.g., /map?loop=xyz)
+  const { getLoopById } = useLoops()
+  const highlightedLoopId = searchParams.get('loop')
+  const highlightedLoop = highlightedLoopId ? getLoopById(highlightedLoopId) : null
   const {
     isRecording,
     trackPoints,
@@ -101,14 +107,37 @@ export function TrailMap() {
     }
   }, [highlightedTrail])
 
+  // Fit bounds to highlighted loop from URL param
+  useEffect(() => {
+    if (highlightedLoop && mapRef.current) {
+      // Collect all coordinates from all trails in the loop
+      const allCoords = highlightedLoop.trails.flatMap((t) => t.coordinates)
+      if (allCoords.length > 0) {
+        // Calculate bounds from all trail coordinates
+        const lngs = allCoords.map((c) => c.lng)
+        const lats = allCoords.map((c) => c.lat)
+        const bounds: [[number, number], [number, number]] = [
+          [Math.min(...lngs), Math.min(...lats)],
+          [Math.max(...lngs), Math.max(...lats)],
+        ]
+
+        // Fit map to loop bounds with padding
+        mapRef.current.fitBounds(bounds, {
+          padding: { top: 80, bottom: 80, left: 40, right: 40 },
+          duration: 1000,
+        })
+      }
+    }
+  }, [highlightedLoop])
+
   // Clear highlight param when popup is closed
   const handleClosePopup = useCallback(() => {
     setSelectedTrail(null)
-    // Clear the trail param from URL when closing popup
-    if (highlightedTrailId) {
+    // Clear the trail/loop param from URL when closing popup
+    if (highlightedTrailId || highlightedLoopId) {
       setSearchParams({}, { replace: true })
     }
-  }, [highlightedTrailId, setSearchParams])
+  }, [highlightedTrailId, highlightedLoopId, setSearchParams])
 
   // Center map on user location
   const centerOnUser = useCallback(() => {
@@ -331,6 +360,35 @@ export function TrailMap() {
                 'line-color': styleConfig.trails.highlighted.color,
                 'line-width': styleConfig.trails.highlighted.width,
                 'line-opacity': styleConfig.trails.highlighted.opacity,
+              }}
+            />
+          </Source>
+        )}
+
+        {/* Highlighted loop trails (from "View Loop on Map" navigation) */}
+        {highlightedLoop && (
+          <Source
+            id="highlighted-loop"
+            type="geojson"
+            data={{
+              type: 'FeatureCollection',
+              features: highlightedLoop.trails.map((trail) => ({
+                type: 'Feature' as const,
+                properties: { id: trail.id, name: trail.name },
+                geometry: {
+                  type: 'LineString' as const,
+                  coordinates: trail.coordinates.map((c) => [c.lng, c.lat]),
+                },
+              })),
+            }}
+          >
+            <Layer
+              id="highlighted-loop-layer"
+              type="line"
+              paint={{
+                'line-color': styleConfig.trails.highlightedLoop.color,
+                'line-width': styleConfig.trails.highlightedLoop.width,
+                'line-opacity': styleConfig.trails.highlightedLoop.opacity,
               }}
             />
           </Source>

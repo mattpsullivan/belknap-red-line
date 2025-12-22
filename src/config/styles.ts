@@ -41,6 +41,12 @@ export const styleConfig = {
       width: 6,
       opacity: 1,
     },
+    /** Highlighted loop trails (distinct from single trail) */
+    highlightedLoop: {
+      color: '#A855F7', // purple-500
+      width: 6,
+      opacity: 1,
+    },
   },
 
   /**

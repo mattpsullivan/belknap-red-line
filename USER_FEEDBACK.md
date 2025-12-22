@@ -439,6 +439,280 @@ function findConnectedTrails(trails: Trail[], thresholdMeters = 100): Map<string
 
 ---
 
+### 7. Centralized Style Configuration
+
+**User Feedback:**
+> "The gray doesn't 'pop' - can we make the unfinished trail color be a brighter contrasting color?"
+
+**Development Note:**
+> "Let's make it configurable in the project - no UI, but let's get rid of the magic number colors and introduce a single place for style config - this will help with possible future white-labelling."
+
+**Current State:**
+- Colors are scattered across multiple files:
+  - `src/index.css` - CSS custom properties for UI colors
+  - `src/components/map/TrailMap.tsx` - Hardcoded hex values for map layers
+  - `src/components/trails/ElevationProfile.tsx` - Hardcoded hex values
+  - Various components use Tailwind color classes directly
+- Incomplete trail color is `#9CA3AF` (gray-400) - doesn't stand out on map backgrounds
+- No single source of truth for theming
+
+**Requested Changes:**
+
+1. **Brighter Incomplete Trail Color**
+   - Current: `#9CA3AF` (gray-400) - low contrast, hard to see
+   - Suggested alternatives:
+     - `#0EA5E9` (sky-500) - bright blue, high visibility
+     - `#8B5CF6` (purple-500) - distinct from red completed trails
+     - `#06B6D4` (cyan-500) - bright, contrasts with land colors
+     - `#F59E0B` (amber-500) - warm, visible on most backgrounds
+
+2. **Centralized Style Config**
+   ```typescript
+   // src/config/styles.ts
+   export const styleConfig = {
+     trails: {
+       completed: {
+         color: '#EF4444',      // red-500
+         width: 3,
+       },
+       incomplete: {
+         color: '#0EA5E9',      // sky-500 (brighter than gray)
+         width: 3,
+       },
+       recorded: {
+         color: '#F97316',      // orange-500
+         width: 4,
+       },
+     },
+     map: {
+       locationMarker: '#3B82F6',  // blue-500
+       locationRadius: '#3B82F6',
+     },
+     elevation: {
+       profile: '#22C55E',        // green-500
+       minPoint: '#22C55E',
+       maxPoint: '#EF4444',
+     },
+     difficulty: {
+       easy: '#22C55E',
+       moderate: '#EAB308',
+       difficult: '#EF4444',
+     },
+   }
+   ```
+
+3. **Benefits for White-Labeling**
+   - Single file to customize for different trail systems
+   - Could be loaded from external config in future
+   - Consistent theming across all components
+   - Easier to maintain and update
+
+**Implementation:**
+- Create `src/config/styles.ts` with centralized color definitions
+- Update `TrailMap.tsx` to import from config instead of hardcoded values
+- Update `ElevationProfile.tsx` similarly
+- Consider generating CSS custom properties from the config
+
+**Priority:** Medium (improves maintainability, enables white-labeling)
+**Complexity:** Low-Medium (refactoring, no new features)
+**Related Files:**
+- New: `src/config/styles.ts`
+- `src/components/map/TrailMap.tsx:247, 260, 274, 289, 297`
+- `src/components/trails/ElevationProfile.tsx:150-185`
+- `src/index.css` (could generate from config)
+
+---
+
+### 8. "View on Map" Navigation Enhancement
+
+**User Feedback:**
+> "When I click on the 'View on Map' link from the trail page - it would be nice if the map view were zoomed in more and the trail itself were highlighted in a different color."
+
+**Current State:**
+- Trail detail page has a "View on Map" link that navigates to `/map`
+- Navigation doesn't pass any trail context to the map
+- Map opens at default view (full Belknap Range)
+- Selected trail is not highlighted differently from other trails
+
+**Requested Changes:**
+
+1. **Zoom to Trail**
+   - When navigating from trail detail, center map on the selected trail
+   - Zoom level should fit the trail bounds with padding
+   - Auto-open the trail popup/info card
+
+2. **Highlight Selected Trail**
+   - Show selected trail in a distinct highlight color (e.g., bright yellow, cyan)
+   - Or increase line width / add glow effect
+   - Other trails remain in normal completed/incomplete colors
+
+**Implementation:**
+
+1. **Pass trail ID via URL or state**
+   ```typescript
+   // Option A: Query parameter
+   <Link to={`/map?trail=${trail.id}`}>View on Map</Link>
+
+   // Option B: React Router state
+   <Link to="/map" state={{ selectedTrail: trail.id }}>View on Map</Link>
+   ```
+
+2. **Map component reads selection**
+   ```typescript
+   // In TrailMap.tsx
+   const location = useLocation()
+   const searchParams = new URLSearchParams(location.search)
+   const highlightTrailId = searchParams.get('trail')
+
+   // Or from state
+   const { selectedTrail } = location.state || {}
+   ```
+
+3. **Fit bounds to trail**
+   ```typescript
+   useEffect(() => {
+     if (highlightTrailId && mapRef.current) {
+       const trail = getTrailById(highlightTrailId)
+       if (trail) {
+         const bounds = getBoundsFromCoordinates(trail.coordinates)
+         mapRef.current.fitBounds(bounds, { padding: 50 })
+         setSelectedTrail({ trail, lat: trail.trailhead.lat, lng: trail.trailhead.lng })
+       }
+     }
+   }, [highlightTrailId])
+   ```
+
+4. **Add highlight layer**
+   ```typescript
+   // New layer for highlighted trail (renders on top)
+   {highlightTrailId && (
+     <Layer
+       id="highlighted-trail"
+       type="line"
+       source="trails"
+       filter={['==', ['get', 'id'], highlightTrailId]}
+       paint={{
+         'line-color': '#FBBF24',  // amber-400 for highlight
+         'line-width': 5,
+         'line-opacity': 1,
+       }}
+     />
+   )}
+   ```
+
+**Priority:** Medium (improves navigation UX)
+**Complexity:** Low (URL params + fitBounds + highlight layer)
+**Related Files:**
+- `src/pages/TrailDetailPage.tsx` - Update "View on Map" link
+- `src/components/map/TrailMap.tsx` - Read URL param, fitBounds, add highlight layer
+- `src/App.tsx` - Ensure route handles query params
+
+---
+
+### 9. Loop Detail View Enhancements
+
+**User Feedback:**
+> "For the Loops - could we get a similar View on Map option that highlighted the trail sections that were part of the loop, and a similar elevation view for the combined trails?"
+
+**Current State:**
+- Loop detail page shows list of trails in the loop
+- No "View on Map" option for loops
+- No combined elevation profile for the entire loop
+- Each trail's elevation must be viewed separately
+
+**Requested Changes:**
+
+1. **"View on Map" for Loops**
+   - Add "View on Map" button to loop detail page
+   - Navigate to map with all loop trails highlighted
+   - Fit map bounds to encompass entire loop
+   - Use distinct highlight color for loop trails (differentiate from single trail highlight)
+
+2. **Combined Elevation Profile**
+   - Show elevation profile for the entire loop as one continuous chart
+   - Concatenate elevation data from all trails in sequence
+   - Mark trail boundaries with vertical lines or labels
+   - Show cumulative distance along x-axis
+   - Display total elevation gain/loss for the loop
+
+**Implementation:**
+
+1. **Loop "View on Map" navigation**
+   ```typescript
+   // In LoopDetailPage.tsx
+   <Link to={`/map?loop=${loop.id}`}>
+     View Loop on Map
+   </Link>
+   ```
+
+2. **Map reads loop param and highlights multiple trails**
+   ```typescript
+   // In TrailMap.tsx
+   const loopId = searchParams.get('loop')
+   const highlightedLoop = loopId ? getLoopById(loopId) : null
+   const highlightTrailIds = highlightedLoop?.trails.map(t => t.id) || []
+
+   // Highlight layer for loop trails
+   {highlightTrailIds.length > 0 && (
+     <Layer
+       id="highlighted-loop-trails"
+       type="line"
+       source="trails"
+       filter={['in', ['get', 'id'], ['literal', highlightTrailIds]]}
+       paint={{
+         'line-color': '#A855F7',  // purple-500 for loops (distinct from amber single-trail)
+         'line-width': 5,
+         'line-opacity': 1,
+       }}
+     />
+   )}
+   ```
+
+3. **Combined elevation profile component**
+   ```typescript
+   // New component or extend ElevationProfile
+   interface CombinedElevationProfileProps {
+     trails: Trail[]  // ordered list of trails in the loop
+   }
+
+   function CombinedElevationProfile({ trails }: CombinedElevationProfileProps) {
+     // Concatenate coordinates from all trails
+     const combinedCoordinates = trails.flatMap((trail, index) => {
+       // Mark first point of each trail with trail name for labeling
+       return trail.coordinates.map((coord, i) => ({
+         ...coord,
+         trailName: i === 0 ? trail.name : undefined,
+         trailIndex: index,
+       }))
+     })
+
+     // Calculate cumulative distance for x-axis
+     // Render single continuous elevation chart
+     // Add trail boundary markers
+   }
+   ```
+
+4. **Fit bounds to loop**
+   ```typescript
+   useEffect(() => {
+     if (highlightedLoop && mapRef.current) {
+       const allCoords = highlightedLoop.trails.flatMap(t => t.coordinates)
+       const bounds = getBoundsFromCoordinates(allCoords)
+       mapRef.current.fitBounds(bounds, { padding: 50 })
+     }
+   }, [highlightedLoop])
+   ```
+
+**Priority:** Medium (enhances loop feature)
+**Complexity:** Medium (extends existing patterns from #8, elevation concat logic)
+**Related Files:**
+- `src/pages/LoopDetailPage.tsx` - Add "View on Map" link, combined elevation profile
+- `src/components/map/TrailMap.tsx` - Handle `?loop=` param, multi-trail highlight
+- `src/components/trails/ElevationProfile.tsx` - Extend or create combined version
+- `src/hooks/useLoops.ts` - May need helper for combined coordinates
+
+---
+
 ## Cross-Cutting Observations & Ideas
 
 These insights emerged from the feedback discussion and connect multiple feature requests:
@@ -540,6 +814,9 @@ Building on the "scavenger hunt" concept from feedback #5:
 | Dec 2025 | User | Trail detail page with map, elevation, loops | Open |
 | Dec 2025 | User | Multi-trail-system / white-label support | Open |
 | Dec 2025 | User | Multi-trail trip planning & loops | Open |
+| Dec 2025 | User | Brighter incomplete trail color, centralized style config | Open |
+| Dec 2025 | User | "View on Map" zoom & highlight selected trail | Open |
+| Dec 2025 | User | Loop "View on Map" & combined elevation profile | Open |
 
 ---
 
@@ -551,11 +828,13 @@ Based on complexity, user value, and dependencies:
 | Feature | Effort | Impact |
 |---------|--------|--------|
 | #2 Red-line colors | 1 hour | High - fixes core identity issue |
+| #7 Centralized style config | 2-3 hours | Medium - enables theming, improves maintainability |
 | #1 Area tags on trail cards | 2-3 hours | Medium - improves discoverability |
 
 ### Phase 2: Core Enhancements
 | Feature | Effort | Impact |
 |---------|--------|--------|
+| #8 "View on Map" zoom & highlight | 2-3 hours | Medium - better navigation flow |
 | #3 Trail tap/click on map | 1-2 days | High - major UX improvement |
 | #4 Trail detail page (basic) | 2-3 days | High - foundation for other features |
 | #1 Progress by area | 1 day | Medium - motivational |
@@ -564,6 +843,7 @@ Based on complexity, user value, and dependencies:
 | Feature | Effort | Impact |
 |---------|--------|--------|
 | #6 Pre-built loops data | 1-2 days | Medium - quick value |
+| #9 Loop view on map & elevation | 1 day | Medium - enhances loop experience |
 | #6 Loops UI in trails list | 1-2 days | Medium |
 | #4 Elevation profiles | 2-3 days | Medium - data enrichment needed |
 | #4 Connected trails | 1 day | Medium - auto-computed |
@@ -577,9 +857,15 @@ Based on complexity, user value, and dependencies:
 
 ### Dependencies
 ```
-#2 (colors) ──────────────────────────────────> standalone
+#2 (colors) ───────┬──────────────────────────> standalone
+                   │
+#7 (style config) ─┴──────────────────────────> #5 (white-label)
 
 #1 (areas) ───────────────────────────────────> standalone
+
+#8 (view on map) ─────> depends on #4 existing (trail detail page)
+
+#9 (loop view) ───────> depends on #6 (loops) + extends #8 pattern
 
 #3 (map labels) ──────> #4 (detail page) ─────> #6 (trip planning)
                               │
@@ -590,10 +876,11 @@ Based on complexity, user value, and dependencies:
 
 ## Summary
 
-**6 feature requests** captured from user feedback, ranging from quick color fixes to platform-level enhancements. The requests cluster around three themes:
+**9 feature requests** captured from user feedback, ranging from quick color fixes to platform-level enhancements. The requests cluster around four themes:
 
-1. **Better Trail Discovery** (#1, #3, #4) - Help users understand and explore the trail network
-2. **Trip Planning** (#6) - Enable multi-trail hike planning with loops and itineraries
+1. **Better Trail Discovery** (#1, #3, #4, #8) - Help users understand and explore the trail network
+2. **Trip Planning** (#6, #9) - Enable multi-trail hike planning with loops and itineraries
 3. **Platform Expansion** (#5) - Make the app work for any trail system
+4. **Developer Experience & Theming** (#2, #7) - Centralize styling for maintainability and future white-labeling
 
-The recommended approach is to start with quick wins (#2, #1 enhancements) to show immediate progress, then build the trail detail page (#4) as a foundation for trip planning and map interactions.
+The recommended approach is to start with quick wins (#2, #7, #1 enhancements) to show immediate progress, then build the trail detail page (#4) as a foundation for trip planning and map interactions.

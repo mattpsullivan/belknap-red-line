@@ -1,4 +1,5 @@
 import type { Coordinate } from '@/types'
+import { styleConfig } from '@/config/styles'
 
 interface ElevationProfileProps {
   coordinates: Coordinate[]
@@ -147,8 +148,8 @@ export function ElevationProfile({
         {/* Gradient definition */}
         <defs>
           <linearGradient id="elevationGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#22C55E" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="#22C55E" stopOpacity="0.05" />
+            <stop offset="0%" stopColor={styleConfig.elevation.profile.gradientStart} stopOpacity={styleConfig.elevation.profile.gradientStartOpacity} />
+            <stop offset="100%" stopColor={styleConfig.elevation.profile.gradientEnd} stopOpacity={styleConfig.elevation.profile.gradientEndOpacity} />
           </linearGradient>
         </defs>
 
@@ -159,7 +160,7 @@ export function ElevationProfile({
         <path
           d={pathData}
           fill="none"
-          stroke="#22C55E"
+          stroke={styleConfig.elevation.profile.line}
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -173,7 +174,7 @@ export function ElevationProfile({
               cx={scaleX(points.find((p) => p.elevation === minElev)!.distance)}
               cy={scaleY(minElev)}
               r="4"
-              fill="#EF4444"
+              fill={styleConfig.elevation.minPoint}
               stroke="white"
               strokeWidth="2"
             />
@@ -182,7 +183,7 @@ export function ElevationProfile({
               cx={scaleX(points.find((p) => p.elevation === maxElev)!.distance)}
               cy={scaleY(maxElev)}
               r="4"
-              fill="#22C55E"
+              fill={styleConfig.elevation.maxPoint}
               stroke="white"
               strokeWidth="2"
             />

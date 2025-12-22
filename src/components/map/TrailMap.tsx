@@ -10,6 +10,7 @@ import {
   useTrailDetection,
 } from '@/hooks'
 import { usePMTiles } from '@/providers/PMTilesProvider'
+import { styleConfig } from '@/config/styles'
 import type { Trail } from '@/types'
 
 const ONLINE_MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty'
@@ -238,15 +239,15 @@ export function TrailMap() {
         interactiveLayerIds={['incomplete-trails-layer', 'completed-trails-layer']}
         cursor="pointer"
       >
-        {/* Incomplete trails (gray - yet to be hiked) */}
+        {/* Incomplete trails (bright blue - yet to be hiked) */}
         <Source id="incomplete-trails" type="geojson" data={incompleteTrails}>
           <Layer
             id="incomplete-trails-layer"
             type="line"
             paint={{
-              'line-color': '#9CA3AF',
-              'line-width': 4,
-              'line-opacity': 0.8,
+              'line-color': styleConfig.trails.incomplete.color,
+              'line-width': styleConfig.trails.incomplete.width,
+              'line-opacity': styleConfig.trails.incomplete.opacity,
             }}
           />
         </Source>
@@ -257,9 +258,9 @@ export function TrailMap() {
             id="completed-trails-layer"
             type="line"
             paint={{
-              'line-color': '#EF4444',
-              'line-width': 4,
-              'line-opacity': 0.8,
+              'line-color': styleConfig.trails.completed.color,
+              'line-width': styleConfig.trails.completed.width,
+              'line-opacity': styleConfig.trails.completed.opacity,
             }}
           />
         </Source>
@@ -271,9 +272,9 @@ export function TrailMap() {
               id="recorded-track-layer"
               type="line"
               paint={{
-                'line-color': '#F97316',
-                'line-width': 5,
-                'line-opacity': 0.9,
+                'line-color': styleConfig.trails.recorded.color,
+                'line-width': styleConfig.trails.recorded.width,
+                'line-opacity': styleConfig.trails.recorded.opacity,
               }}
             />
           </Source>
@@ -286,17 +287,17 @@ export function TrailMap() {
               id="accuracy-circle-layer"
               type="fill"
               paint={{
-                'fill-color': '#3B82F6',
-                'fill-opacity': 0.15,
+                'fill-color': styleConfig.location.accuracy.fill,
+                'fill-opacity': styleConfig.location.accuracy.fillOpacity,
               }}
             />
             <Layer
               id="accuracy-circle-outline"
               type="line"
               paint={{
-                'line-color': '#3B82F6',
-                'line-width': 2,
-                'line-opacity': 0.5,
+                'line-color': styleConfig.location.accuracy.stroke,
+                'line-width': styleConfig.location.accuracy.strokeWidth,
+                'line-opacity': styleConfig.location.accuracy.strokeOpacity,
               }}
             />
           </Source>
@@ -327,8 +328,8 @@ export function TrailMap() {
                 <div
                   className={`w-2.5 h-2.5 rounded-full ${
                     isTrailCompleted(selectedTrail.trail.id)
-                      ? 'bg-red-500'
-                      : 'bg-gray-400'
+                      ? 'bg-red-600'
+                      : 'bg-sky-500'
                   }`}
                 />
                 <h3 className="font-semibold text-primary text-sm">
@@ -350,7 +351,7 @@ export function TrailMap() {
                     {selectedTrail.trail.difficulty}
                   </span>
                 </div>
-                {selectedTrail.trail.elevationGain && (
+                {(selectedTrail.trail.elevationGain ?? 0) > 0 && (
                   <div className="flex justify-between">
                     <span>Elevation:</span>
                     <span className="font-medium">{selectedTrail.trail.elevationGain} ft</span>
@@ -360,8 +361,8 @@ export function TrailMap() {
                   <span>Status:</span>
                   <span className={`font-medium ${
                     isTrailCompleted(selectedTrail.trail.id)
-                      ? 'text-red-500'
-                      : 'text-gray-500'
+                      ? 'text-red-600'
+                      : 'text-sky-500'
                   }`}>
                     {isTrailCompleted(selectedTrail.trail.id) ? 'Completed' : 'Not hiked'}
                   </span>
@@ -377,7 +378,7 @@ export function TrailMap() {
                     })
                     setSelectedTrail(null)
                   }}
-                  className="mt-3 w-full px-3 py-1.5 bg-red-500 text-white text-xs font-medium rounded-lg hover:bg-red-600 transition-colors"
+                  className="mt-3 w-full px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 transition-colors"
                 >
                   Mark Complete
                 </button>

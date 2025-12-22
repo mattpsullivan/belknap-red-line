@@ -1,10 +1,19 @@
+export interface Coordinate {
+  lat: number
+  lng: number
+  elevation?: number // feet above sea level
+}
+
 export interface Trail {
   id: string
   name: string
   distance: number // miles
-  elevationGain?: number // feet
+  elevationGain?: number // total feet climbed
+  elevationLoss?: number // total feet descended
+  elevationMin?: number // lowest point in feet
+  elevationMax?: number // highest point in feet
   difficulty: 'easy' | 'moderate' | 'difficult'
-  coordinates: { lat: number; lng: number }[]
+  coordinates: Coordinate[]
   trailhead: { lat: number; lng: number }
   area?: string
 }

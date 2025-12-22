@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useTrails, useCompletions, useLoops } from '@/hooks'
-import { CompletionModal } from '@/components/trails'
+import { CompletionModal, ElevationProfile } from '@/components/trails'
 import type { Completion } from '@/types'
 
 const AREA_SHORT_NAMES: Record<string, string> = {
@@ -126,6 +126,9 @@ export function TrailDetailPage() {
             <p className="text-sm text-secondary">ft elevation</p>
           </div>
         </div>
+
+        {/* Elevation Profile */}
+        <ElevationProfile coordinates={trail.coordinates} />
 
         {/* Mini Map Preview */}
         <div className="bg-surface rounded-xl overflow-hidden">

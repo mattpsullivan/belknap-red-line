@@ -167,9 +167,9 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 
 ---
 
-### ✅ CURRENT STATE: Phase 4 Complete
+### ✅ CURRENT STATE: Phase 5 Nearly Complete
 
-**Status:** Phase 4 user feedback implementation complete with 91 passing tests.
+**Status:** Phase 5 elevation data enhancement ~90% complete with 97 passing tests.
 
 **What's Working:**
 - Progress Dashboard with animated progress ring
@@ -199,8 +199,11 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 - **12 pre-built loops** with LoopsPage and LoopDetailPage
 - **Connected trails** detection (100m endpoint threshold)
 - **Area badges** on trail cards
+- **Elevation Profile** component with SVG chart on TrailDetailPage
+- **Elevation data** enriched for all trail coordinates
+- **Elevation stats** (gain, loss, min, max) per trail
 
-**Next:** Phase 5 Elevation Data Enhancement
+**Next:** Phase 6 Future Enhancements (optional: elevation in map popup, elevation filter)
 
 ---
 
@@ -428,8 +431,8 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 - [x] Create `scripts/requirements.txt` (Python dependencies)
 - [x] Create `scripts/README.md` (documentation)
 
-#### 5.3 Data Schema Update
-- [ ] Update Trail type to include elevation per coordinate
+#### 5.3 Data Schema Update ✅
+- [x] Update Trail type to include elevation per coordinate
   ```typescript
   interface Coordinate {
     lat: number
@@ -441,24 +444,29 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
     // ... existing fields
     elevationGain: number   // total feet gained
     elevationLoss: number   // total feet lost
+    elevationMin: number    // lowest point in feet
+    elevationMax: number    // highest point in feet
     coordinates: Coordinate[]
   }
   ```
+- [x] Export Coordinate type from types/index.ts
+- [x] Enrich trails.json with elevation data (all coordinates + summary stats)
 
-#### 5.4 Elevation Profile Component
-- [ ] Create `ElevationProfile` component
+#### 5.4 Elevation Profile Component ✅
+- [x] Create `ElevationProfile` component (6 tests)
   - SVG-based chart showing elevation vs distance
-  - Hover/tap to show elevation at point
-  - Min/max elevation markers
+  - Min/max elevation markers (red dot for min, green dot for max)
   - Gradient fill under line
+  - Elevation gain/loss stats display
+  - Graceful handling of missing elevation data
+- [x] Add to TrailDetailPage
+  - Show profile between stats grid and mini map
+  - Stats grid already shows elevationGain
 
-- [ ] Add to TrailDetailPage
-  - Show profile between stats and completion history
-  - Display elevation gain/loss in stats grid
-
-#### 5.5 Integration
-- [ ] Update useTrails to expose elevation data
-- [ ] Add elevation to trail popup on map
+#### 5.5 Integration ✅
+- [x] ElevationProfile integrated into TrailDetailPage
+- [x] Create fix-missing-elevation.cjs script for API-based enrichment
+- [ ] Add elevation to trail popup on map (optional)
 - [ ] Add elevation filter to TrailsPage (optional)
 
 **Estimated Data Impact:**
@@ -586,5 +594,10 @@ const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 | 2025-12-21 | Research: Elevation data sources (USGS NED, Open Topo Data) | Done |
 | 2025-12-21 | Plan: Phase 5 Elevation Data Enhancement | Done |
 | 2025-12-21 | Phase 5.2: Elevation enrichment scripts (local DEM + API fallback) | Done |
+| 2025-12-22 | Phase 5.3: Data schema update (Coordinate type, Trail elevation fields) | Done |
+| 2025-12-22 | Phase 5.4: ElevationProfile component with SVG chart (6 tests) | Done |
+| 2025-12-22 | Phase 5.5: Integrate ElevationProfile into TrailDetailPage | Done |
+| 2025-12-22 | Enrich trails.json with elevation data for all coordinates | Done |
+| 2025-12-22 | **PHASE 5 CORE COMPLETE** - Elevation profile integrated (97 tests) | Done |
 
 <!-- Update this log after each work session -->

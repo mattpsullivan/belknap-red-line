@@ -1,4 +1,5 @@
 import { useMemo, useRef, useCallback, useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import Map, { Source, Layer, Marker, Popup } from 'react-map-gl/maplibre'
 import type { MapRef, MapLayerMouseEvent } from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
@@ -24,7 +25,8 @@ const INITIAL_VIEW = {
 
 export function TrailMap() {
   const mapRef = useRef<MapRef>(null)
-  const { trails } = useTrails()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const { trails, getTrailById } = useTrails()
   const { isTrailCompleted, addCompletion, completedTrailIds } = useCompletions()
   const { isOfflineMode, offlineStyle } = usePMTiles()
   const { position, error, isWatching, startWatching, stopWatching } =
@@ -36,6 +38,10 @@ export function TrailMap() {
     lng: number
     lat: number
   } | null>(null)
+
+  // Get highlighted trail from URL param (e.g., /map?trail=xyz)
+  const highlightedTrailId = searchParams.get('trail')
+  const highlightedTrail = highlightedTrailId ? getTrailById(highlightedTrailId) : null
   const {
     isRecording,
     trackPoints,
@@ -64,6 +70,45 @@ export function TrailMap() {
       })
     }
   }, [isRecording, position, addPoint])
+
+  // Fit bounds to highlighted trail from URL param
+  useEffect(() => {
+    if (highlightedTrail && mapRef.current) {
+      const coords = highlightedTrail.coordinates
+      if (coords.length > 0) {
+        // Calculate bounds from trail coordinates
+        const lngs = coords.map((c) => c.lng)
+        const lats = coords.map((c) => c.lat)
+        const bounds: [[number, number], [number, number]] = [
+          [Math.min(...lngs), Math.min(...lats)],
+          [Math.max(...lngs), Math.max(...lats)],
+        ]
+
+        // Fit map to trail bounds with padding
+        mapRef.current.fitBounds(bounds, {
+          padding: { top: 80, bottom: 80, left: 40, right: 40 },
+          duration: 1000,
+        })
+
+        // Auto-select the trail to show popup
+        const centerIdx = Math.floor(coords.length / 2)
+        setSelectedTrail({
+          trail: highlightedTrail,
+          lng: coords[centerIdx].lng,
+          lat: coords[centerIdx].lat,
+        })
+      }
+    }
+  }, [highlightedTrail])
+
+  // Clear highlight param when popup is closed
+  const handleClosePopup = useCallback(() => {
+    setSelectedTrail(null)
+    // Clear the trail param from URL when closing popup
+    if (highlightedTrailId) {
+      setSearchParams({}, { replace: true })
+    }
+  }, [highlightedTrailId, setSearchParams])
 
   // Center map on user location
   const centerOnUser = useCallback(() => {
@@ -265,6 +310,32 @@ export function TrailMap() {
           />
         </Source>
 
+        {/* Highlighted trail (from "View on Map" navigation) */}
+        {highlightedTrail && (
+          <Source
+            id="highlighted-trail"
+            type="geojson"
+            data={{
+              type: 'Feature',
+              properties: { id: highlightedTrail.id },
+              geometry: {
+                type: 'LineString',
+                coordinates: highlightedTrail.coordinates.map((c) => [c.lng, c.lat]),
+              },
+            }}
+          >
+            <Layer
+              id="highlighted-trail-layer"
+              type="line"
+              paint={{
+                'line-color': styleConfig.trails.highlighted.color,
+                'line-width': styleConfig.trails.highlighted.width,
+                'line-opacity': styleConfig.trails.highlighted.opacity,
+              }}
+            />
+          </Source>
+        )}
+
         {/* Recorded track (orange) */}
         {recordedTrackGeoJSON && (
           <Source id="recorded-track" type="geojson" data={recordedTrackGeoJSON}>
@@ -319,7 +390,7 @@ export function TrailMap() {
             latitude={selectedTrail.lat}
             longitude={selectedTrail.lng}
             anchor="bottom"
-            onClose={() => setSelectedTrail(null)}
+            onClose={handleClosePopup}
             closeOnClick={false}
             className="trail-popup"
           >

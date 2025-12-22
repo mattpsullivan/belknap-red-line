@@ -140,7 +140,7 @@ export function TrailDetailPage() {
             />
             <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
               <Link
-                to="/map"
+                to={`/map?trail=${trail.id}`}
                 className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow text-sm font-medium text-primary hover:bg-gray-50 transition-colors"
               >
                 <svg

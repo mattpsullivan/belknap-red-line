@@ -901,7 +901,7 @@ Building on the "scavenger hunt" concept from feedback #5:
 
 | Date | Source | Summary | Status |
 |------|--------|---------|--------|
-| Dec 2025 | User | Trail area/region organization | Open |
+| Dec 2025 | User | Trail area/region organization | Done |
 | Dec 2025 | User | Red-line color scheme for completed trails | Done |
 | Dec 2025 | User | Trail info/labels on map | Done |
 | Dec 2025 | User | Trail detail page with map, elevation, loops | Open |
@@ -910,7 +910,7 @@ Building on the "scavenger hunt" concept from feedback #5:
 | Dec 2025 | User | Brighter incomplete trail color, centralized style config | Done |
 | Dec 2025 | User | "View on Map" zoom & highlight selected trail | Done |
 | Dec 2025 | User | Loop "View on Map" & combined elevation profile | Done |
-| Dec 2025 | User | Trail data sync with map tiles | Open |
+| Dec 2025 | User | Trail data sync with map tiles | Done |
 
 ---
 

@@ -1,17 +1,7 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useProgress, useCompletions, useTrails } from '@/hooks'
-
-const AREA_SHORT_NAMES: Record<string, string> = {
-  'Lockes Hill': 'Lockes Hill',
-  'Mt. Rowe & Gunstock Mountain': 'Rowe/Gunstock',
-  'Belknap Mountain': 'Belknap',
-  'Piper, Whiteface & Swett Mountains': 'Piper/Whiteface',
-  'Mt. Klem, Mt. Mack & Mt. Anna': 'Klem/Mack/Anna',
-  'Rand, Quarry & Straightback Mountains': 'Rand/Quarry',
-  'Mt. Major': 'Mt. Major',
-  'Mt. Shannon, Goat Pasture Hill & Pine Mountain': 'Shannon/Goat',
-}
+import { getAreaShortName, getAreaColors } from '@/config/styles'
 
 export function ProgressPage() {
   const {
@@ -47,7 +37,8 @@ export function ProgressPage() {
     return Array.from(areaMap.entries())
       .map(([area, stats]) => ({
         area,
-        shortName: AREA_SHORT_NAMES[area] || area,
+        shortName: getAreaShortName(area),
+        colors: getAreaColors(area),
         ...stats,
         percent: stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0,
       }))
@@ -192,7 +183,10 @@ export function ProgressPage() {
                 className="block bg-surface rounded-xl p-3 hover:bg-gray-50 transition-colors"
               >
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium text-primary text-sm">
+                  <span
+                    className="px-2 py-0.5 text-xs font-medium rounded-full"
+                    style={{ backgroundColor: area.colors.bg, color: area.colors.text }}
+                  >
                     {area.shortName}
                   </span>
                   <span className="text-xs text-secondary">
@@ -201,10 +195,11 @@ export function ProgressPage() {
                 </div>
                 <div className="w-full bg-border rounded-full h-2">
                   <div
-                    className={`h-2 rounded-full transition-all duration-500 ${
-                      area.percent === 100 ? 'bg-red-500' : 'bg-location'
-                    }`}
-                    style={{ width: `${area.percent}%` }}
+                    className="h-2 rounded-full transition-all duration-500"
+                    style={{
+                      width: `${area.percent}%`,
+                      backgroundColor: area.percent === 100 ? '#DC2626' : area.colors.text,
+                    }}
                   />
                 </div>
                 <div className="flex items-center justify-between mt-1">
@@ -212,9 +207,8 @@ export function ProgressPage() {
                     {area.completedMiles.toFixed(1)} / {area.miles.toFixed(1)} mi
                   </span>
                   <span
-                    className={`text-xs font-medium ${
-                      area.percent === 100 ? 'text-red-500' : 'text-location'
-                    }`}
+                    className="text-xs font-medium"
+                    style={{ color: area.percent === 100 ? '#DC2626' : area.colors.text }}
                   >
                     {area.percent}%
                   </span>

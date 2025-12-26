@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useLoops } from '@/hooks'
+import { FilterChip } from '@/components/common'
 
 type FilterDifficulty = 'all' | 'easy' | 'moderate' | 'difficult'
 type FilterStatus = 'all' | 'complete' | 'incomplete' | 'in-progress'
@@ -198,28 +199,5 @@ export function LoopsPage() {
         </div>
       </div>
     </div>
-  )
-}
-
-function FilterChip({
-  children,
-  active,
-  onClick,
-}: {
-  children: React.ReactNode
-  active: boolean
-  onClick: () => void
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-        active
-          ? 'bg-location text-white'
-          : 'bg-surface text-secondary hover:bg-border'
-      }`}
-    >
-      {children}
-    </button>
   )
 }

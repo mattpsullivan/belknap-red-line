@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTrails, useCompletions } from '@/hooks'
 import { CompletionModal } from '@/components/trails'
+import { FilterChip } from '@/components/common'
 import { getAreaColors, getAreaShortName, AREA_SHORT_NAMES } from '@/config/styles'
 import type { Trail, Completion } from '@/types'
 
@@ -239,29 +240,6 @@ export function TrailsPage() {
         />
       )}
     </div>
-  )
-}
-
-function FilterChip({
-  children,
-  active,
-  onClick,
-}: {
-  children: React.ReactNode
-  active: boolean
-  onClick: () => void
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-        active
-          ? 'bg-location text-white'
-          : 'bg-surface text-secondary hover:bg-border'
-      }`}
-    >
-      {children}
-    </button>
   )
 }
 

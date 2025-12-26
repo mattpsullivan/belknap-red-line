@@ -101,6 +101,45 @@ export const styleConfig = {
     surface: '#F8FAFC', // slate-50
     border: '#E2E8F0', // slate-200
   },
+
+  /**
+   * Trail area colors for badges and map highlighting
+   * Each area gets a distinct, accessible color
+   */
+  areas: {
+    'Lockes Hill': {
+      bg: '#DBEAFE', // blue-100
+      text: '#1E40AF', // blue-800
+    },
+    'Mt. Rowe & Gunstock Mountain': {
+      bg: '#D1FAE5', // emerald-100
+      text: '#065F46', // emerald-800
+    },
+    'Belknap Mountain': {
+      bg: '#FEE2E2', // red-100
+      text: '#991B1B', // red-800
+    },
+    'Piper, Whiteface & Swett Mountains': {
+      bg: '#E0E7FF', // indigo-100
+      text: '#3730A3', // indigo-800
+    },
+    'Mt. Klem, Mt. Mack & Mt. Anna': {
+      bg: '#FEF3C7', // amber-100
+      text: '#92400E', // amber-800
+    },
+    'Rand, Quarry & Straightback Mountains': {
+      bg: '#FCE7F3', // pink-100
+      text: '#9D174D', // pink-800
+    },
+    'Mt. Major': {
+      bg: '#CCFBF1', // teal-100
+      text: '#115E59', // teal-800
+    },
+    'Mt. Shannon, Goat Pasture Hill & Pine Mountain': {
+      bg: '#F3E8FF', // purple-100
+      text: '#6B21A8', // purple-800
+    },
+  } as Record<string, { bg: string; text: string }>,
 } as const
 
 /**
@@ -124,4 +163,19 @@ export function getDifficultyColor(
   difficulty: 'easy' | 'moderate' | 'difficult'
 ): string {
   return styleConfig.difficulty[difficulty]
+}
+
+/**
+ * Default area colors for unknown areas
+ */
+const defaultAreaColors = {
+  bg: '#F1F5F9', // slate-100
+  text: '#475569', // slate-600
+}
+
+/**
+ * Helper to get area colors
+ */
+export function getAreaColors(area: string): { bg: string; text: string } {
+  return styleConfig.areas[area] || defaultAreaColors
 }

@@ -1,5 +1,5 @@
 import { useMemo, useRef, useCallback, useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, Link } from 'react-router-dom'
 import Map, { Source, Layer, Marker, Popup } from 'react-map-gl/maplibre'
 import type { MapRef, MapLayerMouseEvent } from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
@@ -34,10 +34,16 @@ export function TrailMap() {
     useGeolocation()
   const [showCompletionPrompt, setShowCompletionPrompt] = useState(false)
   const [pendingCompletions, setPendingCompletions] = useState<Trail[]>([])
+  const [showRecordingReminder, setShowRecordingReminder] = useState(false)
   const [selectedTrail, setSelectedTrail] = useState<{
     trail: Trail
     lng: number
     lat: number
+  } | null>(null)
+  const [hoveredTrail, setHoveredTrail] = useState<{
+    trail: Trail
+    x: number
+    y: number
   } | null>(null)
 
   // Get highlighted trail from URL param (e.g., /map?trail=xyz)
@@ -174,12 +180,24 @@ export function TrailMap() {
         setShowCompletionPrompt(true)
       }
     } else {
-      if (!isWatching) {
-        startWatching()
-      }
-      await startRecording()
+      // Show safety reminder before starting recording
+      setShowRecordingReminder(true)
     }
-  }, [isRecording, isWatching, startWatching, startRecording, stopRecording, newlyCompletedTrails])
+  }, [isRecording, stopRecording, newlyCompletedTrails])
+
+  // Confirm recording start after safety reminder
+  const confirmStartRecording = useCallback(async () => {
+    setShowRecordingReminder(false)
+    if (!isWatching) {
+      startWatching()
+    }
+    await startRecording()
+  }, [isWatching, startWatching, startRecording])
+
+  // Dismiss recording reminder
+  const dismissRecordingReminder = useCallback(() => {
+    setShowRecordingReminder(false)
+  }, [])
 
   // Confirm trail completions
   const confirmCompletions = useCallback(async () => {
@@ -214,11 +232,45 @@ export function TrailMap() {
             lng: e.lngLat.lng,
             lat: e.lngLat.lat,
           })
+          // Clear hover when clicking
+          setHoveredTrail(null)
         }
       }
     },
     [trails]
   )
+
+  // Handle trail hover (desktop only)
+  const handleMapMouseMove = useCallback(
+    (e: MapLayerMouseEvent) => {
+      // Don't show hover tooltip if a popup is already open
+      if (selectedTrail) {
+        setHoveredTrail(null)
+        return
+      }
+
+      const features = e.features
+      if (features && features.length > 0) {
+        const feature = features[0]
+        const trailId = feature.properties?.id
+        const trail = trails.find((t) => t.id === trailId)
+        if (trail) {
+          setHoveredTrail({
+            trail,
+            x: e.point.x,
+            y: e.point.y,
+          })
+        }
+      } else {
+        setHoveredTrail(null)
+      }
+    },
+    [trails, selectedTrail]
+  )
+
+  const handleMapMouseLeave = useCallback(() => {
+    setHoveredTrail(null)
+  }, [])
 
   // Convert trails to GeoJSON for MapLibre
   const trailsGeoJSON = useMemo(() => {
@@ -310,9 +362,23 @@ export function TrailMap() {
         style={{ width: '100%', height: '100%' }}
         mapStyle={isOfflineMode && offlineStyle ? offlineStyle : ONLINE_MAP_STYLE}
         onClick={handleMapClick}
-        interactiveLayerIds={['incomplete-trails-layer', 'completed-trails-layer']}
+        onMouseMove={handleMapMouseMove}
+        onMouseLeave={handleMapMouseLeave}
+        interactiveLayerIds={['trails-hit-area']}
         cursor="pointer"
       >
+        {/* Invisible wider hit area for easier trail clicking */}
+        <Source id="trails-hit-area" type="geojson" data={trailsGeoJSON}>
+          <Layer
+            id="trails-hit-area"
+            type="line"
+            paint={{
+              'line-color': 'transparent',
+              'line-width': 20,
+            }}
+          />
+        </Source>
+
         {/* Incomplete trails (bright blue - yet to be hiked) */}
         <Source id="incomplete-trails" type="geojson" data={incompleteTrails}>
           <Layer
@@ -497,25 +563,59 @@ export function TrailMap() {
                   </span>
                 </div>
               </div>
-              {!isTrailCompleted(selectedTrail.trail.id) && (
-                <button
-                  onClick={() => {
-                    addCompletion({
-                      trailId: selectedTrail.trail.id,
-                      completedAt: new Date(),
-                      manualEntry: true,
-                    })
-                    setSelectedTrail(null)
-                  }}
-                  className="mt-3 w-full px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 transition-colors"
+              <div className="mt-3 flex gap-2">
+                <Link
+                  to={`/trails/${selectedTrail.trail.id}`}
+                  className="flex-1 px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-200 transition-colors text-center"
                 >
-                  Mark Complete
-                </button>
-              )}
+                  View Details
+                </Link>
+                {!isTrailCompleted(selectedTrail.trail.id) && (
+                  <button
+                    onClick={() => {
+                      addCompletion({
+                        trailId: selectedTrail.trail.id,
+                        completedAt: new Date(),
+                        manualEntry: true,
+                      })
+                      setSelectedTrail(null)
+                    }}
+                    className="flex-1 px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    Mark Complete
+                  </button>
+                )}
+              </div>
             </div>
           </Popup>
         )}
       </Map>
+
+      {/* Hover tooltip (desktop only) */}
+      {hoveredTrail && (
+        <div
+          className="absolute pointer-events-none bg-white rounded-lg shadow-lg px-3 py-2 z-10 hidden md:block"
+          style={{
+            left: hoveredTrail.x + 12,
+            top: hoveredTrail.y - 10,
+            transform: 'translateY(-100%)',
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <div
+              className={`w-2 h-2 rounded-full ${
+                isTrailCompleted(hoveredTrail.trail.id) ? 'bg-red-600' : 'bg-sky-500'
+              }`}
+            />
+            <span className="font-medium text-sm text-primary">
+              {hoveredTrail.trail.name}
+            </span>
+          </div>
+          <div className="text-xs text-secondary mt-1">
+            {hoveredTrail.trail.distance} mi • {hoveredTrail.trail.difficulty}
+          </div>
+        </div>
+      )}
 
       {/* Location controls */}
       <div className="absolute top-4 right-4 flex flex-col gap-2">
@@ -688,6 +788,66 @@ export function TrailMap() {
                 className="flex-1 px-4 py-2 bg-complete text-white rounded-lg hover:opacity-90 transition-opacity"
               >
                 Mark Complete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Recording safety reminder */}
+      {showRecordingReminder && (
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-amber-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-primary">Before You Go</h3>
+            </div>
+            <div className="space-y-3 text-sm text-secondary mb-6">
+              <p>
+                <strong className="text-primary">This app does not provide navigation.</strong>{' '}
+                Bring proper maps and know your route.
+              </p>
+              <p>
+                Remember: your destination is always your car, not the summit. Turn back if conditions change.
+              </p>
+              <p>
+                <a
+                  href="https://www.nps.gov/articles/10essentials.htm"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-location hover:underline"
+                >
+                  Do you have the Ten Essentials?
+                </a>
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={dismissRecordingReminder}
+                className="flex-1 px-4 py-2 text-secondary border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmStartRecording}
+                className="flex-1 px-4 py-2 bg-location text-white rounded-lg hover:opacity-90 transition-opacity"
+              >
+                Start Recording
               </button>
             </div>
           </div>

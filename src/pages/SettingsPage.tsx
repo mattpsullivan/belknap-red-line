@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useRef, useEffect } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { useCompletions, useTrackHistory, useTrails } from '@/hooks'
 import { usePMTiles } from '@/providers/PMTilesProvider'
 import {
@@ -19,6 +19,15 @@ export function SettingsPage() {
   const [isImporting, setIsImporting] = useState(false)
   const [showClearConfirm, setShowClearConfirm] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const safetyRef = useRef<HTMLElement>(null)
+  const location = useLocation()
+
+  // Scroll to safety section if hash is #safety
+  useEffect(() => {
+    if (location.hash === '#safety' && safetyRef.current) {
+      safetyRef.current.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [location.hash])
 
   const exportData = generateRedlineExportData(trails, completions)
 
@@ -280,6 +289,113 @@ export function SettingsPage() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      </section>
+
+      {/* Safety Information */}
+      <section ref={safetyRef} id="safety" className="space-y-3 scroll-mt-4">
+        <h2 className="text-lg font-semibold text-primary flex items-center gap-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 text-amber-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            />
+          </svg>
+          Safety Information
+        </h2>
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-3">
+          <div>
+            <p className="font-semibold text-amber-800 mb-1">
+              This is NOT a Navigation App
+            </p>
+            <p className="text-sm text-amber-700">
+              Belknap Tracker is for recording trail completions only. Do not rely on this app for navigation, route-finding, or safety decisions. Always carry proper maps and know how to use them.
+            </p>
+          </div>
+        </div>
+        <div className="bg-surface rounded-xl p-4 space-y-4">
+          <div>
+            <p className="font-semibold text-primary mb-1">
+              The Destination is Your Car
+            </p>
+            <p className="text-sm text-secondary">
+              Remember: the destination is always the car at the end of the trip, not the summit. Weather changes, fatigue, unexpected conditions, or simply not feeling right are all valid reasons to turn back. A successful hike is one where you return safely.
+            </p>
+          </div>
+          <div className="border-t border-gray-200 pt-4">
+            <p className="font-semibold text-primary mb-2">
+              The Ten Essentials
+            </p>
+            <p className="text-sm text-secondary mb-3">
+              Always carry these items, even on short hikes:
+            </p>
+            <ol className="text-sm text-secondary space-y-1 list-decimal list-inside">
+              <li>Navigation (map, compass, GPS)</li>
+              <li>Sun protection (sunscreen, sunglasses, hat)</li>
+              <li>Insulation (extra clothing)</li>
+              <li>Illumination (headlamp, flashlight)</li>
+              <li>First-aid supplies</li>
+              <li>Fire (matches, lighter)</li>
+              <li>Repair tools and knife</li>
+              <li>Nutrition (extra food)</li>
+              <li>Hydration (extra water)</li>
+              <li>Emergency shelter</li>
+            </ol>
+            <p className="text-sm mt-3">
+              <a
+                href="https://www.nps.gov/articles/10essentials.htm"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-location hover:underline inline-flex items-center gap-1"
+              >
+                Learn more about the Ten Essentials
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  />
+                </svg>
+              </a>
+            </p>
+          </div>
+          <div className="border-t border-gray-200 pt-4">
+            <p className="font-semibold text-primary mb-2">
+              Emergency Resources
+            </p>
+            <div className="text-sm text-secondary space-y-2">
+              <p>
+                <strong>NH Fish & Game (Search & Rescue):</strong>{' '}
+                <a href="tel:+16032713361" className="text-location hover:underline">
+                  (603) 271-3361
+                </a>
+              </p>
+              <p>
+                <strong>Emergency:</strong>{' '}
+                <a href="tel:911" className="text-location hover:underline">
+                  911
+                </a>
+              </p>
+              <p className="text-xs text-secondary pt-2">
+                Cell coverage may be limited in the Belknap Range. Let someone know your plans before you hike.
+              </p>
+            </div>
           </div>
         </div>
       </section>

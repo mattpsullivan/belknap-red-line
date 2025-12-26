@@ -70,6 +70,10 @@ Swap the color scheme to match traditional red-lining:
 **User Feedback:**
 > "Looking at the map view - can we add a way to see for each trail line an inline description of what each segment is?"
 
+> "Clicking on the trails on the map is a little difficult - is it possible to expand the clickable width of the trail?"
+
+> "The trail popup after clicking the map should link to the trail page for that trail."
+
 **Current State:**
 - Trail lines are displayed on the map with no labels or interactivity
 - No way to identify which trail is which without cross-referencing the Trails list
@@ -83,6 +87,7 @@ Swap the color scheme to match traditional red-lining:
 
 2. **Tap/click interaction** - Show trail info when user taps a trail line
    - Popup/tooltip with: Trail name, distance, difficulty, completion status
+   - Link to trail detail page from popup
    - Option to mark complete directly from popup
 
 3. **Hover tooltips** (desktop) - Quick preview on mouse hover
@@ -111,6 +116,18 @@ const handleMapClick = (e) => {
     setSelectedTrail(features[0].properties)
   }
 }
+
+// Option C: Invisible wider hit area layer for easier clicking
+<Layer
+  id="trails-hit-area"
+  type="line"
+  source="trails"
+  paint={{
+    'line-color': 'transparent',
+    'line-width': 20,  // Much wider than visible trail (3px)
+  }}
+/>
+// Click handler targets this invisible layer for easier interaction
 ```
 
 **Priority:** Medium
@@ -609,6 +626,82 @@ function findConnectedTrails(trails: Trail[], thresholdMeters = 100): Map<string
 
 ---
 
+### 10. Trail Data Sync with Map Tiles
+
+**User Feedback:**
+> "When looking at the online map tiles I notice that some of the trails do not match what the tiles show, or that the tiles show additional trails and trail segments. Is there a way that we can ingest trail data from the tiles themselves?"
+
+**Current State:**
+- Trail coordinates in `trails.json` were fetched from OpenStreetMap Overpass API (December 2025)
+- Map tiles come from OpenFreeMap, which renders OpenStreetMap data
+- 48/61 trails have OSM-sourced coordinates; 13 use placeholder/estimated coordinates
+- OSM data is constantly being updated by contributors, so tile rendering may have newer trail data than our bundled JSON
+- Some discrepancies may exist between our snapshot and the live tile rendering
+
+**Root Cause Analysis:**
+1. **Stale data** - Our trails.json is a snapshot from when we queried OSM; tiles render current OSM data
+2. **Missing trails** - Some BRATTS trails may not have been mapped in OSM at query time
+3. **Coordinate drift** - Trail paths in OSM may have been refined/corrected since our export
+4. **Additional trails** - Tiles may show trails not in the official BRATTS program
+
+**Options to Consider:**
+
+1. **Re-sync from OSM Overpass API** (Recommended)
+   - Re-run the `scripts/match-osm-trails.js` script with updated queries
+   - Most straightforward: same source as tiles, just fresher data
+   - Maintains offline-first design (data bundled at build time)
+   - Can be done periodically to stay in sync
+   - Effort: Low (existing infrastructure)
+
+2. **Vector Tile Parsing**
+   - Parse MVT (Mapbox Vector Tile) data directly from tile responses
+   - Extract trail geometries from the `transportation` or `path` layers
+   - Technical: Would need to decode Protocol Buffer format
+   - Challenge: Tiles are pre-simplified for display, may lose precision
+   - Challenge: Would need to identify which features are BRATTS trails vs other paths
+   - Effort: High (new parsing infrastructure)
+
+3. **Runtime OSM Fetch**
+   - Query OSM Overpass API at runtime for trail data
+   - Always matches tiles (same data source)
+   - Breaks offline-first design (requires network for trail data)
+   - Could cache with long TTL
+   - Effort: Medium
+
+4. **Hybrid Approach**
+   - Keep bundled data for offline use
+   - Add "Sync Trail Data" button that fetches latest from OSM
+   - Store updated data in IndexedDB
+   - Falls back to bundled data when offline
+   - Effort: Medium-High
+
+5. **OSM Community Contribution**
+   - If BRATTS trails are missing from OSM, add them
+   - Benefits the wider community
+   - Tiles would eventually render the additions
+   - Effort: Variable (depends on how many trails need adding)
+
+**Implementation Notes (Option 1):**
+```bash
+# Re-fetch OSM data for Belknap Range
+node scripts/fetch-osm-trails.js --bbox 43.4,-71.5,43.6,-71.2 --output fresh-trails.geojson
+
+# Match against BRATTS trail names
+node scripts/match-osm-trails.js --input fresh-trails.geojson --bratts data/bratts-trails.json
+
+# Enrich with elevation (already have this script)
+python scripts/enrich-elevation-api.py
+```
+
+**Priority:** Medium-High (affects data accuracy)
+**Complexity:** Low (Option 1) to High (Option 2)
+**Related Files:**
+- `scripts/match-osm-trails.js` - OSM matching script
+- `src/data/trails.json` - Trail data to update
+- `scripts/fetch-osm-trails.js` (new) - Direct Overpass API fetch
+
+---
+
 ### 9. Loop Detail View Enhancements
 
 **User Feedback:**
@@ -809,14 +902,15 @@ Building on the "scavenger hunt" concept from feedback #5:
 | Date | Source | Summary | Status |
 |------|--------|---------|--------|
 | Dec 2025 | User | Trail area/region organization | Open |
-| Dec 2025 | User | Red-line color scheme for completed trails | Open |
-| Dec 2025 | User | Trail info/labels on map | Open |
+| Dec 2025 | User | Red-line color scheme for completed trails | Done |
+| Dec 2025 | User | Trail info/labels on map | Done |
 | Dec 2025 | User | Trail detail page with map, elevation, loops | Open |
 | Dec 2025 | User | Multi-trail-system / white-label support | Open |
 | Dec 2025 | User | Multi-trail trip planning & loops | Open |
-| Dec 2025 | User | Brighter incomplete trail color, centralized style config | Open |
-| Dec 2025 | User | "View on Map" zoom & highlight selected trail | Open |
-| Dec 2025 | User | Loop "View on Map" & combined elevation profile | Open |
+| Dec 2025 | User | Brighter incomplete trail color, centralized style config | Done |
+| Dec 2025 | User | "View on Map" zoom & highlight selected trail | Done |
+| Dec 2025 | User | Loop "View on Map" & combined elevation profile | Done |
+| Dec 2025 | User | Trail data sync with map tiles | Open |
 
 ---
 
@@ -876,11 +970,12 @@ Based on complexity, user value, and dependencies:
 
 ## Summary
 
-**9 feature requests** captured from user feedback, ranging from quick color fixes to platform-level enhancements. The requests cluster around four themes:
+**10 feature requests** captured from user feedback, ranging from quick color fixes to platform-level enhancements. The requests cluster around five themes:
 
 1. **Better Trail Discovery** (#1, #3, #4, #8) - Help users understand and explore the trail network
 2. **Trip Planning** (#6, #9) - Enable multi-trail hike planning with loops and itineraries
 3. **Platform Expansion** (#5) - Make the app work for any trail system
 4. **Developer Experience & Theming** (#2, #7) - Centralize styling for maintainability and future white-labeling
+5. **Data Accuracy** (#10) - Keep trail data in sync with map tile rendering
 
 The recommended approach is to start with quick wins (#2, #7, #1 enhancements) to show immediate progress, then build the trail detail page (#4) as a foundation for trip planning and map interactions.

@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Layout } from '@/components/layout/Layout'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { PMTilesProvider } from '@/providers/PMTilesProvider'
+import { SafetyDisclaimerModal } from '@/components/SafetyDisclaimerModal'
 
 // Lazy load pages for better initial bundle size
 const ProgressPage = lazy(() => import('@/pages/ProgressPage').then(m => ({ default: m.ProgressPage })))
@@ -38,6 +39,7 @@ function App() {
   return (
     <PMTilesProvider>
       <BrowserRouter>
+        <SafetyDisclaimerModal />
         <Routes>
           <Route element={<Layout />}>
             <Route index element={<LazyPage><ProgressPage /></LazyPage>} />

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useTrails, useCompletions, useLoops } from '@/hooks'
 import { CompletionModal, ElevationProfile } from '@/components/trails'
+import { getAreaColors } from '@/config/styles'
 import type { Completion } from '@/types'
 
 const AREA_SHORT_NAMES: Record<string, string> = {
@@ -96,7 +97,13 @@ export function TrailDetailPage() {
             {isCompleted ? 'Completed' : 'Not Hiked'}
           </span>
           {trail.area && (
-            <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
+            <span
+              className="px-3 py-1 rounded-full text-sm font-medium"
+              style={{
+                backgroundColor: getAreaColors(trail.area).bg,
+                color: getAreaColors(trail.area).text,
+              }}
+            >
               {AREA_SHORT_NAMES[trail.area] || trail.area}
             </span>
           )}

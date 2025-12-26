@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTrails, useCompletions } from '@/hooks'
 import { CompletionModal } from '@/components/trails'
+import { getAreaColors } from '@/config/styles'
 import type { Trail, Completion } from '@/types'
 
 type FilterStatus = 'all' | 'complete' | 'incomplete'
@@ -294,8 +295,12 @@ function DifficultyBadge({
 
 function AreaBadge({ area }: { area: string }) {
   const shortName = AREA_SHORT_NAMES[area] || area
+  const colors = getAreaColors(area)
   return (
-    <span className="px-2 py-0.5 text-xs font-medium bg-border text-secondary rounded-full truncate max-w-[100px]">
+    <span
+      className="px-2 py-0.5 text-xs font-medium rounded-full truncate max-w-[100px]"
+      style={{ backgroundColor: colors.bg, color: colors.text }}
+    >
       {shortName}
     </span>
   )

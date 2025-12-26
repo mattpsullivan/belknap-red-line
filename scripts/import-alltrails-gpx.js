@@ -15,11 +15,9 @@ function parseGPX(filePath) {
   const content = fs.readFileSync(filePath, 'utf8');
   const points = [];
 
-  // Extract track name
   const nameMatch = content.match(/<name><!\[CDATA\[(.*?)\]\]><\/name>/);
   const name = nameMatch ? nameMatch[1] : path.basename(filePath, '.gpx');
 
-  // Extract all track points
   const trkptRegex = /<trkpt lat="([^"]+)" lon="([^"]+)">/g;
   let match;
   while ((match = trkptRegex.exec(content)) !== null) {
@@ -43,8 +41,8 @@ function distance(p1, p2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-// Calculate total length of a trail in meters
-function trailLength(coords) {
+// Calculate total length of a path in meters
+function pathLength(coords) {
   let total = 0;
   for (let i = 1; i < coords.length; i++) {
     total += distance(coords[i-1], coords[i]);
@@ -52,57 +50,52 @@ function trailLength(coords) {
   return total;
 }
 
-// Find the closest point on the GPX track to a given point
-function findClosestPoint(point, gpxPoints) {
-  let minDist = Infinity;
-  let closestIdx = -1;
-  for (let i = 0; i < gpxPoints.length; i++) {
-    const d = distance(point, gpxPoints[i]);
-    if (d < minDist) {
-      minDist = d;
-      closestIdx = i;
+// Find segment of target length starting near a point
+function findSegmentByLength(gpxPoints, nearPoint, targetLengthMeters, tolerance = 0.3) {
+  // Find starting points near the given point
+  const candidates = [];
+
+  for (let startIdx = 0; startIdx < gpxPoints.length; startIdx++) {
+    const startDist = distance(nearPoint, gpxPoints[startIdx]);
+    if (startDist > 150) continue; // Start point must be within 150m
+
+    // Try to find a segment of the right length
+    let runningLength = 0;
+    for (let endIdx = startIdx + 1; endIdx < gpxPoints.length; endIdx++) {
+      runningLength += distance(gpxPoints[endIdx-1], gpxPoints[endIdx]);
+
+      // Check if we're close to target length
+      const ratio = runningLength / targetLengthMeters;
+      if (ratio >= (1 - tolerance) && ratio <= (1 + tolerance)) {
+        candidates.push({
+          startIdx,
+          endIdx,
+          startDist,
+          length: runningLength,
+          ratio,
+          points: gpxPoints.slice(startIdx, endIdx + 1)
+        });
+      }
+
+      // Stop if we've gone too far
+      if (ratio > (1 + tolerance)) break;
     }
   }
-  return { index: closestIdx, distance: minDist };
+
+  // Return best candidate (closest start point with best length match)
+  if (candidates.length === 0) return null;
+
+  candidates.sort((a, b) => {
+    // Prefer better length match, then closer start
+    const aScore = Math.abs(1 - a.ratio) * 100 + a.startDist;
+    const bScore = Math.abs(1 - b.ratio) * 100 + b.startDist;
+    return aScore - bScore;
+  });
+
+  return candidates[0];
 }
 
-// Extract segment from GPX that matches a trail
-function extractTrailSegment(trail, gpxPoints, bufferMeters = 50) {
-  const trailStart = trail.coordinates[0];
-  const trailEnd = trail.coordinates[trail.coordinates.length - 1];
-  const expectedLength = trail.distance * 1609.34; // miles to meters
-
-  // Find closest points to trail start and end
-  const startMatch = findClosestPoint(trailStart, gpxPoints);
-  const endMatch = findClosestPoint(trailEnd, gpxPoints);
-
-  // Check if we found good matches (within buffer)
-  if (startMatch.distance > bufferMeters || endMatch.distance > bufferMeters) {
-    return null;
-  }
-
-  // Extract segment (handle both directions)
-  let startIdx = startMatch.index;
-  let endIdx = endMatch.index;
-
-  if (startIdx > endIdx) {
-    [startIdx, endIdx] = [endIdx, startIdx];
-  }
-
-  const segment = gpxPoints.slice(startIdx, endIdx + 1);
-
-  // Validate segment length - should be within 50% of expected
-  const segmentLength = trailLength(segment);
-  const lengthRatio = segmentLength / expectedLength;
-
-  if (lengthRatio < 0.5 || lengthRatio > 1.5) {
-    return null; // Segment doesn't match expected trail length
-  }
-
-  return segment;
-}
-
-// Load and parse all GPX files
+// Load GPX files
 const gpxDir = path.join(__dirname, '../data/gpx');
 const gpxFiles = fs.readdirSync(gpxDir).filter(f => f.endsWith('.gpx') && !f.includes('(1)'));
 
@@ -117,42 +110,51 @@ gpxFiles.forEach(file => {
 
 console.log(`\nTotal GPX tracks: ${gpxTracks.length}\n`);
 
-// Try to improve each trail
-console.log('Matching trails to GPX data...\n');
+// Find improvements for sparse trails
+console.log('Matching sparse trails to GPX data...\n');
 
-let improved = 0;
 const improvements = [];
 
 trails.forEach(trail => {
   const currentCoords = trail.coordinates.length;
 
-  // Skip if already has good data (more than 50 points)
-  if (currentCoords >= 50) {
-    return;
-  }
+  // Only try to improve trails with sparse data
+  if (currentCoords >= 40) return;
+
+  const targetLength = trail.distance * 1609.34; // miles to meters
+  const trailStart = trail.coordinates[0];
+  const trailEnd = trail.coordinates[trail.coordinates.length - 1];
 
   // Try each GPX track
   for (const gpx of gpxTracks) {
-    const segment = extractTrailSegment(trail, gpx.points, 75);
+    // Try from start point
+    let segment = findSegmentByLength(gpx.points, trailStart, targetLength, 0.25);
 
-    if (segment && segment.length > currentCoords * 1.5) {
+    // Also try from end point if no match
+    if (!segment) {
+      segment = findSegmentByLength(gpx.points, trailEnd, targetLength, 0.25);
+    }
+
+    if (segment && segment.points.length > currentCoords * 1.3) {
       improvements.push({
         name: trail.name,
+        id: trail.id,
         before: currentCoords,
-        after: segment.length,
+        after: segment.points.length,
         expectedMiles: trail.distance,
-        actualMiles: (trailLength(segment) / 1609.34).toFixed(2),
+        actualMiles: (segment.length / 1609.34).toFixed(2),
         source: gpx.name,
-        segment
+        segment: segment.points
       });
-      break; // Use first good match
+      break;
     }
   }
 });
 
-// Show potential improvements
+// Show improvements
 console.log('Potential improvements:\n');
 improvements.sort((a, b) => (b.after - b.before) - (a.after - a.before));
+
 improvements.forEach(imp => {
   console.log(`  ${imp.name}:`);
   console.log(`    Points: ${imp.before} → ${imp.after}`);
@@ -161,15 +163,15 @@ improvements.forEach(imp => {
 });
 
 if (improvements.length === 0) {
-  console.log('  No improvements found (trails already have good data or no matches)\n');
+  console.log('  No additional improvements found\n');
 }
 
-// Apply improvements interactively
+// Apply improvements
 if (improvements.length > 0) {
   console.log(`\nApplying ${improvements.length} improvements...`);
 
   improvements.forEach(imp => {
-    const trail = trails.find(t => t.name === imp.name);
+    const trail = trails.find(t => t.id === imp.id);
     if (trail) {
       trail.coordinates = imp.segment;
       trail.trailhead = imp.segment[0];
@@ -180,11 +182,10 @@ if (improvements.length > 0) {
   console.log('Saved updated trails.json');
 }
 
-// Summary stats
+// Summary
 const coordCounts = trails.map(t => t.coordinates.length);
 console.log('\nFinal stats:');
 console.log(`  Total points: ${coordCounts.reduce((a, b) => a + b, 0)}`);
 console.log(`  Min coords: ${Math.min(...coordCounts)}`);
-console.log(`  Max coords: ${Math.max(...coordCounts)}`);
 console.log(`  Trails with <20 coords: ${coordCounts.filter(c => c < 20).length}`);
-console.log(`  Trails with <50 coords: ${coordCounts.filter(c => c < 50).length}`);
+console.log(`  Trails with <40 coords: ${coordCounts.filter(c => c < 40).length}`);

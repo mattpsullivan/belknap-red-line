@@ -2,19 +2,8 @@ import { useMemo, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useTrails, useCompletions, useLoops } from '@/hooks'
 import { CompletionModal, ElevationProfile } from '@/components/trails'
-import { getAreaColors } from '@/config/styles'
+import { getAreaColors, getAreaShortName } from '@/config/styles'
 import type { Completion } from '@/types'
-
-const AREA_SHORT_NAMES: Record<string, string> = {
-  'Lockes Hill': 'Lockes Hill',
-  'Mt. Rowe & Gunstock Mountain': 'Rowe/Gunstock',
-  'Belknap Mountain': 'Belknap',
-  'Piper, Whiteface & Swett Mountains': 'Piper/Whiteface',
-  'Mt. Klem, Mt. Mack & Mt. Anna': 'Klem/Mack/Anna',
-  'Rand, Quarry & Straightback Mountains': 'Rand/Quarry',
-  'Mt. Major': 'Mt. Major',
-  'Mt. Shannon, Goat Pasture Hill & Pine Mountain': 'Shannon/Goat',
-}
 
 export function TrailDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -104,7 +93,7 @@ export function TrailDetailPage() {
                 color: getAreaColors(trail.area).text,
               }}
             >
-              {AREA_SHORT_NAMES[trail.area] || trail.area}
+              {getAreaShortName(trail.area)}
             </span>
           )}
           <span
@@ -348,7 +337,7 @@ export function TrailDetailPage() {
         {nearbyTrails.length > 0 && (
           <div className="bg-surface rounded-xl p-4">
             <h2 className="font-semibold text-primary mb-3">
-              More in {AREA_SHORT_NAMES[trail.area || ''] || trail.area}
+              More in {getAreaShortName(trail.area || '')}
             </h2>
             <div className="space-y-2">
               {nearbyTrails.map((nearbyTrail) => (

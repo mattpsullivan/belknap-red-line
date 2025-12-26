@@ -179,3 +179,25 @@ const defaultAreaColors = {
 export function getAreaColors(area: string): { bg: string; text: string } {
   return styleConfig.areas[area] || defaultAreaColors
 }
+
+/**
+ * Short display names for trail areas
+ * Used in badges and dropdowns where space is limited
+ */
+export const AREA_SHORT_NAMES: Record<string, string> = {
+  'Lockes Hill': 'Lockes Hill',
+  'Mt. Rowe & Gunstock Mountain': 'Rowe/Gunstock',
+  'Belknap Mountain': 'Belknap',
+  'Piper, Whiteface & Swett Mountains': 'Piper/Whiteface',
+  'Mt. Klem, Mt. Mack & Mt. Anna': 'Klem/Mack/Anna',
+  'Rand, Quarry & Straightback Mountains': 'Rand/Quarry',
+  'Mt. Major': 'Mt. Major',
+  'Mt. Shannon, Goat Pasture Hill & Pine Mountain': 'Shannon/Goat',
+}
+
+/**
+ * Helper to get short area name
+ */
+export function getAreaShortName(area: string): string {
+  return AREA_SHORT_NAMES[area] || area
+}

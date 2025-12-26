@@ -9,11 +9,12 @@ describe('App', () => {
     // Check that the header is present
     expect(screen.getByText('Belknap Tracker')).toBeInTheDocument()
 
-    // Check that navigation items are present
+    // Check that navigation items are present (use getAllByText for items that may appear elsewhere)
     expect(screen.getByText('Progress')).toBeInTheDocument()
     expect(screen.getByText('Map')).toBeInTheDocument()
     expect(screen.getByText('Trails')).toBeInTheDocument()
-    expect(screen.getByText('Settings')).toBeInTheDocument()
+    // Settings appears in both nav and safety modal, so check it exists
+    expect(screen.getAllByText('Settings').length).toBeGreaterThan(0)
   })
 
   it('shows progress page by default', async () => {

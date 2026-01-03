@@ -31,3 +31,8 @@ lerna-debug.log*
 *.sln
 *.sw?
 __pycache__/
+
+# Misc
+.cache/
+tmp/
+temp/

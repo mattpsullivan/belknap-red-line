@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OSM Way Mapper - Belknap Trails</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; display: flex; height: 100vh; }
+
+    #map { flex: 1; height: 100%; }
+
+    #sidebar {
+      width: 420px;
+      height: 100%;
+      overflow-y: auto;
+      background: #f5f5f5;
+      border-left: 1px solid #ddd;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel { padding: 12px; border-bottom: 1px solid #ddd; }
+    .panel h3 { margin-bottom: 8px; font-size: 14px; color: #333; }
+
+    #status { background: #e8f4e8; font-size: 13px; }
+    #status.loading { background: #fff3cd; }
+    #status.error { background: #f8d7da; }
+
+    #selected-way { background: #e3f2fd; min-height: 80px; }
+    #selected-way.empty { color: #666; font-style: italic; }
+    .way-info { font-size: 13px; line-height: 1.5; }
+    .way-info strong { color: #1976d2; }
+    .way-id { font-family: monospace; background: #fff; padding: 2px 6px; border-radius: 3px; }
+
+    #bratts-panel { flex: 1; overflow-y: auto; }
+    #bratts-filter {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+
+    .trail-item {
+      padding: 8px 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-bottom: 6px;
+      background: white;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.15s;
+    }
+    .trail-item:hover { border-color: #1976d2; background: #f0f7ff; }
+    .trail-item.mapped { background: #e8f5e9; border-color: #4caf50; }
+    .trail-item.selected { background: #bbdefb; border-color: #1976d2; }
+    .trail-item .name { font-weight: 500; }
+    .trail-item .meta { font-size: 11px; color: #666; margin-top: 2px; }
+    .trail-item .mapping { font-size: 11px; color: #4caf50; margin-top: 4px; }
+
+    #actions { background: #fff; }
+    #actions button {
+      padding: 8px 16px;
+      margin-right: 8px;
+      margin-bottom: 8px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    #actions label {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+    #actions input[type="checkbox"] {
+      margin-right: 6px;
+    }
+    .btn-primary { background: #1976d2; color: white; }
+    .btn-primary:hover { background: #1565c0; }
+    .btn-secondary { background: #e0e0e0; color: #333; }
+    .btn-secondary:hover { background: #d0d0d0; }
+    .btn-danger { background: #f44336; color: white; }
+    .btn-danger:hover { background: #d32f2f; }
+
+    #export-panel { display: none; background: #fff; }
+    #export-panel textarea {
+      width: 100%;
+      height: 200px;
+      font-family: monospace;
+      font-size: 11px;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; margin-top: 8px; }
+    .legend-item { display: flex; align-items: center; gap: 4px; }
+    .legend-color { width: 20px; height: 3px; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div id="sidebar">
+    <div id="status" class="panel loading">Loading OSM data...</div>
+
+    <div id="selected-way" class="panel empty">
+      Click an OSM way on the map to select it
+    </div>
+
+    <div id="actions" class="panel">
+      <label>
+        <input type="checkbox" id="show-unnamed" checked onchange="toggleUnnamed()">
+        Show unnamed segments (<span id="unnamed-count">0</span>)
+      </label>
+      <label>
+        <input type="checkbox" id="show-named" checked onchange="toggleNamed()">
+        Show named segments (<span id="named-count">0</span>)
+      </label>
+      <button class="btn-primary" onclick="assignToSelected()" id="assign-btn" disabled>
+        Assign to Selected Trail
+      </button>
+      <button class="btn-secondary" onclick="toggleExport()">Export Mapping</button>
+      <button class="btn-secondary" onclick="loadExistingMapping()">Load Existing</button>
+      <button class="btn-danger" onclick="clearMapping()">Clear All</button>
+      <div class="legend">
+        <div class="legend-item"><span class="legend-color" style="background: #2196f3"></span> Named (unmapped)</div>
+        <div class="legend-item"><span class="legend-color" style="background: #9e9e9e"></span> Unnamed</div>
+        <div class="legend-item"><span class="legend-color" style="background: #4caf50"></span> Mapped</div>
+        <div class="legend-item"><span class="legend-color" style="background: #ff9800"></span> Selected</div>
+      </div>
+    </div>
+
+    <div id="export-panel" class="panel">
+      <h3>Mapping Export (paste into script)</h3>
+      <textarea id="export-text" readonly></textarea>
+    </div>
+
+    <div id="bratts-panel" class="panel">
+      <h3>BRATTS Trails (<span id="trail-count">0</span> total, <span id="mapped-count">0</span> mapped)</h3>
+      <input type="text" id="bratts-filter" placeholder="Filter trails..." oninput="filterTrails()">
+      <div id="bratts-list"></div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    // State
+    let map;
+    let osmWays = [];       // Raw OSM ways
+    let segments = [];      // Split segments at intersections
+    let brattsTrails = [];
+    let selectedSegment = null;
+    let selectedBrattsTrail = null;
+    let mapping = {}; // brattsId -> { segmentIds: [...], osmNames: [...] }
+    let segmentLayers = {}; // segmentId -> layer
+
+    // Initialize map
+    function initMap() {
+      map = L.map('map').setView([43.51, -71.35], 12);
+
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+    }
+
+    // Fetch OSM ways from Overpass
+    async function fetchOsmWays() {
+      const bbox = '43.40,-71.55,43.62,-71.20';
+      const query = `
+        [out:json][timeout:120];
+        (
+          way["highway"="path"](${bbox});
+          way["highway"="footway"](${bbox});
+          way["highway"="track"](${bbox});
+        );
+        out body geom;
+      `;
+
+      const response = await fetch('https://overpass-api.de/api/interpreter', {
+        method: 'POST',
+        body: 'data=' + encodeURIComponent(query)
+      });
+
+      if (!response.ok) throw new Error('Overpass API error');
+
+      const data = await response.json();
+      return data.elements.filter(el => el.geometry && el.geometry.length > 1);
+    }
+
+    // Fetch BRATTS trails
+    async function fetchBrattsTrails() {
+      const response = await fetch('../src/data/trails.json');
+      return response.json();
+    }
+
+    // Create coordinate key for comparison (rounded to ~1m precision)
+    function coordKey(lat, lon) {
+      return `${lat.toFixed(5)},${lon.toFixed(5)}`;
+    }
+
+    // Split ways at intersections
+    function splitWaysAtIntersections(ways) {
+      // Step 1: Build index of all points and which ways use them
+      const pointToWays = new Map(); // coordKey -> Set of wayIds
+      const wayPointIndices = new Map(); // wayId -> Map of coordKey -> index
+
+      ways.forEach(way => {
+        const indices = new Map();
+        way.geometry.forEach((pt, idx) => {
+          const key = coordKey(pt.lat, pt.lon);
+          indices.set(key, idx);
+
+          if (!pointToWays.has(key)) {
+            pointToWays.set(key, new Set());
+          }
+          pointToWays.get(key).add(way.id);
+        });
+        wayPointIndices.set(way.id, indices);
+      });
+
+      // Step 2: Find intersection points (used by 2+ ways)
+      const intersectionPoints = new Set();
+      pointToWays.forEach((wayIds, key) => {
+        if (wayIds.size >= 2) {
+          intersectionPoints.add(key);
+        }
+      });
+
+      // Step 3: Also add start/end points of each way as split points
+      // (so segments naturally end where ways end)
+      ways.forEach(way => {
+        if (way.geometry.length > 0) {
+          const first = way.geometry[0];
+          const last = way.geometry[way.geometry.length - 1];
+          intersectionPoints.add(coordKey(first.lat, first.lon));
+          intersectionPoints.add(coordKey(last.lat, last.lon));
+        }
+      });
+
+      // Step 4: Split each way at intersection points
+      const allSegments = [];
+      let segmentId = 1;
+
+      ways.forEach(way => {
+        // Find indices where this way intersects
+        const splitIndices = [0]; // Always start at 0
+        const indices = wayPointIndices.get(way.id);
+
+        way.geometry.forEach((pt, idx) => {
+          const key = coordKey(pt.lat, pt.lon);
+          if (intersectionPoints.has(key) && idx > 0 && idx < way.geometry.length - 1) {
+            splitIndices.push(idx);
+          }
+        });
+
+        splitIndices.push(way.geometry.length - 1); // Always end at last
+        splitIndices.sort((a, b) => a - b);
+
+        // Remove duplicates
+        const uniqueIndices = [...new Set(splitIndices)];
+
+        // Create segments between consecutive split points
+        for (let i = 0; i < uniqueIndices.length - 1; i++) {
+          const startIdx = uniqueIndices[i];
+          const endIdx = uniqueIndices[i + 1];
+
+          if (endIdx > startIdx) {
+            const segmentGeometry = way.geometry.slice(startIdx, endIdx + 1);
+
+            allSegments.push({
+              id: `seg-${segmentId++}`,
+              wayId: way.id,
+              wayName: way.tags?.name || null,
+              tags: way.tags || {},
+              geometry: segmentGeometry,
+              startIdx,
+              endIdx
+            });
+          }
+        }
+      });
+
+      return allSegments;
+    }
+
+    // Get color for a segment
+    function getSegmentColor(segment) {
+      const isMapped = Object.values(mapping).some(m => m.segmentIds.includes(segment.id));
+      if (isMapped) return '#4caf50';
+      if (segment.wayName) return '#2196f3';
+      return '#9e9e9e';
+    }
+
+    // Render segments on map
+    function renderSegments() {
+      const namedCount = segments.filter(s => s.wayName).length;
+      const unnamedCount = segments.length - namedCount;
+      document.getElementById('named-count').textContent = namedCount;
+      document.getElementById('unnamed-count').textContent = unnamedCount;
+
+      segments.forEach(segment => {
+        const coords = segment.geometry.map(p => [p.lat, p.lon]);
+        const isNamed = !!segment.wayName;
+
+        const layer = L.polyline(coords, {
+          color: getSegmentColor(segment),
+          weight: isNamed ? 4 : 2,
+          opacity: isNamed ? 0.8 : 0.6
+        }).addTo(map);
+
+        layer.segmentData = segment;
+        layer.on('click', () => selectSegment(segment));
+        layer.on('mouseover', () => layer.setStyle({ weight: isNamed ? 6 : 4 }));
+        layer.on('mouseout', () => layer.setStyle({ weight: isNamed ? 4 : 2 }));
+
+        segmentLayers[segment.id] = layer;
+      });
+    }
+
+    // Toggle unnamed segments visibility
+    function toggleUnnamed() {
+      const show = document.getElementById('show-unnamed').checked;
+      segments.forEach(segment => {
+        if (!segment.wayName && segmentLayers[segment.id]) {
+          if (show) {
+            segmentLayers[segment.id].addTo(map);
+          } else {
+            segmentLayers[segment.id].remove();
+          }
+        }
+      });
+    }
+
+    // Toggle named segments visibility
+    function toggleNamed() {
+      const show = document.getElementById('show-named').checked;
+      segments.forEach(segment => {
+        if (segment.wayName && segmentLayers[segment.id]) {
+          if (show) {
+            segmentLayers[segment.id].addTo(map);
+          } else {
+            segmentLayers[segment.id].remove();
+          }
+        }
+      });
+    }
+
+    // Select a segment
+    function selectSegment(segment) {
+      // Reset previous selection
+      if (selectedSegment) {
+        const prevLayer = segmentLayers[selectedSegment.id];
+        prevLayer.setStyle({ color: getSegmentColor(selectedSegment) });
+      }
+
+      selectedSegment = segment;
+      segmentLayers[segment.id].setStyle({ color: '#ff9800' });
+
+      const panel = document.getElementById('selected-way');
+      panel.className = 'panel';
+      panel.innerHTML = `
+        <div class="way-info">
+          <strong>${segment.wayName || 'Unnamed'}</strong><br>
+          Segment: <span class="way-id">${segment.id}</span><br>
+          Way ID: <span class="way-id">${segment.wayId}</span><br>
+          Points: ${segment.geometry.length}<br>
+          ${segment.tags?.highway ? `Type: ${segment.tags.highway}` : ''}
+        </div>
+      `;
+
+      updateAssignButton();
+    }
+
+    // Render BRATTS trail list
+    function renderBrattsTrails(filter = '') {
+      const list = document.getElementById('bratts-list');
+      const filterLower = filter.toLowerCase();
+
+      const filtered = brattsTrails.filter(t =>
+        t.name.toLowerCase().includes(filterLower) ||
+        t.id.toLowerCase().includes(filterLower) ||
+        t.area.toLowerCase().includes(filterLower)
+      );
+
+      list.innerHTML = filtered.map(trail => {
+        const m = mapping[trail.id];
+        const isMapped = !!m;
+        const isSelected = selectedBrattsTrail?.id === trail.id;
+
+        return `
+          <div class="trail-item ${isMapped ? 'mapped' : ''} ${isSelected ? 'selected' : ''}"
+               onclick="selectBrattsTrail('${trail.id}')">
+            <div class="name">${trail.name}</div>
+            <div class="meta">${trail.distance} mi · ${trail.area}</div>
+            ${isMapped ? `<div class="mapping">→ ${m.segmentIds.length} segment(s): ${m.osmNames.join(', ')}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('trail-count').textContent = brattsTrails.length;
+      document.getElementById('mapped-count').textContent = Object.keys(mapping).length;
+    }
+
+    // Select a BRATTS trail
+    function selectBrattsTrail(trailId) {
+      selectedBrattsTrail = brattsTrails.find(t => t.id === trailId);
+      renderBrattsTrails(document.getElementById('bratts-filter').value);
+      updateAssignButton();
+
+      // If this trail is already mapped, highlight those segments and fit bounds
+      const m = mapping[trailId];
+      if (m && m.segmentIds.length > 0) {
+        const bounds = L.latLngBounds();
+        m.segmentIds.forEach(segId => {
+          const layer = segmentLayers[segId];
+          if (layer) {
+            bounds.extend(layer.getBounds());
+          }
+        });
+        if (bounds.isValid()) {
+          map.fitBounds(bounds, { padding: [50, 50] });
+        }
+      }
+    }
+
+    // Update assign button state
+    function updateAssignButton() {
+      const btn = document.getElementById('assign-btn');
+      btn.disabled = !selectedSegment || !selectedBrattsTrail;
+    }
+
+    // Assign selected segment to selected BRATTS trail
+    function assignToSelected() {
+      if (!selectedSegment || !selectedBrattsTrail) return;
+
+      const trailId = selectedBrattsTrail.id;
+
+      if (!mapping[trailId]) {
+        mapping[trailId] = { segmentIds: [], osmNames: [], wayIds: [] };
+      }
+
+      if (!mapping[trailId].segmentIds.includes(selectedSegment.id)) {
+        mapping[trailId].segmentIds.push(selectedSegment.id);
+        mapping[trailId].osmNames.push(selectedSegment.wayName || 'Unnamed');
+        // Also track original way IDs for export
+        if (!mapping[trailId].wayIds.includes(selectedSegment.wayId)) {
+          mapping[trailId].wayIds.push(selectedSegment.wayId);
+        }
+      }
+
+      // Update layer color to mapped (green)
+      segmentLayers[selectedSegment.id].setStyle({ color: getSegmentColor(selectedSegment) });
+
+      // Clear selection
+      selectedSegment = null;
+      document.getElementById('selected-way').className = 'panel empty';
+      document.getElementById('selected-way').innerHTML = 'Click an OSM way on the map to select it';
+
+      renderBrattsTrails(document.getElementById('bratts-filter').value);
+      updateExport();
+    }
+
+    // Filter trails
+    function filterTrails() {
+      renderBrattsTrails(document.getElementById('bratts-filter').value);
+    }
+
+    // Toggle export panel
+    function toggleExport() {
+      const panel = document.getElementById('export-panel');
+      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+      updateExport();
+    }
+
+    // Update export text - exports segment geometry directly
+    function updateExport() {
+      // Export format: trailId -> array of {wayId, geometry} for each segment
+      const exportObj = {};
+      Object.entries(mapping).forEach(([trailId, data]) => {
+        exportObj[trailId] = {
+          wayIds: data.wayIds,
+          segments: data.segmentIds.map(segId => {
+            const seg = segments.find(s => s.id === segId);
+            return {
+              wayId: seg.wayId,
+              wayName: seg.wayName,
+              geometry: seg.geometry.map(p => ({ lat: p.lat, lng: p.lon }))
+            };
+          })
+        };
+      });
+
+      document.getElementById('export-text').value =
+        '// OSM Segment Mapping\n' +
+        '// Generated: ' + new Date().toISOString() + '\n' +
+        '// Each trail maps to segments with their geometry\n' +
+        'const osmSegmentMapping = ' + JSON.stringify(exportObj, null, 2) + ';';
+    }
+
+    // Clear all mappings
+    function clearMapping() {
+      if (!confirm('Clear all mappings?')) return;
+      mapping = {};
+      segments.forEach(segment => {
+        if (segmentLayers[segment.id]) {
+          segmentLayers[segment.id].setStyle({ color: getSegmentColor(segment) });
+        }
+      });
+      renderBrattsTrails(document.getElementById('bratts-filter').value);
+      updateExport();
+    }
+
+    // Load existing mapping from localStorage
+    function loadExistingMapping() {
+      const saved = localStorage.getItem('osm-segment-mapping');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          mapping = parsed;
+
+          // Update layer colors for all mapped segments
+          Object.values(mapping).forEach(m => {
+            if (m.segmentIds) {
+              m.segmentIds.forEach(segId => {
+                const segment = segments.find(s => s.id === segId);
+                if (segmentLayers[segId] && segment) {
+                  segmentLayers[segId].setStyle({ color: getSegmentColor(segment) });
+                }
+              });
+            }
+          });
+
+          renderBrattsTrails(document.getElementById('bratts-filter').value);
+          updateExport();
+          alert('Loaded ' + Object.keys(mapping).length + ' mappings');
+        } catch (e) {
+          alert('Error loading mapping: ' + e.message);
+        }
+      } else {
+        alert('No saved mapping found');
+      }
+    }
+
+    // Auto-save mapping to localStorage
+    function saveMapping() {
+      localStorage.setItem('osm-segment-mapping', JSON.stringify(mapping));
+    }
+
+    // Initialize
+    async function init() {
+      initMap();
+
+      try {
+        document.getElementById('status').textContent = 'Fetching OSM data...';
+
+        const [ways, trails] = await Promise.all([
+          fetchOsmWays(),
+          fetchBrattsTrails()
+        ]);
+
+        osmWays = ways;
+        brattsTrails = trails.sort((a, b) => a.name.localeCompare(b.name));
+
+        document.getElementById('status').textContent = 'Splitting ways at intersections...';
+
+        // Split ways into segments at intersections
+        segments = splitWaysAtIntersections(osmWays);
+
+        document.getElementById('status').className = 'panel';
+        document.getElementById('status').textContent =
+          `Loaded ${osmWays.length} OSM ways → ${segments.length} segments, ${brattsTrails.length} BRATTS trails`;
+
+        renderSegments();
+        renderBrattsTrails();
+
+        // Auto-save on changes
+        const originalAssign = assignToSelected;
+        assignToSelected = function() {
+          originalAssign();
+          saveMapping();
+        };
+
+      } catch (error) {
+        document.getElementById('status').className = 'panel error';
+        document.getElementById('status').textContent = 'Error: ' + error.message;
+        console.error(error);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

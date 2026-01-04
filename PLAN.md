@@ -484,14 +484,42 @@ Drawback: Requires network, breaks offline-first design.
 ---
 
 ### Phase 6: Future Enhancements
-- [ ] Social features
-- [ ] Photo attachments
-- [ ] Weather integration
-- [ ] Trail condition reports
-- [ ] BRATTS patch application helper
+
+#### 6.1 Trail Data & Discovery
+- [ ] **Add new trails from GPS tracks** - Walk an unmapped trail, save track, create new trail entry
+  - Leverage existing OSM way mapper tooling
+  - Option to submit new trails back to OSM
+  - Support "provisional" trails pending verification
+- [ ] **Trail condition reports** - Mark trails as muddy, icy, blocked, etc.
+
+#### 6.2 White Label / Multi-Network Support
+- [ ] **White-label architecture** - Support other trail networks beyond Belknap Range
+  - Configurable trail data source (JSON file or URL)
+  - Customizable branding (colors, app name, icons)
+  - Example use cases: other NH hiking areas, local community walking routes
+- [ ] **Trail network selector** - Switch between multiple trail datasets
+- [ ] **Community walking mode** - Track neighborhood walks, not just hiking trails
+
+#### 6.3 Trail Fixup Tooling Improvements
+- [ ] **Offline OSM data download** - Fetch all trails (marked + unmarked) once
+  - Cache Overpass API results locally
+  - Support incremental updates
+- [ ] **Partial mapping persistence** - Save/load incomplete trail mappings
+  - Do cleanup at home, continue after field verification
+  - Export/import mapping progress
+- [ ] **Batch processing mode** - Run tool without web UI for scripting
+
+#### 6.4 Track & Media Features
 - [ ] Track replay animation (playback recorded hikes on map)
 - [ ] Side-by-side track comparison (compare multiple hikes)
 - [ ] Export tracks to GPX format
+- [ ] Photo attachments with geolocation
+- [ ] BRATTS patch application helper
+
+#### 6.5 Social & External
+- [ ] Social features (share completions, leaderboards)
+- [ ] Weather integration
+- [ ] Trail popularity / recent activity indicators
 
 ---
 
@@ -766,6 +794,8 @@ const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 | 2025-12-22 | **PHASE 5 CORE COMPLETE** - Elevation profile integrated (97 tests) | Done |
 | 2026-01-04 | Phase 7: Created design doc for Capacitor native wrapper | Done |
 | 2026-01-04 | Phase 7: Added detailed checklist to PLAN.md | Done |
-| 2026-01-04 | Phase 7: Created `feature/capacitor-native` branch | In Progress |
+| 2026-01-04 | Phase 7: Created `feature/capacitor-native` branch | Done |
+| 2026-01-04 | Phase 7: Capacitor scaffold, geolocation abstraction, privacy policy | Done |
+| 2026-01-04 | Phase 6: Added future ideas (new trails, white-label, tooling improvements) | Planned |
 
 <!-- Update this log after each work session -->

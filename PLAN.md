@@ -167,9 +167,9 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 
 ---
 
-### ✅ CURRENT STATE: Phase 5 Nearly Complete
+### ✅ CURRENT STATE: Phase 7 In Progress
 
-**Status:** Phase 5 elevation data enhancement ~90% complete with 97 passing tests.
+**Status:** Phase 5 complete. Phase 7 (Capacitor Native Wrapper) in progress on `feature/capacitor-native` branch.
 
 **What's Working:**
 - Progress Dashboard with animated progress ring
@@ -495,6 +495,171 @@ Drawback: Requires network, breaks offline-first design.
 
 ---
 
+### Phase 7: Capacitor Native Wrapper (Background GPS)
+
+> **Design Doc:** `docs/design/capacitor-native-wrapper.md`
+> **Branch:** `feature/capacitor-native`
+> **Goal:** Enable GPS recording while phone is locked during hikes
+
+#### 7.1 Capacitor Core Setup
+- [ ] Install Capacitor core dependencies
+  ```bash
+  npm install @capacitor/core
+  npm install -D @capacitor/cli
+  ```
+- [ ] Initialize Capacitor configuration
+  ```bash
+  npx cap init "Belknap Tracker" "com.belknaptracker.app"
+  ```
+- [ ] Configure `capacitor.config.ts`
+  - Set `webDir: 'dist'`
+  - Set `android.useLegacyBridge: true` (required for background plugin)
+- [ ] Add Android platform
+  ```bash
+  npm install @capacitor/android
+  npx cap add android
+  ```
+- [ ] Add iOS platform
+  ```bash
+  npm install @capacitor/ios
+  npx cap add ios
+  ```
+- [ ] Verify web build works with Capacitor
+  ```bash
+  npm run build && npx cap sync
+  ```
+
+#### 7.2 Background Geolocation Plugin
+- [ ] Install @capgo/background-geolocation plugin
+  ```bash
+  npm install @capgo/background-geolocation
+  npx cap sync
+  ```
+- [ ] Configure iOS permissions (Info.plist)
+  - `NSLocationWhenInUseUsageDescription`
+  - `NSLocationAlwaysAndWhenInUseUsageDescription`
+  - `UIBackgroundModes` with `location`
+- [ ] Configure Android permissions (AndroidManifest.xml)
+  - `ACCESS_FINE_LOCATION`
+  - `ACCESS_COARSE_LOCATION`
+  - `ACCESS_BACKGROUND_LOCATION`
+  - `FOREGROUND_SERVICE`
+  - `POST_NOTIFICATIONS` (Android 13+)
+- [ ] Test plugin loads without errors
+
+#### 7.3 Geolocation Abstraction Layer
+- [ ] Create `src/services/geolocation/types.ts`
+  - `GeoPosition` interface
+  - `GeolocationProvider` interface
+  - `GeolocationError` types
+- [ ] Create `src/services/geolocation/webProvider.ts`
+  - Wrap `navigator.geolocation.watchPosition`
+  - Match provider interface
+- [ ] Create `src/services/geolocation/nativeProvider.ts`
+  - Wrap `@capgo/background-geolocation`
+  - Match provider interface
+  - Configure notification text/appearance
+- [ ] Create `src/services/geolocation/index.ts`
+  - Factory function using `Capacitor.isNativePlatform()`
+  - Export unified interface
+- [ ] Write tests for abstraction layer
+  - Mock Capacitor platform detection
+  - Test web provider
+  - Test native provider interface
+
+#### 7.4 Hook Integration
+- [ ] Refactor `useGeolocation.ts` to use provider factory
+  - Remove direct `navigator.geolocation` calls
+  - Use async provider API
+  - Preserve throttle/distance filtering logic
+- [ ] Update `useTrackRecording.ts` if needed
+  - Ensure works with async geolocation provider
+- [ ] Verify existing tests still pass
+- [ ] Add tests for native code path (mocked)
+
+#### 7.5 App Assets & Branding
+- [ ] Install capacitor-assets tool
+  ```bash
+  npm install -D @capacitor/assets
+  ```
+- [ ] Create source assets in `resources/`
+  - `icon.png` (1024x1024 master icon)
+  - `splash.png` (2732x2732 splash screen)
+  - `icon-foreground.png` (adaptive icon, optional)
+- [ ] Generate platform assets
+  ```bash
+  npx capacitor-assets generate --iconBackgroundColor '#3B82F6'
+  ```
+- [ ] Verify icons appear correctly in both platforms
+
+#### 7.6 Privacy Policy & Compliance
+- [ ] Create `docs/privacy-policy.md` with required content
+  - Data collection (GPS during active recording)
+  - Data storage (local only, no server)
+  - Data deletion (Settings → Clear All Data)
+  - Contact information
+- [ ] Add `/privacy` route to app (optional, or host externally)
+- [ ] Prepare background location justification text for App Store
+
+#### 7.7 Build Scripts & Workflow
+- [ ] Add npm scripts to package.json:
+  ```json
+  {
+    "cap:sync": "npx cap sync",
+    "cap:android": "npm run build && npx cap sync && npx cap open android",
+    "cap:ios": "npm run build && npx cap sync && npx cap open ios",
+    "cap:run:android": "npm run build && npx cap sync && npx cap run android",
+    "cap:run:ios": "npm run build && npx cap sync && npx cap run ios"
+  }
+  ```
+- [ ] Update `.gitignore` for native projects
+  - `android/app/build/`
+  - `ios/App/Pods/`
+  - `ios/App/build/`
+- [ ] Document build workflow in README or CONTRIBUTING.md
+
+#### 7.8 Testing & Verification
+- [ ] Test on Android device/emulator
+  - Verify app launches
+  - Test foreground GPS tracking
+  - Test background GPS (lock screen)
+  - Verify notification appears during background tracking
+- [ ] Test on iOS device/simulator
+  - Verify app launches
+  - Test foreground GPS tracking
+  - Test background GPS (lock screen)
+  - Test "Always Allow" permission flow
+- [ ] Test web PWA still works (regression)
+- [ ] Battery usage testing (extended recording session)
+
+#### 7.9 App Store Preparation (Optional)
+- [ ] iOS App Store Connect
+  - Create app listing
+  - Upload screenshots
+  - Write description, keywords
+  - Configure privacy questions
+  - TestFlight internal testing
+- [ ] Google Play Console
+  - Create app listing
+  - Upload screenshots
+  - Write description
+  - Complete content rating questionnaire
+  - Internal testing track
+- [ ] Submit for review (when ready)
+
+**Dependencies:**
+- Capacitor v6+ (latest stable)
+- @capgo/background-geolocation (latest)
+- @capacitor/assets (dev dependency)
+
+**Estimated Effort:**
+- Phase 7.1-7.4: Core implementation (~1-2 days)
+- Phase 7.5-7.6: Assets & compliance (~0.5 day)
+- Phase 7.7-7.8: Build & testing (~1 day)
+- Phase 7.9: App Store submission (~1-2 days, mostly waiting)
+
+---
+
 ## Key Implementation Details
 
 ### OpenFreeMap Setup
@@ -599,5 +764,8 @@ const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 | 2025-12-22 | Phase 5.5: Integrate ElevationProfile into TrailDetailPage | Done |
 | 2025-12-22 | Enrich trails.json with elevation data for all coordinates | Done |
 | 2025-12-22 | **PHASE 5 CORE COMPLETE** - Elevation profile integrated (97 tests) | Done |
+| 2026-01-04 | Phase 7: Created design doc for Capacitor native wrapper | Done |
+| 2026-01-04 | Phase 7: Added detailed checklist to PLAN.md | Done |
+| 2026-01-04 | Phase 7: Created `feature/capacitor-native` branch | In Progress |
 
 <!-- Update this log after each work session -->

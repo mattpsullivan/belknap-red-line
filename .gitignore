@@ -36,3 +36,16 @@ __pycache__/
 .cache/
 tmp/
 temp/
+
+# Capacitor native project build artifacts
+android/app/build/
+android/.gradle/
+android/build/
+android/captures/
+android/local.properties
+ios/App/Pods/
+ios/App/build/
+ios/App/App.xcworkspace/xcuserdata/
+ios/App/App.xcodeproj/xcuserdata/
+ios/DerivedData/
+*.xcuserstate

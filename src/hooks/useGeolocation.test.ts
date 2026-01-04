@@ -1,13 +1,13 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { renderHook, act } from '@testing-library/react'
-import { useGeolocation } from './useGeolocation'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { renderHook, act, waitFor } from '@testing-library/react';
+import { useGeolocation } from './useGeolocation';
 
 // Mock geolocation API
 const mockGeolocation = {
   getCurrentPosition: vi.fn(),
   watchPosition: vi.fn(),
   clearWatch: vi.fn(),
-}
+};
 
 const mockCoords = {
   latitude: 43.5179,
@@ -17,251 +17,269 @@ const mockCoords = {
   altitudeAccuracy: null,
   heading: null,
   speed: null,
-  toJSON() {
-    return {
-      latitude: this.latitude,
-      longitude: this.longitude,
-      accuracy: this.accuracy,
-      altitude: this.altitude,
-      altitudeAccuracy: this.altitudeAccuracy,
-      heading: this.heading,
-      speed: this.speed,
-    }
-  },
-}
+};
 
 const mockPosition = {
   coords: mockCoords,
   timestamp: Date.now(),
-  toJSON() {
-    return {
-      coords: this.coords.toJSON(),
-      timestamp: this.timestamp,
-    }
+} as GeolocationPosition;
+
+// Mock Capacitor to return web platform
+vi.mock('@capacitor/core', () => ({
+  Capacitor: {
+    isNativePlatform: () => false,
+    getPlatform: () => 'web',
   },
-} as GeolocationPosition
+}));
 
 describe('useGeolocation', () => {
   beforeEach(() => {
-    vi.useFakeTimers()
     // @ts-expect-error - mocking geolocation
-    navigator.geolocation = mockGeolocation
-    vi.clearAllMocks()
-  })
-
-  afterEach(() => {
-    vi.useRealTimers()
-  })
+    navigator.geolocation = mockGeolocation;
+    vi.clearAllMocks();
+  });
 
   it('should start with null position and no error', () => {
-    const { result } = renderHook(() => useGeolocation())
+    const { result } = renderHook(() => useGeolocation());
 
-    expect(result.current.position).toBeNull()
-    expect(result.current.error).toBeNull()
-    expect(result.current.isWatching).toBe(false)
-  })
+    expect(result.current.position).toBeNull();
+    expect(result.current.error).toBeNull();
+    expect(result.current.isWatching).toBe(false);
+    expect(result.current.supportsBackground).toBe(false);
+  });
 
-  it('should start watching position when startWatching is called', () => {
-    mockGeolocation.watchPosition.mockReturnValue(1)
+  it('should start watching position when startWatching is called', async () => {
+    mockGeolocation.watchPosition.mockReturnValue(1);
 
-    const { result } = renderHook(() => useGeolocation())
+    const { result } = renderHook(() => useGeolocation());
 
     act(() => {
-      result.current.startWatching()
-    })
+      result.current.startWatching();
+    });
 
-    expect(result.current.isWatching).toBe(true)
-    expect(mockGeolocation.watchPosition).toHaveBeenCalledTimes(1)
-  })
+    expect(result.current.isWatching).toBe(true);
 
-  it('should update position when geolocation succeeds', () => {
+    await waitFor(() => {
+      expect(mockGeolocation.watchPosition).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('should update position when geolocation succeeds', async () => {
     mockGeolocation.watchPosition.mockImplementation((success) => {
-      setTimeout(() => success(mockPosition), 0)
-      return 1
-    })
+      // Immediately call success
+      success(mockPosition);
+      return 1;
+    });
 
-    const { result } = renderHook(() => useGeolocation())
+    const { result } = renderHook(() => useGeolocation());
 
     act(() => {
-      result.current.startWatching()
-      vi.runAllTimers()
-    })
+      result.current.startWatching();
+    });
+
+    await waitFor(() => {
+      expect(result.current.position).not.toBeNull();
+    });
 
     expect(result.current.position).toEqual({
       lat: 43.5179,
       lng: -71.3692,
       accuracy: 10,
       timestamp: mockPosition.timestamp,
-    })
-  })
+      altitude: undefined,
+      speed: undefined,
+      bearing: undefined,
+    });
+  });
 
-  it('should set error when geolocation fails', () => {
+  it('should set error when geolocation fails', async () => {
     const mockError: GeolocationPositionError = {
       code: 1,
       message: 'User denied geolocation',
       PERMISSION_DENIED: 1,
       POSITION_UNAVAILABLE: 2,
       TIMEOUT: 3,
-    }
+    };
 
     mockGeolocation.watchPosition.mockImplementation((_, error) => {
-      setTimeout(() => error(mockError), 0)
-      return 1
-    })
+      error(mockError);
+      return 1;
+    });
 
-    const { result } = renderHook(() => useGeolocation())
-
-    act(() => {
-      result.current.startWatching()
-      vi.runAllTimers()
-    })
-
-    expect(result.current.error).toBe('Permission denied')
-    expect(result.current.isWatching).toBe(false)
-  })
-
-  it('should stop watching when stopWatching is called', () => {
-    mockGeolocation.watchPosition.mockReturnValue(42)
-
-    const { result } = renderHook(() => useGeolocation())
+    const { result } = renderHook(() => useGeolocation());
 
     act(() => {
-      result.current.startWatching()
-    })
+      result.current.startWatching();
+    });
 
-    expect(result.current.isWatching).toBe(true)
+    await waitFor(() => {
+      expect(result.current.error).toBe('User denied geolocation');
+    });
+    expect(result.current.isWatching).toBe(false);
+  });
+
+  it('should stop watching when stopWatching is called', async () => {
+    mockGeolocation.watchPosition.mockReturnValue(42);
+
+    const { result } = renderHook(() => useGeolocation());
 
     act(() => {
-      result.current.stopWatching()
-    })
+      result.current.startWatching();
+    });
 
-    expect(result.current.isWatching).toBe(false)
-    expect(mockGeolocation.clearWatch).toHaveBeenCalledWith(42)
-  })
+    await waitFor(() => {
+      expect(mockGeolocation.watchPosition).toHaveBeenCalled();
+    });
+
+    act(() => {
+      result.current.stopWatching();
+    });
+
+    expect(result.current.isWatching).toBe(false);
+
+    await waitFor(() => {
+      expect(mockGeolocation.clearWatch).toHaveBeenCalledWith(42);
+    });
+  });
 
   it('should throttle position updates', async () => {
-    let successCallback: (pos: GeolocationPosition) => void
+    vi.useFakeTimers();
+    let successCallback: (pos: GeolocationPosition) => void;
 
     mockGeolocation.watchPosition.mockImplementation((success) => {
-      successCallback = success
-      return 1
-    })
+      successCallback = success;
+      return 1;
+    });
 
-    const { result } = renderHook(() => useGeolocation({ throttleMs: 5000 }))
+    const { result } = renderHook(() => useGeolocation({ throttleMs: 5000 }));
 
-    act(() => {
-      result.current.startWatching()
-    })
+    await act(async () => {
+      result.current.startWatching();
+      // Let the async provider initialize
+      await vi.advanceTimersByTimeAsync(10);
+    });
 
     // First position update should go through
     act(() => {
-      successCallback(mockPosition)
-    })
+      successCallback(mockPosition);
+    });
 
-    expect(result.current.position?.lat).toBe(43.5179)
+    expect(result.current.position?.lat).toBe(43.5179);
 
     // Second update immediately after should be throttled
     const newPosition = {
       ...mockPosition,
       coords: { ...mockPosition.coords, latitude: 43.52 },
-    }
+    };
 
     act(() => {
-      successCallback(newPosition)
-    })
+      successCallback(newPosition);
+    });
 
     // Position should still be the first one (throttled)
-    expect(result.current.position?.lat).toBe(43.5179)
+    expect(result.current.position?.lat).toBe(43.5179);
 
     // Advance time past throttle
-    act(() => {
-      vi.advanceTimersByTime(5001)
-    })
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(5001);
+    });
 
     // Now update should go through
     act(() => {
-      successCallback(newPosition)
-    })
+      successCallback(newPosition);
+    });
 
-    expect(result.current.position?.lat).toBe(43.52)
-  })
+    expect(result.current.position?.lat).toBe(43.52);
 
-  it('should clean up on unmount', () => {
-    mockGeolocation.watchPosition.mockReturnValue(99)
+    vi.useRealTimers();
+  });
 
-    const { result, unmount } = renderHook(() => useGeolocation())
+  it('should clean up on unmount', async () => {
+    mockGeolocation.watchPosition.mockReturnValue(99);
 
-    act(() => {
-      result.current.startWatching()
-    })
-
-    unmount()
-
-    expect(mockGeolocation.clearWatch).toHaveBeenCalledWith(99)
-  })
-
-  it('should handle geolocation not supported', () => {
-    // @ts-expect-error - removing geolocation
-    delete navigator.geolocation
-
-    const { result } = renderHook(() => useGeolocation())
+    const { result, unmount } = renderHook(() => useGeolocation());
 
     act(() => {
-      result.current.startWatching()
-    })
+      result.current.startWatching();
+    });
 
-    expect(result.current.error).toBe('Geolocation not supported')
-    expect(result.current.isWatching).toBe(false)
-  })
+    await waitFor(() => {
+      expect(mockGeolocation.watchPosition).toHaveBeenCalled();
+    });
 
-  it('should skip updates when moved less than minDistanceMeters', () => {
-    let successCallback: (pos: GeolocationPosition) => void
+    unmount();
+
+    await waitFor(() => {
+      expect(mockGeolocation.clearWatch).toHaveBeenCalledWith(99);
+    });
+  });
+
+  it('should handle geolocation not supported', async () => {
+    // @ts-expect-error - removing geolocation to simulate unsupported
+    navigator.geolocation = undefined;
+
+    const { result } = renderHook(() => useGeolocation());
+
+    act(() => {
+      result.current.startWatching();
+    });
+
+    await waitFor(() => {
+      expect(result.current.error).toBe('Geolocation not supported in this browser');
+    });
+    expect(result.current.isWatching).toBe(false);
+  });
+
+  it('should skip updates when moved less than minDistanceMeters', async () => {
+    let successCallback: (pos: GeolocationPosition) => void;
 
     mockGeolocation.watchPosition.mockImplementation((success) => {
-      successCallback = success
-      return 1
-    })
+      successCallback = success;
+      return 1;
+    });
 
     const { result } = renderHook(() =>
       useGeolocation({ throttleMs: 0, minDistanceMeters: 10 })
-    )
+    );
 
     act(() => {
-      result.current.startWatching()
-    })
+      result.current.startWatching();
+    });
+
+    await waitFor(() => {
+      expect(mockGeolocation.watchPosition).toHaveBeenCalled();
+    });
 
     // First position update should go through
     act(() => {
-      successCallback(mockPosition)
-    })
+      successCallback(mockPosition);
+    });
 
-    expect(result.current.position?.lat).toBe(43.5179)
+    expect(result.current.position?.lat).toBe(43.5179);
 
     // Second update only ~5m away should be skipped
-    // ~0.00005 degrees latitude ≈ 5.5 meters
     const closePosition = {
       ...mockPosition,
       coords: { ...mockPosition.coords, latitude: 43.51795 },
-    }
+    };
 
     act(() => {
-      successCallback(closePosition)
-    })
+      successCallback(closePosition);
+    });
 
     // Position should still be the first one (distance filtered)
-    expect(result.current.position?.lat).toBe(43.5179)
+    expect(result.current.position?.lat).toBe(43.5179);
 
     // Third update ~15m away should go through
-    // ~0.00015 degrees latitude ≈ 16.7 meters
     const farPosition = {
       ...mockPosition,
       coords: { ...mockPosition.coords, latitude: 43.5181 },
-    }
+    };
 
     act(() => {
-      successCallback(farPosition)
-    })
+      successCallback(farPosition);
+    });
 
-    expect(result.current.position?.lat).toBe(43.5181)
-  })
-})
+    expect(result.current.position?.lat).toBe(43.5181);
+  });
+});

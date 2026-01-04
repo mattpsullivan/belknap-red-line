@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Background with rounded corners -->
+  <rect width="1024" height="1024" fill="#3B82F6" rx="180"/>
+
+  <!-- Mountain outline - stylized peak representing Belknap Range -->
+  <path
+    d="M512 180 L820 720 H204 Z"
+    fill="none"
+    stroke="white"
+    stroke-width="36"
+    stroke-linejoin="round"
+    stroke-linecap="round"
+  />
+
+  <!-- Secondary smaller peak -->
+  <path
+    d="M340 720 L460 520 L580 720"
+    fill="none"
+    stroke="white"
+    stroke-width="24"
+    stroke-linejoin="round"
+    stroke-linecap="round"
+    opacity="0.7"
+  />
+
+  <!-- Hiking trail path (red line - representing "red-lining") -->
+  <path
+    d="M280 680 Q400 550 512 480 Q624 410 744 340"
+    fill="none"
+    stroke="#DC2626"
+    stroke-width="28"
+    stroke-linecap="round"
+    stroke-dasharray="8 24"
+  />
+
+  <!-- Current location marker -->
+  <circle cx="512" cy="480" r="48" fill="#22C55E"/>
+  <circle cx="512" cy="480" r="20" fill="white"/>
+
+  <!-- GPS accuracy ring -->
+  <circle cx="512" cy="480" r="72" fill="none" stroke="#22C55E" stroke-width="4" opacity="0.5"/>
+</svg>

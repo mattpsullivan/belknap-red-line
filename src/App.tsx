@@ -1,21 +1,23 @@
-import { lazy, Suspense } from 'react'
+import { Suspense } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Layout } from '@/components/layout/Layout'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { PMTilesProvider } from '@/providers/PMTilesProvider'
 import { SafetyDisclaimerModal } from '@/components/SafetyDisclaimerModal'
+import { lazyWithRetry } from '@/utils/lazyWithRetry'
 
-// Lazy load pages for better initial bundle size
-const ProgressPage = lazy(() => import('@/pages/ProgressPage').then(m => ({ default: m.ProgressPage })))
-const MapPage = lazy(() => import('@/pages/MapPage').then(m => ({ default: m.MapPage })))
-const TrailsPage = lazy(() => import('@/pages/TrailsPage').then(m => ({ default: m.TrailsPage })))
-const SettingsPage = lazy(() => import('@/pages/SettingsPage').then(m => ({ default: m.SettingsPage })))
-const TrackHistoryPage = lazy(() => import('@/pages/TrackHistoryPage').then(m => ({ default: m.TrackHistoryPage })))
-const TrackDetailPage = lazy(() => import('@/pages/TrackDetailPage').then(m => ({ default: m.TrackDetailPage })))
-const TrailDetailPage = lazy(() => import('@/pages/TrailDetailPage').then(m => ({ default: m.TrailDetailPage })))
-const LoopsPage = lazy(() => import('@/pages/LoopsPage').then(m => ({ default: m.LoopsPage })))
-const LoopDetailPage = lazy(() => import('@/pages/LoopDetailPage').then(m => ({ default: m.LoopDetailPage })))
-const TimelinePage = lazy(() => import('@/pages/TimelinePage').then(m => ({ default: m.TimelinePage })))
+// Lazy load pages for better initial bundle size. lazyWithRetry reloads once if
+// a chunk import fails after an app update (stale service-worker cache).
+const ProgressPage = lazyWithRetry(() => import('@/pages/ProgressPage').then(m => ({ default: m.ProgressPage })))
+const MapPage = lazyWithRetry(() => import('@/pages/MapPage').then(m => ({ default: m.MapPage })))
+const TrailsPage = lazyWithRetry(() => import('@/pages/TrailsPage').then(m => ({ default: m.TrailsPage })))
+const SettingsPage = lazyWithRetry(() => import('@/pages/SettingsPage').then(m => ({ default: m.SettingsPage })))
+const TrackHistoryPage = lazyWithRetry(() => import('@/pages/TrackHistoryPage').then(m => ({ default: m.TrackHistoryPage })))
+const TrackDetailPage = lazyWithRetry(() => import('@/pages/TrackDetailPage').then(m => ({ default: m.TrackDetailPage })))
+const TrailDetailPage = lazyWithRetry(() => import('@/pages/TrailDetailPage').then(m => ({ default: m.TrailDetailPage })))
+const LoopsPage = lazyWithRetry(() => import('@/pages/LoopsPage').then(m => ({ default: m.LoopsPage })))
+const LoopDetailPage = lazyWithRetry(() => import('@/pages/LoopDetailPage').then(m => ({ default: m.LoopDetailPage })))
+const TimelinePage = lazyWithRetry(() => import('@/pages/TimelinePage').then(m => ({ default: m.TimelinePage })))
 
 // Loading fallback component
 function PageLoader() {

@@ -3,10 +3,25 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import { execSync } from 'node:child_process'
 import path from 'path'
+
+// Build stamp so the running build is identifiable in-app (header).
+const commit = (() => {
+  try {
+    return execSync('git rev-parse --short HEAD').toString().trim()
+  } catch {
+    return 'dev'
+  }
+})()
+const buildTime = new Date().toISOString().slice(0, 16).replace('T', ' ')
 
 // https://vite.dev/config/
 export default defineConfig({
+  define: {
+    __APP_COMMIT__: JSON.stringify(commit),
+    __APP_BUILD_TIME__: JSON.stringify(buildTime),
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

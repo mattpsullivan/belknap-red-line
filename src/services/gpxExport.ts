@@ -8,6 +8,7 @@
  */
 
 import type { GPSTrack } from '@/types/trail'
+import { exportTextFile } from './fileExport'
 
 /** Serialize a track to a GPX 1.1 document string. */
 export function trackToGPX(track: GPSTrack, name?: string): string {
@@ -42,13 +43,11 @@ export function gpxFilename(track: GPSTrack): string {
   return `belknap-track-${stamp}.gpx`
 }
 
-/** Trigger a browser download of the track as GPX. */
-export function downloadTrackGPX(track: GPSTrack, filename?: string): void {
-  const blob = new Blob([trackToGPX(track)], { type: 'application/gpx+xml' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename ?? gpxFilename(track)
-  a.click()
-  URL.revokeObjectURL(url)
+/** Export the track as GPX (native share sheet on device, download on web). */
+export function downloadTrackGPX(track: GPSTrack, filename?: string): Promise<void> {
+  return exportTextFile(
+    filename ?? gpxFilename(track),
+    trackToGPX(track),
+    'application/gpx+xml'
+  )
 }

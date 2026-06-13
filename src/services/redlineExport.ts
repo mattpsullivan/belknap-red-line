@@ -1,4 +1,5 @@
 import type { Trail, Completion } from '@/types'
+import { exportTextFile } from './fileExport'
 
 /**
  * Sanitize a string for safe CSV export.
@@ -195,13 +196,9 @@ export function generateCSVExport(data: RedlineExportData): string {
   return lines.join('\n')
 }
 
-export function downloadRedlineCSV(data: RedlineExportData, filename = 'belknap-redline-export.csv'): void {
-  const csv = generateCSVExport(data)
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  a.click()
-  URL.revokeObjectURL(url)
+export function downloadRedlineCSV(
+  data: RedlineExportData,
+  filename = 'belknap-redline-export.csv'
+): Promise<void> {
+  return exportTextFile(filename, generateCSVExport(data), 'text/csv;charset=utf-8;')
 }

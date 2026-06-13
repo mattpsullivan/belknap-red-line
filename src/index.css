@@ -40,3 +40,17 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
 }
+
+/* Safe-area insets - keep the header below the status bar and the bottom nav
+ * above the gesture/navigation bar (the WebView draws edge-to-edge). Requires
+ * viewport-fit=cover (set in index.html). */
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+/* Bottom-nav height (4rem) plus the gesture-bar inset, for content padding. */
+.pb-nav-safe {
+  padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+}

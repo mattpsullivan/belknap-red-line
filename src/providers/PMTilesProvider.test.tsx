@@ -4,7 +4,10 @@ import userEvent from '@testing-library/user-event'
 import { PMTilesProvider, usePMTiles } from './PMTilesProvider'
 import maplibregl from 'maplibre-gl'
 
-// Mock maplibre-gl protocol methods
+// Stub only the WebGL boundary (maplibre needs a GL canvas, unavailable in
+// jsdom). The pmtiles library and protomaps style are exercised for real - the
+// archive bytes are never parsed in the mount path (PMTiles is lazy), so a
+// small dummy buffer stands in for the file without a mock framework.
 vi.mock('maplibre-gl', () => ({
   default: {
     addProtocol: vi.fn(),
@@ -12,14 +15,8 @@ vi.mock('maplibre-gl', () => ({
   },
 }))
 
-// Mock pmtiles Protocol
-vi.mock('pmtiles', () => ({
-  Protocol: class MockProtocol {
-    tile = vi.fn()
-  },
-}))
+const archiveBuffer = new ArrayBuffer(16)
 
-// Test component that uses the hook
 function TestConsumer() {
   const { isOfflineReady, isOfflineMode, setOfflineMode, offlineStyle, error } = usePMTiles()
   return (
@@ -33,97 +30,84 @@ function TestConsumer() {
   )
 }
 
+const okFetch = (async () => ({
+  ok: true,
+  arrayBuffer: async () => archiveBuffer,
+})) as unknown as typeof fetch
+
 describe('PMTilesProvider', () => {
   const originalFetch = globalThis.fetch
 
   beforeEach(() => {
     vi.clearAllMocks()
     localStorage.clear()
-    // Reset fetch mock before each test
-    globalThis.fetch = vi.fn() as typeof fetch
+    globalThis.fetch = okFetch
   })
 
   afterEach(() => {
     globalThis.fetch = originalFetch
   })
 
-  afterEach(() => {
-    vi.restoreAllMocks()
-  })
-
-  it('registers pmtiles protocol on mount', async () => {
-    // Mock successful HEAD request
-    ;(globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ ok: true })
-
+  it('registers the pmtiles protocol on mount', async () => {
     render(
       <PMTilesProvider>
         <TestConsumer />
       </PMTilesProvider>
     )
-
     await waitFor(() => {
       expect(maplibregl.addProtocol).toHaveBeenCalledWith('pmtiles', expect.any(Function))
     })
   })
 
-  it('sets isOfflineReady to true when PMTiles file is available', async () => {
-    ;(globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ ok: true })
-
+  it('becomes offline-ready with a style once the archive loads', async () => {
     render(
       <PMTilesProvider>
         <TestConsumer />
       </PMTilesProvider>
     )
-
     await waitFor(() => {
       expect(screen.getByTestId('offline-ready')).toHaveTextContent('true')
     })
     expect(screen.getByTestId('has-style')).toHaveTextContent('true')
   })
 
-  it('sets error when PMTiles file is not available', async () => {
-    ;(globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ ok: false })
-
+  it('sets an error when the archive fetch is not ok', async () => {
+    globalThis.fetch = (async () => ({ ok: false, status: 404 })) as unknown as typeof fetch
     render(
       <PMTilesProvider>
         <TestConsumer />
       </PMTilesProvider>
     )
-
     await waitFor(() => {
-      expect(screen.getByTestId('error')).toHaveTextContent('Offline map tiles not available')
+      expect(screen.getByTestId('error')).toHaveTextContent('Could not load offline map tiles')
     })
     expect(screen.getByTestId('offline-ready')).toHaveTextContent('false')
   })
 
-  it('sets error when fetch fails', async () => {
-    ;(globalThis.fetch as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error('Network error'))
-
+  it('sets an error when the archive fetch rejects', async () => {
+    globalThis.fetch = (async () => {
+      throw new Error('Network error')
+    }) as unknown as typeof fetch
     render(
       <PMTilesProvider>
         <TestConsumer />
       </PMTilesProvider>
     )
-
     await waitFor(() => {
       expect(screen.getByTestId('error')).toHaveTextContent('Could not load offline map tiles')
     })
   })
 
-  it('toggles offline mode', async () => {
+  it('toggles offline mode and persists it', async () => {
     const user = userEvent.setup()
-    ;(globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ ok: true })
-
     render(
       <PMTilesProvider>
         <TestConsumer />
       </PMTilesProvider>
     )
-
     await waitFor(() => {
       expect(screen.getByTestId('offline-ready')).toHaveTextContent('true')
     })
-
     expect(screen.getByTestId('offline-mode')).toHaveTextContent('false')
 
     await act(async () => {
@@ -136,61 +120,48 @@ describe('PMTilesProvider', () => {
 
   it('restores offline mode from localStorage', async () => {
     localStorage.setItem('offlineMode', 'true')
-    ;(globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ ok: true })
-
     render(
       <PMTilesProvider>
         <TestConsumer />
       </PMTilesProvider>
     )
-
     await waitFor(() => {
       expect(screen.getByTestId('offline-mode')).toHaveTextContent('true')
     })
   })
 
-  it('generates correct offline style', async () => {
-    ;(globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ ok: true })
-
-    let capturedStyle: unknown = null
+  it('builds an offline style that references the in-memory archive', async () => {
+    let captured: unknown = null
     function StyleCapture() {
       const { offlineStyle } = usePMTiles()
-      capturedStyle = offlineStyle
+      captured = offlineStyle
       return null
     }
-
     render(
       <PMTilesProvider>
         <StyleCapture />
       </PMTilesProvider>
     )
-
     await waitFor(() => {
-      expect(capturedStyle).not.toBeNull()
+      expect(captured).not.toBeNull()
     })
-
-    const style = capturedStyle as { version: number; sources: Record<string, { type: string; url: string }> }
+    const style = captured as { version: number; sources: Record<string, { type: string; url: string }> }
     expect(style.version).toBe(8)
     expect(style.sources.protomaps.type).toBe('vector')
-    expect(style.sources.protomaps.url).toContain('pmtiles://')
-    expect(style.sources.protomaps.url).toContain('/tiles/belknap-range.pmtiles')
+    // pmtiles://<archive name>, not an http URL (which would force range requests)
+    expect(style.sources.protomaps.url).toBe('pmtiles://belknap')
   })
 
-  it('removes pmtiles protocol on unmount', async () => {
-    ;(globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ ok: true })
-
+  it('removes the pmtiles protocol on unmount', async () => {
     const { unmount } = render(
       <PMTilesProvider>
         <TestConsumer />
       </PMTilesProvider>
     )
-
     await waitFor(() => {
       expect(screen.getByTestId('offline-ready')).toHaveTextContent('true')
     })
-
     unmount()
-
     expect(maplibregl.removeProtocol).toHaveBeenCalledWith('pmtiles')
   })
 })

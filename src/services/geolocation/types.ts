@@ -61,13 +61,19 @@ export interface GeolocationError {
 
 /**
  * Error codes matching the Web Geolocation API
+ *
+ * Declared as a const object rather than a TS `enum` so the file compiles
+ * under `erasableSyntaxOnly` (enums emit runtime code that is not erasable).
  */
-export enum GeolocationErrorCode {
-  PERMISSION_DENIED = 1,
-  POSITION_UNAVAILABLE = 2,
-  TIMEOUT = 3,
-  UNKNOWN = 0,
-}
+export const GeolocationErrorCode = {
+  PERMISSION_DENIED: 1,
+  POSITION_UNAVAILABLE: 2,
+  TIMEOUT: 3,
+  UNKNOWN: 0,
+} as const;
+
+export type GeolocationErrorCode =
+  (typeof GeolocationErrorCode)[keyof typeof GeolocationErrorCode];
 
 /**
  * Permission status for geolocation

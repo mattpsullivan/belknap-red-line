@@ -1,30 +1,7 @@
 import { useEffect, useState, createContext, useContext, type ReactNode } from 'react'
 import maplibregl from 'maplibre-gl'
 import { Protocol } from 'pmtiles'
-import { layers, LIGHT } from '@protomaps/basemaps'
-
-// PMTiles URL (bundled with app)
-const PMTILES_URL = '/tiles/belknap-range.pmtiles'
-
-// Generate map style with PMTiles source
-function createOfflineStyle() {
-  // Use LIGHT theme from protomaps basemaps
-  // Note: basemaps layers() only includes background, fill, and line layers
-  // (no symbol/text layers), so glyphs URL is not needed
-  const baseLayers = layers('protomaps', LIGHT)
-
-  return {
-    version: 8 as const,
-    sources: {
-      protomaps: {
-        type: 'vector' as const,
-        url: `pmtiles://${window.location.origin}${PMTILES_URL}`,
-        attribution: '<a href="https://protomaps.com">Protomaps</a> | <a href="https://openstreetmap.org">OpenStreetMap</a>',
-      },
-    },
-    layers: baseLayers,
-  }
-}
+import { createOfflineStyle, loadPmtilesArchive } from './pmtiles'
 
 interface PMTilesContextValue {
   isOfflineReady: boolean
@@ -56,26 +33,29 @@ export function PMTilesProvider({ children }: PMTilesProviderProps) {
   const [offlineStyle, setOfflineStyle] = useState<ReturnType<typeof createOfflineStyle> | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  // Register PMTiles protocol on mount
+  // Register PMTiles protocol on mount and load the archive into memory.
+  // We register the in-memory PMTiles instance with the protocol (protocol.add)
+  // so MapLibre reads tiles from the buffer instead of issuing HTTP Range
+  // requests, which the Capacitor asset server does not serve (left the
+  // basemap blank). See ./pmtiles for the why.
   useEffect(() => {
     const protocol = new Protocol()
     maplibregl.addProtocol('pmtiles', protocol.tile)
 
-    // Check if PMTiles file is available
-    fetch(PMTILES_URL, { method: 'HEAD' })
-      .then((res) => {
-        if (res.ok) {
-          setOfflineStyle(createOfflineStyle())
-          setIsOfflineReady(true)
-        } else {
-          setError('Offline map tiles not available')
-        }
+    let cancelled = false
+    loadPmtilesArchive()
+      .then((archive) => {
+        if (cancelled) return
+        protocol.add(archive)
+        setOfflineStyle(createOfflineStyle())
+        setIsOfflineReady(true)
       })
       .catch(() => {
-        setError('Could not load offline map tiles')
+        if (!cancelled) setError('Could not load offline map tiles')
       })
 
     return () => {
+      cancelled = true
       maplibregl.removeProtocol('pmtiles')
     }
   }, [])

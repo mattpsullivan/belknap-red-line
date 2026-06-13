@@ -685,8 +685,17 @@ capture before building.
       pocketed phone can't show a banner (`@capacitor/haptics`, `haptics.ts`).
       Caveat: only fires while JS runs; deep OS suspension still needs the
       foreground-service/permission fixes below.
-- [ ] On "start recording", proactively check background-location status; if not
-      granted, show an explainer + deep-link (Android 11+ can't grant via dialog).
+- [x] **Setup gate** (start-recording modal): "Keep tracking with your phone
+      away" block - requires Location "Allow all the time" + battery optimization
+      off, with an "Open location settings" deep-link.
+      ROOT CAUSE FOUND: `@capgo`'s "location" permission alias is only
+      ACCESS_COARSE/FINE_LOCATION - it NEVER requests ACCESS_BACKGROUND_LOCATION,
+      so the app only ever got "While using" => suspended when pocketed. Android
+      11+ can't grant background via a dialog (settings redirect only), so the
+      gate guides + deep-links rather than prompting.
+- [ ] Battery-optimization: direct REQUEST_IGNORE_BATTERY_OPTIMIZATIONS intent
+      would need a small native plugin; for now the gate's deep-link reaches it
+      via app settings.
 - [ ] Request battery-optimization exemption (Doze throttles even granted bg).
 - [ ] Surface the foreground-service / recording-active state (persistent
       notification) so it's obvious tracking is live with the screen off.

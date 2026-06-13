@@ -904,6 +904,22 @@ export function TrailMap() {
                   Do you have the Ten Essentials?
                 </a>
               </p>
+              <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-amber-900">
+                <p className="font-semibold">Keep tracking with your phone away</p>
+                <p className="mt-1 text-amber-800">
+                  Set this app's Location to{' '}
+                  <strong>&ldquo;Allow all the time&rdquo;</strong> and turn off
+                  battery optimization - otherwise the track stops whenever your
+                  screen is off (so the whole hike can be lost).
+                </p>
+                <button
+                  type="button"
+                  onClick={() => void openLocationSettings()}
+                  className="mt-2 font-semibold underline"
+                >
+                  Open location settings
+                </button>
+              </div>
             </div>
             <div className="flex gap-3">
               <button

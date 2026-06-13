@@ -6,7 +6,8 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  // Lint app source only - never generated native build output or coverage.
+  globalIgnores(['dist', 'android', 'ios', 'coverage']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [

@@ -18,6 +18,12 @@ vi.mock('react-map-gl/maplibre', () => ({
   Layer: (props: Record<string, unknown>) => (
     <div data-testid="map-layer" data-type={props.type} />
   ),
+  Marker: ({ children }: { children?: React.ReactNode }) => (
+    <div data-testid="map-marker">{children}</div>
+  ),
+  Popup: ({ children }: { children?: React.ReactNode }) => (
+    <div data-testid="map-popup">{children}</div>
+  ),
 }))
 
 describe('TrailMap', () => {

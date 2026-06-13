@@ -7,6 +7,7 @@ import {
   downloadRedlineCSV,
 } from '@/services/redlineExport'
 import { exportTextFile } from '@/services/fileExport'
+import { shareDebugLogs } from '@/services/logger'
 
 export function SettingsPage() {
   const { completions, importCompletions, clearCompletions } = useCompletions()
@@ -224,6 +225,18 @@ export function SettingsPage() {
           <p className="text-xs text-secondary text-center">
             {completions.length} completion records
           </p>
+
+          <div className="border-t border-gray-200 pt-3">
+            <button
+              onClick={() => void shareDebugLogs()}
+              className="w-full py-2 px-4 bg-gray-600 text-white font-medium rounded-lg hover:opacity-90 transition-opacity"
+            >
+              Share Debug Logs
+            </button>
+            <p className="text-xs text-secondary text-center mt-1">
+              Export app logs via the share sheet (email, Telegram, Drive...)
+            </p>
+          </div>
 
           <div className="border-t border-gray-200 pt-3">
             <input

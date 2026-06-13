@@ -4,8 +4,9 @@ This directory contains source assets for generating iOS and Android app icons a
 
 ## Source Files
 
-- `icon.svg` - App icon source (1024x1024)
+- `icon.svg` - App icon source (1024x1024) — placeholder, due for replacement
 - `splash.svg` - Splash screen source (2732x2732)
+- `icon-prompt.md` - Prompt to generate a new, distinctive app icon via Gemini
 
 ## Generating Platform Assets
 

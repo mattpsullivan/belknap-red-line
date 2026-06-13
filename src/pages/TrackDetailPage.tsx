@@ -4,6 +4,7 @@ import Map, { Source, Layer, Marker } from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useTrackHistory } from '@/hooks/useTrackHistory'
 import { usePMTiles } from '@/providers/PMTilesProvider'
+import { downloadTrackGPX } from '@/services/gpxExport'
 import type { GPSTrack } from '@/types'
 
 const ONLINE_MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty'
@@ -157,12 +158,20 @@ export function TrackDetailPage() {
           <Link to="/tracks" className="text-location hover:underline text-sm">
             ← Back
           </Link>
-          <button
-            onClick={() => setShowDeleteConfirm(true)}
-            className="text-incomplete text-sm hover:underline"
-          >
-            Delete
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => downloadTrackGPX(track)}
+              className="text-location text-sm hover:underline"
+            >
+              Export GPX
+            </button>
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="text-incomplete text-sm hover:underline"
+            >
+              Delete
+            </button>
+          </div>
         </div>
         <h1 className="text-xl font-bold text-primary">
           {formatDateTime(track.startedAt)}

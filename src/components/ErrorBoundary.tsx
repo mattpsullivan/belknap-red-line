@@ -1,4 +1,5 @@
 import { Component, type ReactNode, type ErrorInfo } from 'react'
+import { logger, shareDebugLogs } from '@/services/logger'
 
 interface Props {
   children: ReactNode
@@ -21,6 +22,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    logger.error('ErrorBoundary caught an error:', error, errorInfo.componentStack ?? '')
     console.error('ErrorBoundary caught an error:', error, errorInfo)
   }
 
@@ -40,12 +42,20 @@ export class ErrorBoundary extends Component<Props, State> {
           <p className="text-secondary mb-4">
             {this.state.error?.message || 'An unexpected error occurred'}
           </p>
-          <button
-            onClick={this.handleRetry}
-            className="px-4 py-2 bg-location text-white rounded-lg hover:opacity-90 transition-opacity"
-          >
-            Try Again
-          </button>
+          <div className="flex flex-col items-center gap-3">
+            <button
+              onClick={this.handleRetry}
+              className="px-4 py-2 bg-location text-white rounded-lg hover:opacity-90 transition-opacity"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={() => void shareDebugLogs()}
+              className="text-sm text-secondary underline hover:opacity-90"
+            >
+              Share debug logs
+            </button>
+          </div>
         </div>
       )
     }

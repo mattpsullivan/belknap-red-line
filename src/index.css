@@ -11,27 +11,26 @@
  * These CSS variables are for UI components using Tailwind classes.
  */
 @theme {
-  /* Brand palette (from the app icon / brand guidelines - see docs/branding.md).
-   * White-label: these four drive the look; swap them per range. */
-  --color-brand: #16314D;       /* twilight navy - icon background, app chrome */
-  --color-trail: #DC2626;       /* red-line trail (also --color-complete) */
-  --color-summit: #22C55E;      /* summit marker green */
+  /* Tokens derive from the palette injected at runtime (src/config/palette.ts
+   * -> applyPalette -> --c-*). The hex fallbacks here only prevent a first-paint
+   * flash; palette.ts is the single source of truth. Edit colors THERE, not here. */
+  --color-brand: var(--c-brand, #16314D);
+  --color-accent: var(--c-accent, #2563A8);
 
-  /* Trail Status Colors (aligned with red-lining concept) */
-  --color-complete: #DC2626;    /* red-600 - the "red line" */
-  --color-incomplete: #0EA5E9;  /* sky-500 - bright, visible */
-  --color-location: #3B82F6;    /* blue-500 - GPS marker (map only) */
+  --color-complete: var(--c-complete, #DC2626);
+  --color-incomplete: var(--c-incomplete, #0EA5E9);
+  --color-summit: var(--c-summit, #22C55E);
+  /* `location` token kept for existing classes; now points at the brand accent. */
+  --color-location: var(--c-accent, #2563A8);
 
-  /* UI Semantic Colors */
-  --color-primary: #1E293B;     /* slate-800 */
-  --color-secondary: #64748B;   /* slate-500 */
-  --color-surface: #F8FAFC;     /* slate-50 */
-  --color-border: #E2E8F0;      /* slate-200 */
+  --color-primary: var(--c-primary, #1E293B);
+  --color-secondary: var(--c-secondary, #64748B);
+  --color-surface: var(--c-surface, #F8FAFC);
+  --color-border: var(--c-border, #E2E8F0);
 
-  /* Trail Difficulty */
-  --color-easy: #22C55E;        /* green-500 */
-  --color-moderate: #EAB308;    /* yellow-500 */
-  --color-difficult: #EF4444;   /* red-500 */
+  --color-easy: var(--c-easy, #22C55E);
+  --color-moderate: var(--c-moderate, #EAB308);
+  --color-difficult: var(--c-difficult, #EF4444);
 }
 
 /* Base styles */

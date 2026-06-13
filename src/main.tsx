@@ -3,8 +3,10 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { initLogger } from '@/services/logger'
+import { applyPalette } from '@/config/palette'
 
-// Start capturing console + uncaught errors as early as possible.
+// Inject the brand palette as CSS variables, then start capturing logs.
+applyPalette()
 initLogger()
 
 createRoot(document.getElementById('root')!).render(

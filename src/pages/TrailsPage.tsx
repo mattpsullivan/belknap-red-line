@@ -61,7 +61,7 @@ export function TrailsPage() {
       {/* Loops Banner */}
       <Link
         to="/loops"
-        className="mx-4 mt-4 mb-2 p-3 bg-gradient-to-r from-location to-blue-500 rounded-xl flex items-center justify-between text-white hover:opacity-90 transition-opacity"
+        className="mx-4 mt-4 mb-2 p-3 bg-gradient-to-r from-brand to-accent rounded-xl flex items-center justify-between text-white hover:opacity-90 transition-opacity"
       >
         <div>
           <p className="font-semibold">Suggested Loops</p>

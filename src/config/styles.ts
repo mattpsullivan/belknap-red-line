@@ -12,52 +12,34 @@
  * - Incomplete trails use a bright, contrasting color for visibility.
  */
 
+import { palette } from './palette'
+
 export const styleConfig = {
   /**
-   * Trail colors for map display
+   * Trail colors for map display (sourced from src/config/palette.ts).
    */
   trails: {
     /** Completed trails - red "red-line" marking */
-    completed: {
-      color: '#DC2626', // red-600 - slightly deeper red for better visibility
-      width: 4,
-      opacity: 0.9,
-    },
-    /** Incomplete trails - bright blue for contrast against terrain */
-    incomplete: {
-      color: '#0EA5E9', // sky-500 - high visibility against most map backgrounds
-      width: 4,
-      opacity: 0.8,
-    },
+    completed: { color: palette.complete, width: 4, opacity: 0.9 },
+    /** Incomplete trails - bright color for contrast against terrain */
+    incomplete: { color: palette.incomplete, width: 4, opacity: 0.8 },
     /** Active GPS recording track */
-    recorded: {
-      color: '#F97316', // orange-500
-      width: 5,
-      opacity: 0.9,
-    },
+    recorded: { color: palette.recorded, width: 5, opacity: 0.9 },
     /** Highlighted/selected trail */
-    highlighted: {
-      color: '#FBBF24', // amber-400
-      width: 6,
-      opacity: 1,
-    },
+    highlighted: { color: palette.highlight, width: 6, opacity: 1 },
     /** Highlighted loop trails (distinct from single trail) */
-    highlightedLoop: {
-      color: '#A855F7', // purple-500
-      width: 6,
-      opacity: 1,
-    },
+    highlightedLoop: { color: palette.loop, width: 6, opacity: 1 },
   },
 
   /**
    * User location marker colors
    */
   location: {
-    marker: '#3B82F6', // blue-500
+    marker: palette.marker,
     accuracy: {
-      fill: '#3B82F6',
+      fill: palette.marker,
       fillOpacity: 0.15,
-      stroke: '#3B82F6',
+      stroke: palette.marker,
       strokeWidth: 2,
       strokeOpacity: 0.5,
     },
@@ -69,37 +51,37 @@ export const styleConfig = {
   elevation: {
     /** Main profile line and gradient */
     profile: {
-      line: '#22C55E', // green-500
-      gradientStart: '#22C55E',
+      line: palette.summit,
+      gradientStart: palette.summit,
       gradientStartOpacity: 0.3,
-      gradientEnd: '#22C55E',
+      gradientEnd: palette.summit,
       gradientEndOpacity: 0.05,
     },
     /** Elevation gain/loss indicators */
-    gain: '#16A34A', // green-600
-    loss: '#DC2626', // red-600
+    gain: '#16A34A', // green-600 (darker green, gain-specific)
+    loss: palette.complete,
     /** Min/max point markers */
-    minPoint: '#DC2626', // red-600
-    maxPoint: '#22C55E', // green-500
+    minPoint: palette.complete,
+    maxPoint: palette.summit,
   },
 
   /**
    * Trail difficulty colors
    */
   difficulty: {
-    easy: '#22C55E', // green-500
-    moderate: '#EAB308', // yellow-500
-    difficult: '#EF4444', // red-500
+    easy: palette.easy,
+    moderate: palette.moderate,
+    difficult: palette.difficult,
   },
 
   /**
    * UI semantic colors
    */
   ui: {
-    primary: '#1E293B', // slate-800
-    secondary: '#64748B', // slate-500
-    surface: '#F8FAFC', // slate-50
-    border: '#E2E8F0', // slate-200
+    primary: palette.primary,
+    secondary: palette.secondary,
+    surface: palette.surface,
+    border: palette.border,
   },
 
   /**

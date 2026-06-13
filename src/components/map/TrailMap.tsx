@@ -12,6 +12,7 @@ import {
   useLoops,
 } from '@/hooks'
 import { useRecordingHealth } from '@/hooks/useRecordingHealth'
+import { alertVibrate } from '@/services/haptics'
 import { usePMTiles } from '@/providers/PMTilesProvider'
 import { styleConfig } from '@/config/styles'
 import { POIMarkers } from './POIMarkers'
@@ -88,6 +89,15 @@ export function TrailMap() {
     trackPoints,
     completedTrailIds
   )
+
+  // Buzz when tracking stalls - a pocketed phone can't show a banner. Fires on
+  // entering the stalled state and keeps nudging every 20s until it recovers.
+  useEffect(() => {
+    if (recordingStatus.status !== 'stalled') return
+    void alertVibrate()
+    const id = setInterval(() => void alertVibrate(), 20000)
+    return () => clearInterval(id)
+  }, [recordingStatus.status])
 
   // Add position to track when recording
   useEffect(() => {

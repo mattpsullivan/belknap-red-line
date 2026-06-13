@@ -681,6 +681,10 @@ capture before building.
       app's location settings. Catches the failure regardless of cause. Pure
       logic tested (`recordingHealth.ts`). This DETECTS + guides; the items below
       PREVENT it.
+- [x] **Haptic alert**: buzz (3 pulses) on stall + every 20s while stalled - a
+      pocketed phone can't show a banner (`@capacitor/haptics`, `haptics.ts`).
+      Caveat: only fires while JS runs; deep OS suspension still needs the
+      foreground-service/permission fixes below.
 - [ ] On "start recording", proactively check background-location status; if not
       granted, show an explainer + deep-link (Android 11+ can't grant via dialog).
 - [ ] Request battery-optimization exemption (Doze throttles even granted bg).

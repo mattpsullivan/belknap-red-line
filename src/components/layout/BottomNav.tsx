@@ -9,8 +9,8 @@ const navItems = [
 
 export function BottomNav() {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-border">
-      <div className="flex h-full">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-border pb-safe">
+      <div className="relative flex h-16">
         {navItems.map((item) => (
           <NavLink
             key={item.to}
@@ -26,10 +26,9 @@ export function BottomNav() {
             <span>{item.label}</span>
           </NavLink>
         ))}
-      </div>
-      {/* Safety info link */}
-      <Link
-        to="/settings#safety"
+        {/* Safety info link */}
+        <Link
+          to="/settings#safety"
         className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-amber-600 hover:text-amber-700 transition-colors"
         aria-label="Safety information"
         title="Safety information"
@@ -48,7 +47,8 @@ export function BottomNav() {
             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
           />
         </svg>
-      </Link>
+        </Link>
+      </div>
     </nav>
   )
 }

@@ -66,6 +66,8 @@ jobs:
           echo "Release $NAME (versionName=$VN, versionCode=$VC)"
 
       - name: Build web bundle
+        env:
+          RELEASE_BUILD: '1' # hides the in-app debug build stamp
         run: npm run build
 
       - name: Capacitor sync (android)

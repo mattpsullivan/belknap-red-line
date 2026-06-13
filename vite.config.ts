@@ -16,11 +16,16 @@ const commit = (() => {
 })()
 const buildTime = new Date().toISOString().slice(0, 16).replace('T', ' ')
 
+// Show the in-app build stamp on debug/test builds only. The release pipeline
+// sets RELEASE_BUILD=1 (see .github/workflows/release.yml) to hide it.
+const showBuildStamp = process.env.RELEASE_BUILD !== '1'
+
 // https://vite.dev/config/
 export default defineConfig({
   define: {
     __APP_COMMIT__: JSON.stringify(commit),
     __APP_BUILD_TIME__: JSON.stringify(buildTime),
+    __SHOW_BUILD_STAMP__: JSON.stringify(showBuildStamp),
   },
   resolve: {
     alias: {

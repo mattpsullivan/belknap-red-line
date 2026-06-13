@@ -8,11 +8,13 @@ export function Layout() {
       <header className="bg-white border-b border-border shrink-0 pt-safe">
         <div className="h-14 flex items-center justify-between px-4">
           <h1 className="text-lg font-semibold text-primary">Belknap Tracker</h1>
-          <span className="text-[10px] leading-tight text-secondary text-right tabular-nums">
-            {__APP_COMMIT__}
-            <br />
-            {__APP_BUILD_TIME__}
-          </span>
+          {__SHOW_BUILD_STAMP__ && (
+            <span className="text-[10px] leading-tight text-secondary text-right tabular-nums">
+              {__APP_COMMIT__}
+              <br />
+              {__APP_BUILD_TIME__}
+            </span>
+          )}
         </div>
       </header>
 

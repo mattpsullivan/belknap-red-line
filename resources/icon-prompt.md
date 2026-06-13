@@ -82,10 +82,10 @@ PNG, no transparency on `icon.png`, sRGB.
 
 | Name | Hex | Use |
 |------|-----|-----|
-| Trail Red | `#DC2626` | the red-line trail (hero) |
-| Twilight Blue | `#0B2A4A`–`#14375E` | background |
-| White / Cream | `#FFFFFF` / `#F5F2EA` | mountain peaks |
-| Summit Green | `#22C55E` | optional summit dot |
+| Trail Red | #DC2626` | the red-line trail (hero) |
+| Twilight Blue | #0B2A4A– #14375E | background |
+| White / Cream | #FFFFFF / #F5F2EA | mountain peaks |
+| Summit Green | #22C55E | optional summit dot |
 
 (Brand blue `#3B82F6` is the current placeholder background; the twilight blue
 above is a more distinctive, attractive alternative — let Gemini try both.)

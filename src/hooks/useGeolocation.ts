@@ -32,10 +32,14 @@ export interface UseGeolocationReturn {
   error: string | null;
   /** Whether actively watching position */
   isWatching: boolean;
+  /** Wall-clock ms of the last raw GPS fix from the provider (liveness signal). */
+  lastFixAt: number | null;
   /** Start watching for position updates */
   startWatching: () => void;
   /** Stop watching for position updates */
   stopWatching: () => void;
+  /** Open the OS location settings for this app (to grant "Allow all the time"). */
+  openLocationSettings: () => Promise<void>;
   /** Whether background tracking is supported on this platform */
   supportsBackground: boolean;
 }
@@ -66,14 +70,25 @@ export function useGeolocation(
   const [error, setError] = useState<string | null>(null);
   const [isWatching, setIsWatching] = useState(false);
 
+  const [lastFixAt, setLastFixAt] = useState<number | null>(null);
+
   const watcherIdRef = useRef<string | null>(null);
   const lastUpdateRef = useRef<number>(0);
   const lastPositionRef = useRef<GeoPosition | null>(null);
+  const lastFixWriteRef = useRef<number>(0);
 
   // Handle incoming position from provider
   const handlePosition = useCallback(
     (pos: GeoPosition) => {
       const now = Date.now();
+
+      // Liveness: record that a fix arrived (before throttle/distance gating, so
+      // standing still doesn't read as a stall). Throttle the state write so a
+      // high fix rate doesn't spam re-renders.
+      if (now - lastFixWriteRef.current >= 5000) {
+        lastFixWriteRef.current = now;
+        setLastFixAt(now);
+      }
 
       // Throttle updates
       if (now - lastUpdateRef.current < throttleMs) {
@@ -119,11 +134,16 @@ export function useGeolocation(
     setIsWatching(true);
     lastUpdateRef.current = 0; // Reset throttle on start
     lastPositionRef.current = null; // Reset distance check on start
+    lastFixWriteRef.current = 0;
+    setLastFixAt(null); // fresh liveness baseline for this watch session
 
     // Start watching asynchronously
     provider
       .startWatching(handlePosition, handleError, {
-        distanceFilter: minDistanceMeters,
+        // Deliver every fix (we gate the exposed position via throttle +
+        // minDistanceMeters below); a continuous fix stream is what makes the
+        // stall/liveness signal accurate when stationary.
+        distanceFilter: 0,
         interval: throttleMs,
         accuracy: enableHighAccuracy ? 'high' : 'balanced',
         enableBackground,
@@ -140,7 +160,6 @@ export function useGeolocation(
   }, [
     handlePosition,
     handleError,
-    minDistanceMeters,
     throttleMs,
     enableHighAccuracy,
     enableBackground,
@@ -171,12 +190,16 @@ export function useGeolocation(
     };
   }, []);
 
+  const openLocationSettings = useCallback(() => getProvider().openSettings(), []);
+
   return {
     position,
     error,
     isWatching,
+    lastFixAt,
     startWatching,
     stopWatching,
+    openLocationSettings,
     supportsBackground: supportsBackgroundGeolocation(),
   };
 }

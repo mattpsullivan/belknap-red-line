@@ -11,6 +11,7 @@ import {
   useTrailDetection,
   useLoops,
 } from '@/hooks'
+import { useRecordingHealth } from '@/hooks/useRecordingHealth'
 import { usePMTiles } from '@/providers/PMTilesProvider'
 import { styleConfig } from '@/config/styles'
 import { POIMarkers } from './POIMarkers'
@@ -31,8 +32,15 @@ export function TrailMap() {
   const { trails, getTrailById } = useTrails()
   const { isTrailCompleted, addCompletion, completedTrailIds } = useCompletions()
   const { isOfflineMode, offlineStyle } = usePMTiles()
-  const { position, error, isWatching, startWatching, stopWatching } =
-    useGeolocation()
+  const {
+    position,
+    error,
+    isWatching,
+    lastFixAt,
+    startWatching,
+    stopWatching,
+    openLocationSettings,
+  } = useGeolocation()
   const [showCompletionPrompt, setShowCompletionPrompt] = useState(false)
   const [pendingCompletions, setPendingCompletions] = useState<Trail[]>([])
   const [showRecordingReminder, setShowRecordingReminder] = useState(false)
@@ -57,6 +65,7 @@ export function TrailMap() {
   const highlightedLoop = highlightedLoopId ? getLoopById(highlightedLoopId) : null
   const {
     isRecording,
+    currentTrack,
     trackPoints,
     totalDistance,
     startRecording,
@@ -64,6 +73,14 @@ export function TrailMap() {
     cancelRecording,
     addPoint,
   } = useTrackRecording()
+
+  // Warn when recording but GPS fixes have stopped arriving (background
+  // suspension / lost fix / missing "Allow all the time").
+  const recordingStatus = useRecordingHealth(
+    isRecording,
+    lastFixAt,
+    currentTrack ? new Date(currentTrack.startedAt).getTime() : null
+  )
 
   // Trail detection based on recorded track
   const { currentTrail, currentCoverage, newlyCompletedTrails } = useTrailDetection(
@@ -755,6 +772,44 @@ export function TrailMap() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Stall warning - recording but no GPS fixes arriving */}
+      {isRecording && recordingStatus.status === 'stalled' && (
+        <div className="absolute top-4 inset-x-4 z-20 bg-amber-50 border border-amber-300 rounded-lg shadow-lg p-3">
+          <div className="flex items-start gap-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 shrink-0 text-amber-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
+            </svg>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-amber-800">
+                Tracking may be paused
+              </p>
+              <p className="text-xs text-amber-700 mt-0.5">
+                No GPS fix for {recordingStatus.secondsSinceFix}s - your track may
+                have gaps. Set Location to "Allow all the time" and turn off
+                battery optimization for this app.
+              </p>
+              <button
+                onClick={() => void openLocationSettings()}
+                className="mt-2 text-xs font-semibold text-amber-900 underline"
+              >
+                Open location settings
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

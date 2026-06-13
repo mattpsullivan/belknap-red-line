@@ -21,8 +21,10 @@
   "dependencies": {
     "@capacitor/android": "^8.0.0",
     "@capacitor/core": "^8.0.0",
+    "@capacitor/filesystem": "^8.1.2",
     "@capacitor/geolocation": "^8.2.0",
     "@capacitor/ios": "^8.0.0",
+    "@capacitor/share": "^8.0.1",
     "@capgo/background-geolocation": "^8.0.7",
     "@protomaps/basemaps": "^5.7.0",
     "@turf/turf": "^7.3.1",

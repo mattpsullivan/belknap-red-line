@@ -6,6 +6,7 @@ import {
   generateRedlineExportData,
   downloadRedlineCSV,
 } from '@/services/redlineExport'
+import { exportTextFile } from '@/services/fileExport'
 
 export function SettingsPage() {
   const { completions, importCompletions, clearCompletions } = useCompletions()
@@ -32,14 +33,11 @@ export function SettingsPage() {
   const exportData = generateRedlineExportData(trails, completions)
 
   const handleExportJSON = () => {
-    const data = JSON.stringify(completions, null, 2)
-    const blob = new Blob([data], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'belknap-completions.json'
-    a.click()
-    URL.revokeObjectURL(url)
+    void exportTextFile(
+      'belknap-completions.json',
+      JSON.stringify(completions, null, 2),
+      'application/json'
+    )
   }
 
   const handleExportRedline = () => {

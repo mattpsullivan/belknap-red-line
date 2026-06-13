@@ -13,6 +13,7 @@ import {
 } from '@/hooks'
 import { usePMTiles } from '@/providers/PMTilesProvider'
 import { styleConfig } from '@/config/styles'
+import { POIMarkers } from './POIMarkers'
 import type { Trail } from '@/types'
 
 const ONLINE_MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty'
@@ -497,6 +498,9 @@ export function TrailMap() {
             />
           </Source>
         )}
+
+        {/* Historical points of interest from the Belknap Range Trails map */}
+        <POIMarkers />
 
         {/* User location marker */}
         {position && (

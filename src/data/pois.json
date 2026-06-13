@@ -1,0 +1,60 @@
+[
+  {
+    "id": "mt-major-hut-ruins",
+    "code": "HR",
+    "name": "Mt. Major Hut Ruins",
+    "description": "Roof blown off the Mt. Major stone hut in 1928; the foundation and walls remain at the summit.",
+    "gridCell": "E11",
+    "coordinates": { "lat": 43.513702, "lng": -71.287277 },
+    "coordinateSource": "Anchored to the Mt. Major summit (max-elevation point, 1781 ft) on mt-major-trail in trails.json. Approximate; verify in the field.",
+    "needsGeoreference": false
+  },
+  {
+    "id": "old-charcoal-kiln",
+    "code": "CK",
+    "name": "Old Charcoal Kiln",
+    "description": "Charcoal kiln from the 1800s.",
+    "gridCell": "H6",
+    "needsGeoreference": true
+  },
+  {
+    "id": "iron-mine-1827",
+    "code": "IM",
+    "name": "1827 Iron Mine",
+    "description": "Site of an 1827 iron mine.",
+    "gridCell": "D3",
+    "needsGeoreference": true
+  },
+  {
+    "id": "plane-wreck-1973",
+    "code": "PW",
+    "name": "1973 Plane Wreck",
+    "description": "Plane wreck from 1973.",
+    "gridCell": "E4",
+    "needsGeoreference": true
+  },
+  {
+    "id": "quarry-site",
+    "code": "QS",
+    "name": "Quarry Site",
+    "description": "Quarry site from the 1800s.",
+    "gridCell": "E8",
+    "needsGeoreference": true
+  },
+  {
+    "id": "town-corner-fieldstone",
+    "code": "TB",
+    "name": "Town Corner Fieldstone",
+    "description": "Three-sided fieldstone marking the town corner.",
+    "gridCell": "F8",
+    "needsGeoreference": true
+  },
+  {
+    "id": "first-power-line",
+    "code": "TP",
+    "name": "First Power Line to Gilford",
+    "description": "Utility poles; the first power line to Gilford.",
+    "gridCell": "E9, F9",
+    "needsGeoreference": true
+  }
+]

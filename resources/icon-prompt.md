@@ -57,14 +57,11 @@ Then: "Give me the winner as the deliverables below."
 ## Deliverables (ask Gemini for these exact outputs)
 
 Android uses **adaptive icons** = a foreground layer + a background layer the OS
-masks into different shapes. So request:
+masks into different shapes. So please generate:
 
-1. **`icon.png`** — 1024×1024, the full flattened icon (background + art),
-   key art within the central 66%. *(Required — this alone is enough to ship.)*
-2. **`icon-foreground.png`** — 1024×1024, **transparent background**, just the
-   mountains + red line, centered with ~25% padding on all sides.
-3. **Background color** — the single hex used behind the foreground
-   (e.g. `#0B2A4A`). A flat color is better than an image for adaptive icons.
+1. **`icon.png`** — 1024×1024, the full flattened icon (background + art),key art within the central 66%. *(Required — this alone is enough to ship.)*
+1. **`icon-foreground.png`** — 1024×1024, **transparent background**, just the mountains + red line, centered with ~25% padding on all sides.
+2. **Background color** — the single hex used behind the foreground. A flat color is better than an image for adaptive icons.
 
 PNG, no transparency on `icon.png`, sRGB.
 
@@ -78,16 +75,18 @@ PNG, no transparency on `icon.png`, sRGB.
   masked and scaled down.
 - **Don't** add baked-in rounded corners or shadows; the OS applies the mask.
 
+As well - please give me the color palette in hex
+
 ## Color palette
 
 | Name | Hex | Use |
 |------|-----|-----|
-| Trail Red | #DC2626` | the red-line trail (hero) |
-| Twilight Blue | #0B2A4A– #14375E | background |
+| Trail Red | #DC2626 | the red-line trail (hero) |
+| Twilight Blue | #0B2A4A – #14375E | background |
 | White / Cream | #FFFFFF / #F5F2EA | mountain peaks |
 | Summit Green | #22C55E | optional summit dot |
 
-(Brand blue `#3B82F6` is the current placeholder background; the twilight blue
+(Brand blue #3B82F6 is the current placeholder background; the twilight blue
 above is a more distinctive, attractive alternative — let Gemini try both.)
 
 ## After you get the art

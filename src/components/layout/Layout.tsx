@@ -4,12 +4,12 @@ import { BottomNav } from './BottomNav'
 export function Layout() {
   return (
     <div className="h-screen bg-white flex flex-col overflow-hidden">
-      {/* Header - pt-safe keeps the title clear of the status bar */}
-      <header className="bg-white border-b border-border shrink-0 pt-safe">
+      {/* Header - brand navy, pt-safe keeps the title clear of the status bar */}
+      <header className="bg-brand shrink-0 pt-safe">
         <div className="h-14 flex items-center justify-between px-4">
-          <h1 className="text-lg font-semibold text-primary">Belknap Tracker</h1>
+          <h1 className="text-lg font-semibold text-white">Belknap Tracker</h1>
           {__SHOW_BUILD_STAMP__ && (
-            <span className="text-[10px] leading-tight text-secondary text-right tabular-nums">
+            <span className="text-[10px] leading-tight text-white/60 text-right tabular-nums">
               {__APP_COMMIT__}
               <br />
               {__APP_BUILD_TIME__}

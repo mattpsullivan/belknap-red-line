@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Belknap Tracker icon - adaptive foreground (art only, transparent).
+       Art kept within the central safe zone for adaptive-icon masking.
+       Palette: peaks #FFFFFF, trail #DC2626, summit #22C55E. -->
+
+  <!-- Mountain range (white peaks) -->
+  <g fill="#FFFFFF">
+    <!-- left peak -->
+    <polygon points="150,815 332,470 560,815" />
+    <!-- right peak -->
+    <polygon points="470,815 700,488 892,815" />
+    <!-- center peak (tallest, front) -->
+    <polygon points="250,815 512,205 792,815" />
+  </g>
+
+  <!-- Red-line trail switchbacking up to the summit -->
+  <path d="M 512 885
+           C 405 835 405 772 500 738
+           C 614 698 628 640 520 598
+           C 428 562 452 492 504 450
+           C 548 408 548 356 512 316
+           C 488 288 498 250 512 224"
+        fill="none" stroke="#DC2626" stroke-width="46"
+        stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Summit marker -->
+  <circle cx="512" cy="205" r="30" fill="#22C55E" />
+</svg>

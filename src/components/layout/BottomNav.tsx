@@ -18,7 +18,7 @@ export function BottomNav() {
             end={item.to === '/'}
             className={({ isActive }) =>
               `flex-1 flex flex-col items-center justify-center gap-1 text-xs ${
-                isActive ? 'text-location' : 'text-secondary'
+                isActive ? 'text-brand' : 'text-secondary'
               }`
             }
           >

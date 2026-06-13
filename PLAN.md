@@ -676,9 +676,13 @@ disable battery optimization, record a 5-min screen-off walk; confirm continuous
 capture before building.
 
 **Fix:**
-- [ ] On "start recording", check background-location status; if not granted,
-      show an explainer + deep-link to the app's location settings (Android 11+
-      can't grant it via dialog).
+- [x] **Stall detection** (commit b837bc9): warn "Tracking may be paused - no
+      GPS fix for Ns" when recording but fixes stop, with a deep-link to the
+      app's location settings. Catches the failure regardless of cause. Pure
+      logic tested (`recordingHealth.ts`). This DETECTS + guides; the items below
+      PREVENT it.
+- [ ] On "start recording", proactively check background-location status; if not
+      granted, show an explainer + deep-link (Android 11+ can't grant via dialog).
 - [ ] Request battery-optimization exemption (Doze throttles even granted bg).
 - [ ] Surface the foreground-service / recording-active state (persistent
       notification) so it's obvious tracking is live with the screen off.

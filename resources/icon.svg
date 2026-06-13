@@ -1,42 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
-  <!-- Background with rounded corners -->
-  <rect width="1024" height="1024" fill="#3B82F6" rx="180"/>
+  <!-- Belknap Tracker app icon - flattened master (full-bleed, square).
+       The OS/asset tooling applies corner rounding + masks; source stays square.
+       Palette: background #0B2A4A, peaks #FFFFFF, trail #DC2626, summit #22C55E. -->
 
-  <!-- Mountain outline - stylized peak representing Belknap Range -->
-  <path
-    d="M512 180 L820 720 H204 Z"
-    fill="none"
-    stroke="white"
-    stroke-width="36"
-    stroke-linejoin="round"
-    stroke-linecap="round"
-  />
+  <rect width="1024" height="1024" fill="#0B2A4A" />
 
-  <!-- Secondary smaller peak -->
-  <path
-    d="M340 720 L460 520 L580 720"
-    fill="none"
-    stroke="white"
-    stroke-width="24"
-    stroke-linejoin="round"
-    stroke-linecap="round"
-    opacity="0.7"
-  />
-
-  <!-- Hiking trail path (red line - representing "red-lining") -->
-  <path
-    d="M280 680 Q400 550 512 480 Q624 410 744 340"
-    fill="none"
-    stroke="#DC2626"
-    stroke-width="28"
-    stroke-linecap="round"
-    stroke-dasharray="8 24"
-  />
-
-  <!-- Current location marker -->
-  <circle cx="512" cy="480" r="48" fill="#22C55E"/>
-  <circle cx="512" cy="480" r="20" fill="white"/>
-
-  <!-- GPS accuracy ring -->
-  <circle cx="512" cy="480" r="72" fill="none" stroke="#22C55E" stroke-width="4" opacity="0.5"/>
+  <!-- Art (slightly larger than the adaptive foreground for the square icon) -->
+  <g transform="translate(512,512) scale(1.12) translate(-512,-512)">
+    <g fill="#FFFFFF">
+      <polygon points="150,815 332,470 560,815" />
+      <polygon points="470,815 700,488 892,815" />
+      <polygon points="250,815 512,205 792,815" />
+    </g>
+    <path d="M 512 885
+             C 405 835 405 772 500 738
+             C 614 698 628 640 520 598
+             C 428 562 452 492 504 450
+             C 548 408 548 356 512 316
+             C 488 288 498 250 512 224"
+          fill="none" stroke="#DC2626" stroke-width="46"
+          stroke-linecap="round" stroke-linejoin="round" />
+    <circle cx="512" cy="205" r="30" fill="#22C55E" />
+  </g>
 </svg>

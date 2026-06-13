@@ -11,10 +11,16 @@
  * These CSS variables are for UI components using Tailwind classes.
  */
 @theme {
+  /* Brand palette (from the app icon / brand guidelines - see docs/branding.md).
+   * White-label: these four drive the look; swap them per range. */
+  --color-brand: #0B2A4A;       /* twilight navy - icon background, app chrome */
+  --color-trail: #DC2626;       /* red-line trail (also --color-complete) */
+  --color-summit: #22C55E;      /* summit marker green */
+
   /* Trail Status Colors (aligned with red-lining concept) */
   --color-complete: #DC2626;    /* red-600 - the "red line" */
   --color-incomplete: #0EA5E9;  /* sky-500 - bright, visible */
-  --color-location: #3B82F6;    /* blue-500 */
+  --color-location: #3B82F6;    /* blue-500 - GPS marker (map only) */
 
   /* UI Semantic Colors */
   --color-primary: #1E293B;     /* slate-800 */

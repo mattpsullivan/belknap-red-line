@@ -219,6 +219,11 @@ manual setup remains (see `docs/adr/001-private-release-distribution.md`).
 - **Release pipeline** - signed APK via GitHub Actions on a tag, for Obtainium
 
 **Next:**
+- **[TOP PRIORITY] Fix background GPS tracking** - see Phase 7.10. A real hike
+  (2026-06-13) recorded only 19 points over 2h16m: location updates only came
+  through while the phone was foreground; every pocketed/screen-locked stretch
+  (22 min, 14 min, 96 min gaps) recorded nothing. Background recording - the
+  whole reason for the native wrapper - is not working in practice.
 - One-time release setup: add GitHub remote, create + back up the release
   keystore, add the four `RELEASE_*` secrets, cut a test tag, install Obtainium
   (`docs/adr/001-private-release-distribution.md`).
@@ -648,6 +653,43 @@ Drawback: Requires network, breaks offline-first design.
   - Complete content rating questionnaire
   - Internal testing track
 - [ ] Submit for review (when ready)
+
+#### 7.10 Fix background GPS tracking (TOP PRIORITY)
+
+**Problem (observed on a real hike, 2026-06-13):** a 2h16m / ~2.7mi hike with
+kids recorded only **19 points**. Timestamps cluster into short bursts (points
+5-10s apart) separated by long gaps that match when the phone was
+pocketed/screen-locked: 22 min, 14 min, then 96 min with nothing. It also kept
+recording the drive home (forgot to stop). So updates only arrive while the app
+is foreground; background recording does not work in practice. Sample GPX:
+`docs/samples/belknap-track-2026-06-13-background-gps-bug.gpx`.
+
+**Root cause (likely):** Android suspends location for the app when backgrounded
+unless **ACCESS_BACKGROUND_LOCATION ("Allow all the time")** is granted. The app
+only requests foreground location (`@capacitor/geolocation` = "while using"),
+**never requests/checks background location**, and gives no indication it's
+missing. First-run "While using the app" => frozen when pocketed. Secondary
+suspects: Doze / OEM battery optimization; foreground-service not surfaced.
+
+**Validate first (cheap):** set the app's Location to "Allow all the time" +
+disable battery optimization, record a 5-min screen-off walk; confirm continuous
+capture before building.
+
+**Fix:**
+- [ ] On "start recording", check background-location status; if not granted,
+      show an explainer + deep-link to the app's location settings (Android 11+
+      can't grant it via dialog).
+- [ ] Request battery-optimization exemption (Doze throttles even granted bg).
+- [ ] Surface the foreground-service / recording-active state (persistent
+      notification) so it's obvious tracking is live with the screen off.
+- [ ] Verify recording passes `enableBackground` (TrailMap calls `useGeolocation()`
+      with no opts; the native provider forces background via `backgroundMessage`,
+      but make the intent explicit).
+- [ ] Re-test on a real device, screen off, in a pocket (emulator can't
+      reproduce Doze/pocket behavior).
+
+Note: robust Android background GPS is genuinely hard (Doze, OEM killers); expect
+iteration. This blocks the app's core value (recording hikes to redline trails).
 
 **Dependencies:**
 - Capacitor v6+ (latest stable)

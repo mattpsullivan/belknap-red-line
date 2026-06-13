@@ -167,9 +167,20 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 
 ---
 
-### ✅ CURRENT STATE: Phase 7 In Progress
+### ✅ CURRENT STATE: Phase 7 merged; distribution wired
 
-**Status:** Phase 5 complete. Phase 7 (Capacitor Native Wrapper) in progress on `feature/capacitor-native` branch.
+**Status:** Phases 1-5 complete. Phase 7 (Capacitor Native Wrapper) merged to
+`main`. Distribution pipeline (GitHub Releases + Obtainium) in place; one-time
+manual setup remains (see `docs/adr/001-private-release-distribution.md`).
+
+> **2026-06-13 correction:** the original Phase 7 commit added a native
+> geolocation provider written against an `@capgo/background-geolocation` API
+> the installed v8 plugin does not expose (`addListener` / `checkPermissions` /
+> invented `start()` options). It never compiled, so background GPS was dead.
+> It has been ported to the real v8 callback API, with `@capacitor/geolocation`
+> added for permission queries and a James-Shore-style Nullable infrastructure
+> wrapper so the provider is tested without mocks. The boxes below were
+> previously checked optimistically; they now reflect compiling, tested code.
 
 **What's Working:**
 - Progress Dashboard with animated progress ring
@@ -202,8 +213,18 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 - **Elevation Profile** component with SVG chart on TrailDetailPage
 - **Elevation data** enriched for all trail coordinates
 - **Elevation stats** (gain, loss, min, max) per trail
+- **Native background GPS** via @capgo/background-geolocation v8 (Nullable-tested provider)
+- **Historical POI markers** from the Belknap Range Trails map (HR placed; six awaiting georeference)
+- **Trail validation helpers** (sparse / missing-elevation / duplicate-id checks; data currently clean)
+- **Release pipeline** - signed APK via GitHub Actions on a tag, for Obtainium
 
-**Next:** Phase 6 Future Enhancements (optional: elevation in map popup, elevation filter)
+**Next:**
+- One-time release setup: add GitHub remote, create + back up the release
+  keystore, add the four `RELEASE_*` secrets, cut a test tag, install Obtainium
+  (`docs/adr/001-private-release-distribution.md`).
+- POI georeferencing for the six grid-cell-only features; trail-name cross-check
+  against the authoritative map / the 13 unmatched trails (`docs/trail-validation.md`).
+- Phase 6 Future Enhancements (optional: elevation in map popup, elevation filter)
 
 ---
 
@@ -526,84 +547,51 @@ Drawback: Requires network, breaks offline-first design.
 ### Phase 7: Capacitor Native Wrapper (Background GPS)
 
 > **Design Doc:** `docs/design/capacitor-native-wrapper.md`
-> **Branch:** `feature/capacitor-native`
+> **Branch:** merged to `main` (was `feature/capacitor-native`)
 > **Goal:** Enable GPS recording while phone is locked during hikes
 
 #### 7.1 Capacitor Core Setup
-- [ ] Install Capacitor core dependencies
-  ```bash
-  npm install @capacitor/core
-  npm install -D @capacitor/cli
-  ```
-- [ ] Initialize Capacitor configuration
-  ```bash
-  npx cap init "Belknap Tracker" "com.belknaptracker.app"
-  ```
-- [ ] Configure `capacitor.config.ts`
-  - Set `webDir: 'dist'`
-  - Set `android.useLegacyBridge: true` (required for background plugin)
-- [ ] Add Android platform
-  ```bash
-  npm install @capacitor/android
-  npx cap add android
-  ```
-- [ ] Add iOS platform
-  ```bash
-  npm install @capacitor/ios
-  npx cap add ios
-  ```
-- [ ] Verify web build works with Capacitor
-  ```bash
-  npm run build && npx cap sync
-  ```
+- [x] Install Capacitor core dependencies (`@capacitor/core`, `@capacitor/cli`)
+- [x] Initialize Capacitor configuration
+- [x] Configure `capacitor.config.ts` (`webDir: 'dist'`, `android.useLegacyBridge: true`)
+- [x] Add Android platform
+- [x] Add iOS platform
+- [x] Web build works with Capacitor (`npm run build && npx cap sync`)
 
 #### 7.2 Background Geolocation Plugin
-- [ ] Install @capgo/background-geolocation plugin
-  ```bash
-  npm install @capgo/background-geolocation
-  npx cap sync
-  ```
-- [ ] Configure iOS permissions (Info.plist)
+- [x] Install @capgo/background-geolocation plugin (v8) + @capacitor/geolocation (permissions)
+- [ ] Configure iOS permissions (Info.plist) - deferred until iOS build
   - `NSLocationWhenInUseUsageDescription`
   - `NSLocationAlwaysAndWhenInUseUsageDescription`
   - `UIBackgroundModes` with `location`
-- [ ] Configure Android permissions (AndroidManifest.xml)
-  - `ACCESS_FINE_LOCATION`
-  - `ACCESS_COARSE_LOCATION`
-  - `ACCESS_BACKGROUND_LOCATION`
-  - `FOREGROUND_SERVICE`
-  - `POST_NOTIFICATIONS` (Android 13+)
-- [ ] Test plugin loads without errors
+- [x] Configure Android permissions (AndroidManifest.xml)
+  - `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`, `ACCESS_BACKGROUND_LOCATION`
+  - `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_LOCATION`, `POST_NOTIFICATIONS`
+- [x] Plugin compiles and APK builds (verified locally: assembleDebug + assembleRelease)
 
 #### 7.3 Geolocation Abstraction Layer
-- [ ] Create `src/services/geolocation/types.ts`
-  - `GeoPosition` interface
-  - `GeolocationProvider` interface
-  - `GeolocationError` types
-- [ ] Create `src/services/geolocation/webProvider.ts`
-  - Wrap `navigator.geolocation.watchPosition`
-  - Match provider interface
-- [ ] Create `src/services/geolocation/nativeProvider.ts`
-  - Wrap `@capgo/background-geolocation`
-  - Match provider interface
-  - Configure notification text/appearance
-- [ ] Create `src/services/geolocation/index.ts`
-  - Factory function using `Capacitor.isNativePlatform()`
-  - Export unified interface
-- [ ] Write tests for abstraction layer
-  - Mock Capacitor platform detection
-  - Test web provider
-  - Test native provider interface
+- [x] Create `src/services/geolocation/types.ts`
+  - `GeoPosition` / `GeolocationProvider` / `GeolocationError` (error codes as a
+    const object, not an enum, for `erasableSyntaxOnly`)
+- [x] Create `src/services/geolocation/webProvider.ts` (wraps `navigator.geolocation`)
+- [x] Create `src/services/geolocation/nativeProvider.ts`
+  - Maps the app interface onto @capgo v8's callback API via the infra wrapper
+  - Configures background notification text
+- [x] Create `src/services/geolocation/backgroundGeolocationClient.ts`
+  - James Shore infrastructure wrapper: real client + `createNull()` with
+    configurable responses and output tracking
+- [x] Create `src/services/geolocation/index.ts` (factory via `Capacitor.isNativePlatform()`)
+- [x] Tests for the abstraction layer - state-based, no mock framework; the
+  provider is driven by the null client (nativeProvider.test.ts,
+  backgroundGeolocationClient.test.ts)
 
 #### 7.4 Hook Integration
-- [ ] Refactor `useGeolocation.ts` to use provider factory
-  - Remove direct `navigator.geolocation` calls
-  - Use async provider API
-  - Preserve throttle/distance filtering logic
-- [ ] Update `useTrackRecording.ts` if needed
-  - Ensure works with async geolocation provider
-- [ ] Verify existing tests still pass
-- [ ] Add tests for native code path (mocked)
+- [x] `useGeolocation.ts` uses the provider factory (no direct `navigator.geolocation`)
+  - Async provider API; throttle/distance filtering preserved
+- [x] `useTrackRecording.ts` works with the async geolocation provider
+- [x] Existing tests still pass
+- [ ] De-mock the inherited useGeolocation.test.ts (still uses `vi.mock` for
+  Capacitor) per Testing Without Mocks - follow-up
 
 #### 7.5 App Assets & Branding
 - [ ] Install capacitor-assets tool
@@ -621,44 +609,30 @@ Drawback: Requires network, breaks offline-first design.
 - [ ] Verify icons appear correctly in both platforms
 
 #### 7.6 Privacy Policy & Compliance
-- [ ] Create `docs/privacy-policy.md` with required content
-  - Data collection (GPS during active recording)
-  - Data storage (local only, no server)
-  - Data deletion (Settings → Clear All Data)
-  - Contact information
+- [x] Create `docs/privacy-policy.md` with required content
 - [ ] Add `/privacy` route to app (optional, or host externally)
-- [ ] Prepare background location justification text for App Store
+- [ ] Prepare background location justification text (only if a store listing happens)
 
 #### 7.7 Build Scripts & Workflow
-- [ ] Add npm scripts to package.json:
-  ```json
-  {
-    "cap:sync": "npx cap sync",
-    "cap:android": "npm run build && npx cap sync && npx cap open android",
-    "cap:ios": "npm run build && npx cap sync && npx cap open ios",
-    "cap:run:android": "npm run build && npx cap sync && npx cap run android",
-    "cap:run:ios": "npm run build && npx cap sync && npx cap run ios"
-  }
-  ```
-- [ ] Update `.gitignore` for native projects
-  - `android/app/build/`
-  - `ios/App/Pods/`
-  - `ios/App/build/`
-- [ ] Document build workflow in README or CONTRIBUTING.md
+- [x] Add `cap:*` npm scripts to package.json
+- [x] `.gitignore` covers native build output (`android/app/build/`, `ios/App/build/`, Pods)
+- [x] Document build workflow (`docs/adr/001-private-release-distribution.md`,
+  `~/belknap-apk/INSTALL.md`)
+
+#### 7.7b Distribution (GitHub Releases + Obtainium)
+- [x] Release signing config in `android/app/build.gradle` (gitignored keystore.properties)
+- [x] `.github/workflows/release.yml` - signed APK on tag/dispatch -> GitHub Release
+- [x] ADR-001 with the manual setup checklist
+- [x] Local debug APK staged for sideload testing (`~/belknap-apk/`)
+- [ ] One-time: add remote, create + back up keystore, add 4 secrets, cut a test tag, Obtainium + PAT
 
 #### 7.8 Testing & Verification
-- [ ] Test on Android device/emulator
-  - Verify app launches
-  - Test foreground GPS tracking
-  - Test background GPS (lock screen)
-  - Verify notification appears during background tracking
-- [ ] Test on iOS device/simulator
-  - Verify app launches
-  - Test foreground GPS tracking
-  - Test background GPS (lock screen)
-  - Test "Always Allow" permission flow
-- [ ] Test web PWA still works (regression)
-- [ ] Battery usage testing (extended recording session)
+- [x] Local Android build (assembleDebug + assembleRelease) succeeds
+- [ ] Test on Android device: launch, foreground GPS, background GPS (lock screen),
+  notification during background tracking - **morning sideload test**
+- [ ] Test on iOS device/simulator (deferred - no iOS build yet)
+- [x] Web PWA still works (regression: 128 tests pass, build green)
+- [ ] Battery usage testing (extended recording session, real device)
 
 #### 7.9 App Store Preparation (Optional)
 - [ ] iOS App Store Connect

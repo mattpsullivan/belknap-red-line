@@ -8,8 +8,11 @@ A Progressive Web App (PWA) to track hiking progress on Belknap Range trails in 
 - **Interactive Map** - Trail visualization with color-coded completion status (green = complete, red = incomplete)
 - **Trail List** - Searchable, filterable list with difficulty ratings
 - **Manual Completion** - Mark trails complete with date and optional notes
-- **Offline Support** - Works without internet connection (PWA with service worker)
-- **Local Storage** - All data stored locally in IndexedDB
+- **GPS Tracking** - Live location, track recording, and auto-detection of completed trails
+- **Background GPS (native)** - Records while the screen is locked via a Capacitor wrapper (@capgo/background-geolocation)
+- **Historical POIs** - Map markers for historical sites from the official Belknap Range Trails map
+- **Offline Support** - Works without internet connection (PWA with service worker + bundled PMTiles)
+- **Local Storage** - All data stored locally in IndexedDB; JSON/CSV export + import
 
 ## Tech Stack
 
@@ -112,10 +115,14 @@ Current test coverage: 32 tests across 7 test files.
 ## Roadmap
 
 - [x] **Phase 1: MVP** - Dashboard, map, trail list, manual completion
-- [ ] **Phase 2: GPS Tracking** - Live location, track recording, auto-detection
-- [ ] **Phase 3: Full Offline** - PMTiles for offline maps, export/import data
+- [x] **Phase 2: GPS Tracking** - Live location, track recording, auto-detection
+- [x] **Phase 3: Full Offline** - PMTiles for offline maps, export/import data
+- [x] **Phase 4-5: Feedback + Elevation** - Trail detail pages, loops, elevation profiles
+- [x] **Phase 7: Native wrapper** - Capacitor + background GPS (merged); distribution
+  pipeline (GitHub Releases + Obtainium) wired, one-time setup pending
+  ([ADR-001](./docs/adr/001-private-release-distribution.md))
 
-See [PLAN.md](./PLAN.md) for detailed implementation checklist.
+See [PLAN.md](./PLAN.md) for the detailed implementation checklist and current state.
 
 ## Related Resources
 

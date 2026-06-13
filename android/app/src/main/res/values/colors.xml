@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand navy - keep in sync with palette.brand (#16314D). -->
+    <color name="splashScreenBackground">#16314D</color>
+</resources>

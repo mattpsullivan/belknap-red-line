@@ -5,12 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Belknap Tracker</title>
     <meta name="description" content="Track your progress on Belknap Range trails" />
-    <meta name="theme-color" content="#3B82F6" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="theme-color" content="#16314D" />
+    <link rel="icon" type="image/svg+xml" href="/brand-logo.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <style>
+      /* Navy everywhere so there's no white flash before React mounts. */
+      html, body { margin: 0; background-color: #16314D; }
+      /* Branded load screen - shown until the app mounts, then faded out. */
+      #app-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background-color: #16314D;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        transition: opacity 250ms ease;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+      #app-splash img { width: 150px; height: 150px; }
+      #app-splash .title {
+        color: #ffffff;
+        font-size: 24px;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+      }
+      #app-splash.hidden { opacity: 0; pointer-events: none; }
+    </style>
   </head>
   <body>
     <div id="root"></div>
+    <div id="app-splash">
+      <img src="/brand-logo.svg" alt="" />
+      <div class="title">Belknap Tracker</div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

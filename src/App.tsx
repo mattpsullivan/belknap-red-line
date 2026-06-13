@@ -1,4 +1,4 @@
-import { Suspense } from 'react'
+import { Suspense, useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Layout } from '@/components/layout/Layout'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
@@ -38,6 +38,15 @@ function LazyPage({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
+  // Fade out the branded load screen (index.html #app-splash) once mounted.
+  useEffect(() => {
+    const splash = document.getElementById('app-splash')
+    if (!splash) return
+    splash.classList.add('hidden')
+    const t = setTimeout(() => splash.remove(), 300)
+    return () => clearTimeout(t)
+  }, [])
+
   return (
     <PMTilesProvider>
       <BrowserRouter>

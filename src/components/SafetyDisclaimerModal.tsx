@@ -78,7 +78,7 @@ export function SafetyDisclaimerModal({ onAcknowledge }: SafetyDisclaimerModalPr
               The Destination is Your Car
             </p>
             <p className="text-secondary">
-              Remember: the destination is always the car at the end of the trip, not the summit. Weather changes, fatigue, and conditions may require turning back—and that's the right call.
+              Remember: the destination is always the <car at the end of the trip, not the summit. Weather changes, fatigue, and conditions may require turning back—and that's the right call.
             </p>
           </div>
 

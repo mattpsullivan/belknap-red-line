@@ -339,7 +339,7 @@ export function SettingsPage() {
               The Destination is Your Car
             </p>
             <p className="text-sm text-secondary">
-              Remember: the destination is always the car at the end of the trip, not the summit. Weather changes, fatigue, unexpected conditions, or simply not feeling right are all valid reasons to turn back. A successful hike is one where you return safely.
+              Remember: the destination is always <b>the car at the end of the trip</b>, not the summit. Weather changes, fatigue, unexpected conditions, or simply not feeling right are all valid reasons to turn back. A successful hike is one where you return safely.
             </p>
           </div>
           <div className="border-t border-gray-200 pt-4">

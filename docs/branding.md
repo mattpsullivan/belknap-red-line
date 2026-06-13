@@ -18,7 +18,7 @@ Gemini reference sheet is at `resources/brand/brand-guidelines.png`.
 
 | | Role | Hex | CSS token | Usage |
 |---|------|-----|-----------|-------|
-| ![](../resources/brand/swatch-navy.png) | Brand / Background | `#0B2A4A` | `--color-brand` | icon background, app header & nav chrome, splash, PWA theme color |
+| ![](../resources/brand/swatch-navy.png) | Brand / Background | `#16314D` | `--color-brand` | icon background, app header & nav chrome, splash, PWA theme color |
 | ![](../resources/brand/swatch-trail.png) | Red Trail | `#DC2626` | `--color-trail` / `--color-complete` | the red-line (logo trail + completed trails on the map) |
 | ![](../resources/brand/swatch-peak.png) | Mountain Peaks | `#FFFFFF` | - | icon peaks |
 | ![](../resources/brand/swatch-summit.png) | Summit Marker | `#22C55E` | `--color-summit` | icon summit dot (also "easy" difficulty / accents) |
@@ -32,7 +32,7 @@ These live as CSS tokens in `src/index.css`. The GPS location-marker blue
 # edit resources/icon.svg / icon-foreground.svg, then:
 node scripts/render-icon.mjs resources/icon.svg            assets/icon-only.png       1024
 node scripts/render-icon.mjs resources/icon-foreground.svg assets/icon-foreground.png 1024
-magick -size 1024x1024 xc:'#0B2A4A' assets/icon-background.png
+magick -size 1024x1024 xc:'#16314D' assets/icon-background.png
 npx capacitor-assets generate --android   # (and --ios)
 npx cap sync android
 ```

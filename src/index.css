@@ -13,7 +13,7 @@
 @theme {
   /* Brand palette (from the app icon / brand guidelines - see docs/branding.md).
    * White-label: these four drive the look; swap them per range. */
-  --color-brand: #0B2A4A;       /* twilight navy - icon background, app chrome */
+  --color-brand: #16314D;       /* twilight navy - icon background, app chrome */
   --color-trail: #DC2626;       /* red-line trail (also --color-complete) */
   --color-summit: #22C55E;      /* summit marker green */
 

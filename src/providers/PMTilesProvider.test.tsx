@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, waitFor, act } from '@testing-library/react'
+import { render, screen, waitFor, act, renderHook } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { PMTilesProvider, usePMTiles } from './PMTilesProvider'
+import { PMTilesProvider } from './PMTilesProvider'
+import { usePMTiles } from './pmtilesContext'
 import maplibregl from 'maplibre-gl'
 
 // Stub only the WebGL boundary (maplibre needs a GL canvas, unavailable in
@@ -131,21 +132,13 @@ describe('PMTilesProvider', () => {
   })
 
   it('builds an offline style that references the in-memory archive', async () => {
-    let captured: unknown = null
-    function StyleCapture() {
-      const { offlineStyle } = usePMTiles()
-      captured = offlineStyle
-      return null
-    }
-    render(
-      <PMTilesProvider>
-        <StyleCapture />
-      </PMTilesProvider>
-    )
-    await waitFor(() => {
-      expect(captured).not.toBeNull()
+    const { result } = renderHook(() => usePMTiles(), {
+      wrapper: ({ children }) => <PMTilesProvider>{children}</PMTilesProvider>,
     })
-    const style = captured as { version: number; sources: Record<string, { type: string; url: string }> }
+    await waitFor(() => {
+      expect(result.current.offlineStyle).not.toBeNull()
+    })
+    const style = result.current.offlineStyle as unknown as { version: number; sources: Record<string, { type: string; url: string }> }
     expect(style.version).toBe(8)
     expect(style.sources.protomaps.type).toBe('vector')
     // pmtiles://<archive name>, not an http URL (which would force range requests)

@@ -13,7 +13,7 @@ import {
 } from '@/hooks'
 import { useRecordingHealth } from '@/hooks/useRecordingHealth'
 import { alertVibrate } from '@/services/haptics'
-import { usePMTiles } from '@/providers/PMTilesProvider'
+import { usePMTiles } from '@/providers/pmtilesContext'
 import { styleConfig } from '@/config/styles'
 import { POIMarkers } from './POIMarkers'
 import type { Trail } from '@/types'
@@ -130,8 +130,12 @@ export function TrailMap() {
           duration: 1000,
         })
 
-        // Auto-select the trail to show popup
+        // Auto-select the trail to show its popup. This effect synchronizes UI
+        // to the external router URL (?trail=) and drives the imperative
+        // fitBounds above, so it belongs in an effect; the lint rule can't see
+        // that the setState here mirrors external state rather than cascading.
         const centerIdx = Math.floor(coords.length / 2)
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- sync to URL param, not a render cascade
         setSelectedTrail({
           trail: highlightedTrail,
           lng: coords[centerIdx].lng,

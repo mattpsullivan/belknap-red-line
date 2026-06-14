@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 const STORAGE_KEY = 'belknap-safety-acknowledged'
@@ -8,14 +8,9 @@ interface SafetyDisclaimerModalProps {
 }
 
 export function SafetyDisclaimerModal({ onAcknowledge }: SafetyDisclaimerModalProps) {
-  const [isOpen, setIsOpen] = useState(false)
-
-  useEffect(() => {
-    const acknowledged = localStorage.getItem(STORAGE_KEY)
-    if (!acknowledged) {
-      setIsOpen(true)
-    }
-  }, [])
+  // Open on first run only (no prior acknowledgement). Seed from storage at
+  // mount so there is no effect-driven open flash.
+  const [isOpen, setIsOpen] = useState(() => !localStorage.getItem(STORAGE_KEY))
 
   const handleAcknowledge = () => {
     localStorage.setItem(STORAGE_KEY, new Date().toISOString())
@@ -132,17 +127,4 @@ export function SafetyDisclaimerModal({ onAcknowledge }: SafetyDisclaimerModalPr
       </div>
     </div>
   )
-}
-
-export function useSafetyAcknowledged() {
-  const [acknowledged, setAcknowledged] = useState(() => {
-    return !!localStorage.getItem(STORAGE_KEY)
-  })
-
-  const acknowledge = () => {
-    localStorage.setItem(STORAGE_KEY, new Date().toISOString())
-    setAcknowledged(true)
-  }
-
-  return { acknowledged, acknowledge }
 }

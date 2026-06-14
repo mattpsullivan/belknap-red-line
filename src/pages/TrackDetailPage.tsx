@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import Map, { Source, Layer, Marker } from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useTrackHistory } from '@/hooks/useTrackHistory'
-import { usePMTiles } from '@/providers/PMTilesProvider'
+import { usePMTiles } from '@/providers/pmtilesContext'
 import { downloadTrackGPX } from '@/services/gpxExport'
 import type { GPSTrack } from '@/types'
 

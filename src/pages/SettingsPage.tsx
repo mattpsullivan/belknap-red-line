@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useCompletions, useTrackHistory, useTrails } from '@/hooks'
-import { usePMTiles } from '@/providers/PMTilesProvider'
+import { usePMTiles } from '@/providers/pmtilesContext'
 import {
   generateRedlineExportData,
   downloadRedlineCSV,

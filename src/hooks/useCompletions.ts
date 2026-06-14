@@ -5,7 +5,11 @@ import { importFromJSON, type ImportResult } from '@/services/completionImport'
 import type { Completion } from '@/types'
 
 export function useCompletions() {
-  const completions = useLiveQuery(() => db.completions.toArray()) ?? []
+  // useLiveQuery returns undefined until the first query resolves. Default to a
+  // stable [] via useMemo so it doesn't change identity every render and
+  // retrigger the memos/callbacks below.
+  const liveCompletions = useLiveQuery(() => db.completions.toArray())
+  const completions = useMemo(() => liveCompletions ?? [], [liveCompletions])
 
   const addCompletion = useCallback(
     async (completion: Omit<Completion, 'id'>): Promise<number> => {

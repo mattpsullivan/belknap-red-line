@@ -1,27 +1,8 @@
-import { useEffect, useState, createContext, useContext, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import maplibregl from 'maplibre-gl'
 import { Protocol } from 'pmtiles'
 import { createOfflineStyle, loadPmtilesArchive } from './pmtiles'
-
-interface PMTilesContextValue {
-  isOfflineReady: boolean
-  isOfflineMode: boolean
-  setOfflineMode: (enabled: boolean) => void
-  offlineStyle: ReturnType<typeof createOfflineStyle> | null
-  error: string | null
-}
-
-const PMTilesContext = createContext<PMTilesContextValue>({
-  isOfflineReady: false,
-  isOfflineMode: false,
-  setOfflineMode: () => {},
-  offlineStyle: null,
-  error: null,
-})
-
-export function usePMTiles() {
-  return useContext(PMTilesContext)
-}
+import { PMTilesContext } from './pmtilesContext'
 
 interface PMTilesProviderProps {
   children: ReactNode
@@ -49,6 +30,10 @@ export function PMTilesProvider({ children }: PMTilesProviderProps) {
         protocol.add(archive)
         setOfflineStyle(createOfflineStyle())
         setIsOfflineReady(true)
+        // Apply the saved offline preference once tiles are actually ready.
+        if (localStorage.getItem('offlineMode') === 'true') {
+          setOfflineMode(true)
+        }
       })
       .catch(() => {
         if (!cancelled) setError('Could not load offline map tiles')
@@ -59,14 +44,6 @@ export function PMTilesProvider({ children }: PMTilesProviderProps) {
       maplibregl.removeProtocol('pmtiles')
     }
   }, [])
-
-  // Load offline preference from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('offlineMode')
-    if (saved === 'true' && isOfflineReady) {
-      setOfflineMode(true)
-    }
-  }, [isOfflineReady])
 
   // Save offline preference
   const handleSetOfflineMode = (enabled: boolean) => {

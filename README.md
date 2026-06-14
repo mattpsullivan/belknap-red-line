@@ -23,10 +23,12 @@ A Progressive Web App (PWA) to track hiking progress on Belknap Range trails in 
 | Styling | Tailwind CSS 4 |
 | Routing | React Router 7 |
 | Maps | MapLibre GL JS + react-map-gl |
-| Map Tiles | [OpenFreeMap](https://openfreemap.org/) (free, no API key) |
+| Map Tiles | [OpenFreeMap](https://openfreemap.org/) online; bundled [PMTiles](https://docs.protomaps.com/pmtiles/) (protomaps) for offline |
 | Database | Dexie.js (IndexedDB wrapper) |
 | PWA | vite-plugin-pwa + Workbox |
-| Testing | Vitest + React Testing Library |
+| Native | Capacitor (Android) - background GPS + sideload/Obtainium distribution |
+| Theming | All colors in `src/config/palette.ts` (white-label ready) |
+| Testing | Vitest + React Testing Library (no mock framework; Nullables) |
 
 ## Getting Started
 
@@ -59,6 +61,27 @@ This project includes a DevContainer configuration for VS Code:
 2. Open the project folder in VS Code
 3. Click "Reopen in Container" when prompted
 4. Run `npm run dev` in the terminal
+
+## Android (native build & install)
+
+The app ships to a phone as a native Android wrapper (Capacitor) so GPS keeps
+recording with the screen locked. Distribution is private, via signed APKs and
+[Obtainium](https://github.com/ImranR98/Obtainium) - no Play Store.
+
+```bash
+npm run build            # build the web assets
+npx cap sync android     # copy them into the Android project
+# debug APK for sideload testing:
+cd android && ./gradlew assembleDebug
+```
+
+- **Release pipeline:** pushing a `v*` tag builds a signed APK via GitHub Actions
+  and attaches it to a GitHub Release for Obtainium to pull. See
+  [`docs/adr/001-private-release-distribution.md`](./docs/adr/001-private-release-distribution.md)
+  for the one-time setup (remote, keystore, `RELEASE_*` secrets, Obtainium + PAT).
+- **Background GPS** needs Location set to "Allow all the time" + battery
+  optimization off; the app's start-recording gate walks you through it. See
+  Phase 7.10 in [PLAN.md](./PLAN.md).
 
 ## Scripts
 
@@ -110,7 +133,7 @@ npm run test:run
 npm test -- src/hooks/useTrails.test.ts
 ```
 
-Current test coverage: 32 tests across 7 test files.
+Current test coverage: 161 tests across 26 test files (lint clean).
 
 ## Roadmap
 
@@ -121,6 +144,11 @@ Current test coverage: 32 tests across 7 test files.
 - [x] **Phase 7: Native wrapper** - Capacitor + background GPS (merged); distribution
   pipeline (GitHub Releases + Obtainium) wired, one-time setup pending
   ([ADR-001](./docs/adr/001-private-release-distribution.md))
+- [x] **Brand + theming** - SVG icon/splash, navy theme, all colors consolidated
+  in `src/config/palette.ts` for white-labeling ([docs/branding.md](./docs/branding.md))
+- [~] **Background GPS reliability** - detection (stall banner + haptic buzz) and
+  prevention (setup gate) built; **awaiting a real screen-off device walk** to
+  confirm continuous capture (Phase 7.10)
 
 See [PLAN.md](./PLAN.md) for the detailed implementation checklist and current state.
 

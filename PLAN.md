@@ -16,16 +16,17 @@ A React PWA to track hiking progress on Belknap Range trails (NH). Aligned with 
 
 | Category | Choice | Rationale |
 |----------|--------|-----------|
-| Framework | React 18 + TypeScript + Vite | Fast dev, good PWA support |
-| Routing | React Router v6 | URL-based navigation, browser back button |
+| Framework | React 19 + TypeScript + Vite | Fast dev, good PWA support |
+| Routing | React Router v7 | URL-based navigation, browser back button |
 | Maps | MapLibre GL JS + react-map-gl | Vector tiles (smaller), WebGL, open-source |
 | Map Tiles | **OpenFreeMap** | Unlimited free, no API key needed |
 | Offline Tiles | PMTiles (Phase 3) | Single-file format, native MapLibre support |
 | Storage | Dexie.js (IndexedDB) | Async API, service worker compatible, reactive hooks |
 | PWA | vite-plugin-pwa + Workbox | Zero-config, automatic caching |
 | Geo Utils | Turf.js | Trail detection algorithm |
-| Styling | Tailwind CSS | Rapid UI development |
-| Testing | Vitest + Playwright | Unit/integration + E2E |
+| Styling | Tailwind CSS v4 | Rapid UI development |
+| Native | Capacitor (Android) | Background GPS + sideload/Obtainium distribution |
+| Testing | Vitest + React Testing Library | State-based sociable tests, no mock framework (Nullables) |
 
 ---
 
@@ -167,11 +168,15 @@ Create 2-3 HTML/Tailwind prototypes to evaluate design directions before coding.
 
 ---
 
-### ✅ CURRENT STATE: Phase 7 merged; distribution wired
+### ✅ CURRENT STATE: native + branded; background-GPS fix awaiting device test
 
 **Status:** Phases 1-5 complete. Phase 7 (Capacitor Native Wrapper) merged to
-`main`. Distribution pipeline (GitHub Releases + Obtainium) in place; one-time
-manual setup remains (see `docs/adr/001-private-release-distribution.md`).
+`main`, with brand identity (icon/theme/splash + consolidated palette) and the
+background-GPS detect/prevent work (stall banner + buzz, setup gate) merged on
+2026-06-13. The one remaining gate on the app's core value is a real screen-off
+device walk to confirm background recording (Phase 7.10). Distribution pipeline
+(GitHub Releases + Obtainium) in place; one-time manual setup remains (see
+`docs/adr/001-private-release-distribution.md`). 161 tests pass, lint clean.
 
 > **2026-06-13 correction:** the original Phase 7 commit added a native
 > geolocation provider written against an `@capgo/background-geolocation` API
@@ -217,13 +222,28 @@ manual setup remains (see `docs/adr/001-private-release-distribution.md`).
 - **Historical POI markers** from the Belknap Range Trails map (HR placed; six awaiting georeference)
 - **Trail validation helpers** (sparse / missing-elevation / duplicate-id checks; data currently clean)
 - **Release pipeline** - signed APK via GitHub Actions on a tag, for Obtainium
+- **Brand identity** - SVG icon traced to the reference art, navy theme, branded
+  splash; all colors consolidated into `src/config/palette.ts` (single source of
+  truth) for white-labeling. SVG recolors from the palette (`scripts/recolor-icon.mjs`).
+- **Safety tab** - the safety disclaimer promoted from an overlay to its own
+  full-size bottom-nav tab
+- **Recording-stall detection** - banner + 3-pulse haptic buzz when recording
+  but GPS fixes stop (pocketed phone can't see a banner); pure logic tested
+- **Background-tracking setup gate** - start-recording modal requiring "Allow all
+  the time" + battery-opt off, with an "Open location settings" deep-link
 
 **Next:**
-- **[TOP PRIORITY] Fix background GPS tracking** - see Phase 7.10. A real hike
-  (2026-06-13) recorded only 19 points over 2h16m: location updates only came
-  through while the phone was foreground; every pocketed/screen-locked stretch
-  (22 min, 14 min, 96 min gaps) recorded nothing. Background recording - the
-  whole reason for the native wrapper - is not working in practice.
+- **[TOP PRIORITY] Validate background GPS on a real device** - see Phase 7.10.
+  A real hike (2026-06-13) recorded only 19 points over 2h16m: updates came
+  through only while the phone was foreground; every pocketed/screen-locked
+  stretch (22/14/96 min gaps) recorded nothing. Root cause found: `@capgo`'s
+  "location" alias never requests ACCESS_BACKGROUND_LOCATION. The DETECT side
+  (stall banner + haptic buzz) and the PREVENT side (start-recording setup gate
+  requiring "Allow all the time" + battery-opt off, with a settings deep-link)
+  are now built and merged. **What remains is a real screen-off/pocket walk to
+  confirm continuous capture**, then the optional native battery-opt intent and
+  foreground-service notification if gaps persist. Emulator can't reproduce
+  Doze/pocket, so this needs a device.
 - One-time release setup: add GitHub remote, create + back up the release
   keystore, add the four `RELEASE_*` secrets, cut a test tag, install Obtainium
   (`docs/adr/001-private-release-distribution.md`).
@@ -598,20 +618,16 @@ Drawback: Requires network, breaks offline-first design.
 - [ ] De-mock the inherited useGeolocation.test.ts (still uses `vi.mock` for
   Capacitor) per Testing Without Mocks - follow-up
 
-#### 7.5 App Assets & Branding
-- [ ] Install capacitor-assets tool
-  ```bash
-  npm install -D @capacitor/assets
-  ```
-- [ ] Create source assets in `resources/`
-  - `icon.png` (1024x1024 master icon)
-  - `splash.png` (2732x2732 splash screen)
-  - `icon-foreground.png` (adaptive icon, optional)
-- [ ] Generate platform assets
-  ```bash
-  npx capacitor-assets generate --iconBackgroundColor '#3B82F6'
-  ```
-- [ ] Verify icons appear correctly in both platforms
+#### 7.5 App Assets & Branding ✅
+- [x] `@capacitor/assets` installed
+- [x] Source assets in `resources/` - `icon.svg` / `icon-foreground.svg` traced to
+  the reference art; recolored from the palette via `scripts/recolor-icon.mjs`,
+  rendered to PNG via `scripts/render-icon.mjs`
+- [x] Platform icons + adaptive icon generated; navy (`#16314D`) background
+- [x] Branded splash (navy + logo + title), no white flash on launch
+- [x] All colors consolidated into `src/config/palette.ts` for white-labeling
+  (see `docs/branding.md` for the swap-points)
+- [x] Verified on the Android emulator
 
 #### 7.6 Privacy Policy & Compliance
 - [x] Create `docs/privacy-policy.md` with required content
@@ -636,7 +652,7 @@ Drawback: Requires network, breaks offline-first design.
 - [ ] Test on Android device: launch, foreground GPS, background GPS (lock screen),
   notification during background tracking - **morning sideload test**
 - [ ] Test on iOS device/simulator (deferred - no iOS build yet)
-- [x] Web PWA still works (regression: 128 tests pass, build green)
+- [x] Web PWA still works (regression: 161 tests pass, lint clean, build green)
 - [ ] Battery usage testing (extended recording session, real device)
 
 #### 7.9 App Store Preparation (Optional)

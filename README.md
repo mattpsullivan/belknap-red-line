@@ -149,6 +149,11 @@ Current test coverage: 161 tests across 26 test files (lint clean).
 - [~] **Background GPS reliability** - detection (stall banner + haptic buzz) and
   prevention (setup gate) built; **awaiting a real screen-off device walk** to
   confirm continuous capture (Phase 7.10)
+- [ ] **Phase 8: Trail data cleanup** - a map-overlay audit
+  (`scripts/map-overlay.py --check`) against the Bosworth reference map found
+  duplicated/mislocated geometry in `trails.json`. Extract the trail roster from
+  the map, fix the known data bugs, and re-survey suspect trails once background
+  GPS is reliable ([docs/trail-validation.md](./docs/trail-validation.md))
 
 See [PLAN.md](./PLAN.md) for the detailed implementation checklist and current state.
 

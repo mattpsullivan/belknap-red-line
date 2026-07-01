@@ -1,6 +1,6 @@
 # Belknap Red-Line Tracker - Implementation Plan
 
-> **Agents:** Read `AGENTS.md` first for workflow rules (TDD, devcontainer restrictions, plan tracking).
+> **Agents:** Read [`docs/developer/getting-started.md`](./docs/developer/getting-started.md) first for setup and workflow rules (TDD, plan tracking).
 
 ## Overview
 A React PWA to track hiking progress on Belknap Range trails (NH). Aligned with the official **Belknap Range Trail Tenders (BRATTS) Redlining Patch** program: ~70.5 miles of sanctioned trails.
@@ -178,6 +178,12 @@ device walk to confirm background recording (Phase 7.10). Distribution pipeline
 (GitHub Releases + Obtainium) in place; one-time manual setup remains (see
 `docs/adr/001-private-release-distribution.md`). 161 tests pass, lint clean.
 
+> **2026-06-30 data-quality audit:** a map-overlay pass against the Bosworth
+> reference map found `trails.json` has duplicated and mislocated trail
+> geometry (the automated checks only look at point counts and ids, not
+> coordinates). Feature code is solid; the trail *data* needs cleanup. See
+> Phase 8 and [`docs/trail-validation.md`](./docs/trail-validation.md).
+
 > **2026-06-13 correction:** the original Phase 7 commit added a native
 > geolocation provider written against an `@capgo/background-geolocation` API
 > the installed v8 plugin does not expose (`addListener` / `checkPermissions` /
@@ -195,7 +201,7 @@ device walk to confirm background recording (Phase 7.10). Distribution pipeline
 - Completion modal with date picker and notes
 - PWA configured with service worker and offline caching
 - IndexedDB for persistent offline storage
-- Real trail coordinates from OpenStreetMap (48/61 trails with GPS data)
+- Real trail coordinates for 59 trails (OSM + GPX; geometry cleanup pending, see Phase 8)
 - Live GPS tracking with accuracy circle and pulsing marker
 - Track recording with start/stop/cancel and distance display
 - Trail detection using Turf.js (50m buffer, 80% coverage threshold)
@@ -737,6 +743,55 @@ iteration. This blocks the app's core value (recording hikes to redline trails).
 
 ---
 
+### Phase 8: Trail data cleanup (map audit + field re-survey)
+
+The map-overlay audit (`scripts/map-overlay.py --check`) found the bundled
+`trails.json` has duplicated and mislocated geometry. Full findings and the
+georeference method are in
+[`docs/trail-validation.md`](./docs/trail-validation.md). This phase turns those
+findings into clean data. **Blocked on Phase 7.10** (reliable screen-off GPS)
+for anything that needs new field tracks.
+
+#### 8.1 Extract the trail roster from the map
+- [ ] Read every trail name off the Bosworth reference map
+  (`data/reference/belknap-range-trails-map-bosworth-2018.jpg`).
+- [ ] Reconcile three sources into one roster: the map (names + routing), the
+  redlining workbook (`data/Belknap_Range_Redlining_2023v1.xls`, authoritative
+  sanctioned list + distances), and current `trails.json`.
+- [ ] Resolve the count drift: PLAN history shows 61 → 59 trails; the audit
+  shows some of the 59 are duplicate geometry, so the distinct-trail count is
+  lower still. Establish the true number.
+- [ ] List trails on the map but **missing** from `trails.json` (known gap: the
+  Rand and West Quarry ridge has no trail geometry at all).
+- [ ] List trails in `trails.json` that are **not** sanctioned redline trails.
+
+#### 8.2 Fix known data bugs (no field work needed)
+- [ ] Resolve the three duplicate-geometry groups (each is one polyline reused):
+  `red-trail`/`red-trail-anna-goat-pasture-hill-trail-south`;
+  `mack-ridge-trail`/`mack-ridge-trail-south`;
+  `mack-anna-trail`/`anna-straightback-link`/`straightback-major-link`.
+- [ ] Fix `blue-trail` (currently the 741 ft eastern Blue Trail, used wrongly as
+  the Belknap summit trail in `belknap-summit-loop`).
+- [ ] Add a duplicate-geometry check to `src/services/trailValidation.ts` so
+  this class of bug is caught automatically going forward.
+- [ ] After geometry is fixed, correct the `loops.json` entries that depend on
+  it (`belknap-range-trail-mack-major`, `belknap-12-full-traverse`).
+- [ ] Re-read the eastern summit anchors (Klem/Anna/Straightback) so
+  `map-overlay.py` can georeference the east and validate those trails.
+
+#### 8.3 Ordered walk list (once Phase 7.10 is done)
+- [ ] Produce a prioritized, geographically ordered hike list to re-record the
+  suspect trails (not all 59; western/central geometry already aligns). Priority
+  today: the duplicate groups, `blue-trail`, `boulder-trail`, then the eastern
+  spine (Klem / Rand / West Quarry / Anna / Straightback). Order by trailhead so
+  each outing captures adjacent trails in one recording.
+- [ ] Walk and re-record each, import via the existing GPX pipeline, replace the
+  bad geometry, and re-run `map-overlay.py --check` until the flags clear.
+- [ ] Add the missing Rand / West Quarry ridge trail(s) from field tracks
+  (ties into Phase 6.1 "Add new trails from GPS tracks").
+
+---
+
 ## Key Implementation Details
 
 ### OpenFreeMap Setup
@@ -846,5 +901,10 @@ const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 | 2026-01-04 | Phase 7: Created `feature/capacitor-native` branch | Done |
 | 2026-01-04 | Phase 7: Capacitor scaffold, geolocation abstraction, privacy policy | Done |
 | 2026-01-04 | Phase 6: Added future ideas (new trails, white-label, tooling improvements) | Planned |
+| 2026-06-30 | Added Bosworth reference map (`data/reference/`) cropped from the trailhead-banner photo | Done |
+| 2026-06-30 | Added `scripts/map-overlay.py` (georeference + trail overlay + `--check` geometry audit) | Done |
+| 2026-06-30 | Audit found duplicate/mislocated geometry; documented in `docs/trail-validation.md` | Done |
+| 2026-06-30 | Added AMC 12-summit traverse to `loops.json`; renamed old traverse stub to Mack-Major segment | Done |
+| 2026-06-30 | Phase 8: Trail data cleanup (roster extraction, data-bug fixes, ordered walk list) | Planned |
 
 <!-- Update this log after each work session -->

@@ -14,13 +14,75 @@ Pure, tested helpers that guard data quality and flag candidates for hand-check:
 - `findDuplicateTrailIds` - id collisions.
 
 **Current result (59 trails):** 0 sparse (all ≥10 points), 0 missing
-elevation, 0 duplicate ids. Geometry and elevation are in good shape; the
-remaining validation work is names/completeness, which needs the map roster.
+elevation, 0 duplicate ids. These checks pass, but they do not look at the
+coordinates themselves. The map-overlay pass below found duplicated and
+mislocated geometry the automated helpers miss, so geometry is **not** clean.
+`trailValidation.ts` should grow a duplicate-geometry check (see findings).
+
+## Geometry cross-check via map overlay (`scripts/map-overlay.py`)
+
+The photo turned out to be a usable oracle for geometry after all. It has no
+lat/lng graticule, so it yields no coordinates, but projecting our polylines
+onto it exposes shape and position errors.
+
+**Method.** Georeference the cropped map
+(`data/reference/belknap-range-trails-map-bosworth-2018.jpg`) from named summits
+whose pixels are read by hand and whose lng/lat come from `trails.json`. Only
+summits that are mutually self-consistent (~19,900 px/degree of longitude) are
+trusted as anchors. Fit a least-squares affine on the trusted set (Rowe, Mack,
+Major, Whiteface): **RMS ~30 px**. Then:
+
+- `map-overlay.py` renders every trail onto the map for eyeball comparison.
+- `map-overlay.py --check` reports the anomalies below.
+
+Anchoring on `trails.json`'s own summit coords is circular, so a summit whose
+coord disagrees with the trusted fit is reported as a **suspect coordinate**,
+not trusted.
+
+### Findings (2026-06-30)
+
+**Duplicate geometry (identical endpoints + point count):**
+
+1. `red-trail` ≡ `red-trail-anna-goat-pasture-hill-trail-south`
+2. `mack-ridge-trail` ≡ `mack-ridge-trail-south`
+3. `mack-anna-trail-belknap-range-trail` ≡ `anna-straightback-link-belknap-range-trail`
+   ≡ `straightback-major-link-belknap-range-trail`
+
+Group 3 is the whole eastern Belknap Range Trail spine collapsed onto one
+polyline drawn three times. Those three ids are the segments used by the
+`belknap-range-trail-mack-major` loop and the `belknap-12-full-traverse` entry
+in `loops.json`, so both loops draw one stub thrice.
+
+**Suspect summit coordinates (reprojection error vs the trusted fit):**
+Klem ~413 px, Anna ~532 px, Straightback ~225 px. The eastern summit coords are
+unreliable; the map shows Klem and Mack at the same longitude while the data
+places Klem ~0.02° too far east.
+
+**Mislocated / off-map:** `blue-trail` is the wrong Blue Trail (the 741 ft
+eastern trail near Alton, not the Belknap summit trail it is used as in the
+`belknap-summit-loop`). `boulder-trail` projects to the far NE (lat 43.58,
+lng -71.23), wrong for a central Belknap trail. `yellow-trail-shannon` and
+`lakeview-trail` fall outside the fitted anchor hull, so their flags are softer
+and need the eastern anchors fixed before trusting.
+
+## Field cleanup plan
+
+The map is the authoritative roster of what exists; good GPS tracks are how we
+fix the geometry. Prerequisite: reliable screen-off recording (PLAN Phase 7.10).
+
+Walk-to-fix priority (not all 59; the western/central trails already align):
+
+1. The three duplicated groups above - each needs its distinct segments
+   re-recorded.
+2. `blue-trail` (Belknap summit) and `boulder-trail` - re-record in place.
+3. The eastern spine (Klem / Rand / West Quarry / Anna / Straightback) - the
+   Rand and West Quarry ridge has no distinct trail in `trails.json` at all.
+
+Then re-run `map-overlay.py --check` and confirm the flags clear.
 
 ## Manual cross-check (open)
 
-The photo is a weak oracle for coordinate geometry (perspective distortion, no
-recoverable GPS precision), but authoritative for:
+The photo is authoritative for:
 
 1. **Names + official status** - confirm every trail in `trails.json` matches a
    sanctioned BRATTS redline trail name on the map; flag anything off.

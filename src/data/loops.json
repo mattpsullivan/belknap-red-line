@@ -81,13 +81,40 @@
     "highlights": ["Historic quarry", "Mountain views", "Diverse forest"]
   },
   {
-    "id": "belknap-range-traverse",
-    "name": "Belknap Range Traverse",
-    "description": "Epic traverse along the Belknap Range Trail connecting multiple peaks",
+    "id": "belknap-range-trail-mack-major",
+    "name": "Belknap Range Trail (Mack to Major)",
+    "description": "The eastern Belknap Range Trail corridor linking Mt. Mack over Anna and Straightback to Mt. Major. A ridge-link segment, not the full 12-summit day (see Belknap 12 - Full Traverse).",
     "trailIds": ["mack-anna-trail-belknap-range-trail", "anna-straightback-link-belknap-range-trail", "straightback-major-link-belknap-range-trail"],
     "difficulty": "difficult",
     "estimatedTime": "5-6 hours",
     "highlights": ["Range traverse", "Multiple summits", "Remote backcountry"]
+  },
+  {
+    "id": "belknap-12-full-traverse",
+    "name": "Belknap 12 - Full Traverse",
+    "description": "Single-day traverse of all 12 Belknap summits (Rowe, Gunstock, Belknap, Piper, Whiteface, Klem, Mack, Rand, West Quarry, Anna, Straightback, Major): ~18 mi and ~4,875 ft gain, point-to-point with a shuttle between Mt Major and Mt Rowe. The AMC Belknap 12 patch objective. NOTE: route is a best-effort stitch of existing trails - the Belknap-to-Piper connector and the Rand/West Quarry stretch (on the Belknap Range Trail corridor) need field verification against a GPX track.",
+    "trailIds": [
+      "mt-rowe-trail",
+      "ridge-trail",
+      "gunstock-mountain-trail",
+      "saddle-trail",
+      "blue-trail",
+      "piper-mountain-trail",
+      "piper-whiteface-link",
+      "whiteface-mountain-trail",
+      "vista-trail",
+      "klem-summit-spur",
+      "klem-mack-loop",
+      "mack-ridge-trail",
+      "mack-anna-trail-belknap-range-trail",
+      "anna-straightback-link-belknap-range-trail",
+      "straightback-mountain-trail",
+      "straightback-major-link-belknap-range-trail",
+      "mt-major-trail"
+    ],
+    "difficulty": "difficult",
+    "estimatedTime": "10-11 hours",
+    "highlights": ["All 12 Belknap summits in a day", "AMC Belknap 12 patch objective", "18+ miles, 4,875 ft gain", "Point-to-point (shuttle between Mt Major and Mt Rowe)"]
   },
   {
     "id": "shannon-greenwood-loop",

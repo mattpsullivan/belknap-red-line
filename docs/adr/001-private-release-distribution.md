@@ -59,9 +59,13 @@ uninstall + reinstall.
 The pipeline code is in place. Remaining one-time setup (manual - involves
 secrets and a remote, intentionally not automated):
 
-- [ ] **Add a GitHub remote** - this repo is currently local-only. `gh repo
-      create` (private), then `git push -u origin main`.
-- [ ] **Create the release keystore** and back it up in the password manager:
+- [x] **Add a GitHub remote** _(done 2026-07-12 - amended: created **public**, not private.
+      Decision revisited with the meal-planner precedent: the app holds no personal data beyond
+      trail redline progress Matt is happy to have public, and a public repo lets Obtainium read
+      releases with no per-phone PAT. The PAT step below is therefore dropped.)_
+- [x] **Create the release keystore** and back it up in the password manager
+      _(done 2026-07-12: `~/keystores/belknap-release.jks`, PKCS12 so store/key password are
+      one, backed up in 1Password as "Belknap Tracker - Android release signing key")_:
       `keytool -genkeypair -v -keystore belknap-release.jks -alias belknap \
        -keyalg RSA -keysize 2048 -validity 10000`
       Keep the `.jks` outside the repo.
@@ -74,7 +78,7 @@ secrets and a remote, intentionally not automated):
       | `RELEASE_KEY_PASSWORD`    | key password |
 - [ ] **Cut a test release**: `git tag v1.0.1 && git push --tags`; confirm the
       APK asset publishes.
-- [ ] **Install Obtainium** + a fine-grained read-only PAT scoped to this repo;
+- [ ] **Install Obtainium** (no PAT needed - public repo);
       add the repo URL; verify the update notification.
 
 Until then, a locally-built debug APK (`~/belknap-apk/`) covers on-device

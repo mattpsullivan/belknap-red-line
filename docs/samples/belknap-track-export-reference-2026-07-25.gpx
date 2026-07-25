@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Reference output of services/gpxExport.ts (2026-07-25). Synthetic points.
+
+  Validated against the GPX 1.1 schema with xmllint, passing the schema flag
+  pointed at http://www.topografix.com/GPX/1/1/gpx.xsd
+
+  Demonstrates: metadata (name, desc, link, time, bounds), orthometric ele with
+  the geoidheight applied, a point with no vertical fix (no ele at all),
+  horizontal accuracy in a namespaced extensions element, and two trkseg
+  elements split across a 96 minute recording gap.
+
+  The gap between segments is missing data, NOT a route. A single segment there
+  would fabricate a 1.85 mi straight line, which is exactly what the
+  2026-06-13 background GPS bug sample in this directory does.
+-->
+<gpx version="1.1" creator="Belknap Tracker" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:blk="https://github.com/mattpsullivan/belknap-red-line/gpx/1" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+  <metadata>
+    <name>White Trail ascent</name>
+    <desc>Elevation: &lt;ele&gt; is orthometric metres; &lt;geoidheight&gt; is the geoid separation applied, so raw WGS 84 ellipsoidal height = ele + geoidheight. Segments: a gap between &lt;trkseg&gt; elements is missing data, not a route - points were not recorded for more than 45s while moving more than 50 m. Do not interpolate across it. Accuracy is horizontal error in metres under blk:accuracyMeters; it is deliberately not reported as &lt;hdop&gt;, which is a dimensionless quantity.</desc>
+    <link href="https://github.com/mattpsullivan/belknap-red-line"><text>Belknap Tracker</text></link>
+    <time>2026-07-25T17:05:00.000Z</time>
+    <bounds minlat="43.51548" minlon="-71.37305" maxlat="43.52315" maxlon="-71.36806"/>
+  </metadata>
+  <trk>
+    <name><![CDATA[White Trail ascent]]></name>
+    <src>Belknap Tracker (GNSS)</src>
+    <trkseg>
+        <trkpt lat="43.51596" lon="-71.36806"><ele>517.3</ele><time>2026-07-25T17:05:00.000Z</time><geoidheight>-27.1</geoidheight><extensions><blk:accuracyMeters>4.5</blk:accuracyMeters></extensions></trkpt>
+        <trkpt lat="43.51564" lon="-71.36815"><ele>522.9</ele><time>2026-07-25T17:05:06.000Z</time><geoidheight>-27.1</geoidheight><extensions><blk:accuracyMeters>4.5</blk:accuracyMeters></extensions></trkpt>
+        <trkpt lat="43.51548" lon="-71.3682"><time>2026-07-25T17:05:12.000Z</time><extensions><blk:accuracyMeters>4.5</blk:accuracyMeters></extensions></trkpt>
+    </trkseg>
+    <trkseg>
+        <trkpt lat="43.5231" lon="-71.373"><ele>747.2</ele><time>2026-07-25T18:41:00.000Z</time><geoidheight>-27.1</geoidheight><extensions><blk:accuracyMeters>4.5</blk:accuracyMeters></extensions></trkpt>
+        <trkpt lat="43.52315" lon="-71.37305"><ele>748.1</ele><time>2026-07-25T18:41:06.000Z</time><geoidheight>-27.1</geoidheight><extensions><blk:accuracyMeters>4.5</blk:accuracyMeters></extensions></trkpt>
+    </trkseg>
+  </trk>
+</gpx>

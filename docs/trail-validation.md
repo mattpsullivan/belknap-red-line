@@ -65,6 +65,30 @@ lng -71.23), wrong for a central Belknap trail. `yellow-trail-shannon` and
 `lakeview-trail` fall outside the fitted anchor hull, so their flags are softer
 and need the eastern anchors fixed before trusting.
 
+### Source-file finding (2026-07-25)
+
+The audit above checks *trails*. Running the new ingest gate
+(`scripts/lib/trackQuality.mjs`) over the *input* files found a landmine the
+trail-level audit could not see:
+
+**`data/gpx/Whiteface_Mountain_Trail.gpx` is not a Belknap trail.** All 243 of its
+points sit at lat 43.6502..43.6565, lng -71.1094..-71.1021 - roughly 25 km
+northeast of the range, a different mountain that happens to share the name. The
+correct file is `Whiteface_Mountain.gpx` (lat 43.4885..43.5026, lng
+-71.3938..-71.3846), which agrees with the trusted Whiteface anchor
+(43.48880, -71.38680).
+
+`trails.json`'s `whiteface-mountain-trail` matches the **correct** file exactly, so
+the dataset is clean. It escaped only because the right file matched first and the
+importer's `>= 40 coords` guard skipped the trail anyway. This is the same failure
+mode as `blue-trail` - a same-name-different-mountain AllTrails export - and it sat
+in `data/gpx/` from December 2025 until the gate flagged it.
+
+The gate's bounding box comes from the trusted anchor hull, **not** from
+`trails.json`. Deriving it from the data under repair would be circular: the bbox
+of all current coordinates is lat 43.4743..43.5808 / lng -71.4013..-71.2156, and
+its eastern and northern edges are defined by the known-bad trails themselves.
+
 ## Field cleanup plan
 
 The map is the authoritative roster of what exists; good GPS tracks are how we

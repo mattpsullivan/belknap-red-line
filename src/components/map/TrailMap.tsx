@@ -107,6 +107,8 @@ export function TrailMap() {
         lng: position.lng,
         accuracy: position.accuracy,
         timestamp: position.timestamp,
+        // Raw ellipsoidal metres; stays undefined when there is no vertical fix.
+        altitudeEllipsoidM: position.altitude,
       })
     }
   }, [isRecording, position, addPoint])

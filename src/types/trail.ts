@@ -32,6 +32,19 @@ export interface TrackPoint {
   lng: number
   accuracy: number
   timestamp: number
+  /**
+   * Raw GNSS altitude in metres above the **WGS 84 ellipsoid** - NOT mean sea
+   * level, and NOT the same datum as `Coordinate.elevation` (which is feet
+   * orthometric, sampled from a DEM by scripts/enrich-elevation*.py).
+   *
+   * Stored raw and uncorrected on purpose: this is an observation, and the
+   * geoid correction is applied only at the export boundary (see
+   * services/gpxExport.ts). Never store a corrected copy alongside it.
+   *
+   * Optional because a receiver with no vertical fix reports null. Absent must
+   * stay absent - coercing to 0 would read as sea level.
+   */
+  altitudeEllipsoidM?: number
 }
 
 export interface GPSTrack {

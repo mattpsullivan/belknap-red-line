@@ -13,7 +13,7 @@ export interface GeoPosition {
   lng: number;
   accuracy: number; // meters
   timestamp: number; // Unix timestamp in ms
-  altitude?: number; // meters above sea level
+  altitude?: number; // metres above the WGS 84 ellipsoid (NOT mean sea level)
   speed?: number; // meters per second
   bearing?: number; // degrees from north
 }

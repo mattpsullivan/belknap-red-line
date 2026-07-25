@@ -724,6 +724,41 @@ capture before building.
 - [ ] Verify recording passes `enableBackground` (TrailMap calls `useGeolocation()`
       with no opts; the native provider forces background via `backgroundMessage`,
       but make the intent explicit).
+- [x] **Capture GNSS altitude on recorded points** (2026-07-25, ahead of the
+      device walk). Not a background-GPS fix - it makes the walk's track worth
+      more, since altitude cannot be backfilled without re-walking. `GeoPosition`
+      already carried `altitude`; it was dropped where `TrailMap` built the
+      `TrackPoint`. Now stored as `TrackPoint.altitudeEllipsoidM`, raw metres
+      above the WGS 84 ellipsoid. Deliberately NOT the same datum as
+      `Coordinate.elevation` (feet orthometric, from the DEM), and deliberately
+      not fed into `trails.json` - the DEM stays authoritative there, because it
+      is ground-referenced and smoother than GNSS vertical. Recorded altitude's
+      value is as an independent cross-check: DEM elevation is sampled at the
+      coordinates you supply, so it inherits horizontal error amplified by slope,
+      which is the very defect Phase 8 exists to fix.
+      The geoid correction is applied only at the GPX boundary
+      (`BELKNAP_GEOID_HEIGHT_M = -27.1`); see Phase 8.4 for why one constant.
+- [x] **Split `<trkseg>` on recording gaps** (2026-07-25). A single `<trkseg>`
+      asserts its points are connected, so every consumer draws a straight line
+      across a stall and counts it as distance. The 2026-06-13 sample
+      (`docs/samples/belknap-track-2026-06-13-background-gps-bug.gpx`) shows why
+      that matters: 19 points in one segment, and its 2.68 mi straight-line
+      length is close enough to the real ~2.7 mi hike to look fine, while 88.5%
+      of that length sits in just two fabricated jumps (one of 1.85 mi across the
+      96-minute hole). The export now breaks segments instead. Reference output:
+      `docs/samples/belknap-track-export-reference-2026-07-25.gpx`.
+- [ ] **Persist real stall intervals on the track** (proper fix for the above).
+      `splitOnStall` currently *infers* gaps from stored-point timestamps plus
+      displacement, because a gap between stored points is ambiguous:
+      `useGeolocation` drops fixes under `minDistanceMeters` (default 5 m), so
+      standing still records nothing even while fixes arrive fine. The recorder
+      already distinguishes these - it tracks fix liveness separately from point
+      storage, which is how the stall banner avoids firing on rest stops - but
+      that knowledge is not saved. Persist it (stall intervals on `GPSTrack`, or a
+      "first fix after a stall" marker on `TrackPoint`) and the exporter can split
+      on fact instead of heuristic. Note the naive approach here is racy:
+      `recordingHealth` flips back to 'tracking' as soon as the fix that ended the
+      stall lands, so reading status at addPoint time can miss it.
 - [ ] Re-test on a real device, screen off, in a pocket (emulator can't
       reproduce Doze/pocket behavior).
 
@@ -785,10 +820,73 @@ for anything that needs new field tracks.
   today: the duplicate groups, `blue-trail`, `boulder-trail`, then the eastern
   spine (Klem / Rand / West Quarry / Anna / Straightback). Order by trailhead so
   each outing captures adjacent trails in one recording.
-- [ ] Walk and re-record each, import via the existing GPX pipeline, replace the
-  bad geometry, and re-run `map-overlay.py --check` until the flags clear.
+- [ ] Walk and re-record each, then replace the bad geometry with
+  `scripts/replace-trail-geometry.mjs --trail <id> --gpx <file>` and re-run
+  `map-overlay.py --check` until the flags clear.
+  **Not** `import-alltrails-gpx.js`: its `>= 40 coords` sparse guard skips every
+  target on this list (`red-trail` 112, `blue-trail` 71, `boulder-trail` 177,
+  `mack-ridge-trail` 213, `yellow-trail-shannon` 41), and its length-matching
+  heuristic guesses which sub-segment belongs to which trail. Phase 8 is not a
+  guessing problem - you know which trail you walked.
+- [ ] **Re-run elevation enrichment after every geometry replace.**
+  `import-alltrails-gpx.js` sets `trail.coordinates = imp.segment` wholesale and
+  its parser reads only lat/lon, so a re-imported trail loses per-point
+  `elevation` AND all four summary fields (`elevationGain/Loss/Min/Max`).
+  Nothing warns about this today: `findTrailsMissingElevation` would go from 0/59
+  to non-zero, and the ElevationProfile on that trail's detail page would quietly
+  render empty (it degrades gracefully, so there is no error to notice). Run
+  `scripts/enrich-elevation-api.py --dataset ned10m` (needs network; rate-limited
+  to 100 locations/req at 1 req/sec), or `enrich-elevation.py --dem <tiles>` if
+  the NED tiles from 5.1 are on hand (5.1 is still open). Both scripts rewrite the
+  whole file with no per-trail targeting, so use `--output` to a temp path and
+  diff before overwriting `src/data/trails.json`. Confirm
+  `findTrailsMissingElevation` returns 0 before committing. Do NOT shortcut this
+  by letting GPX `<ele>` flow into `trails.json` - see 8.4.
 - [ ] Add the missing Rand / West Quarry ridge trail(s) from field tracks
   (ties into Phase 6.1 "Add new trails from GPS tracks").
+
+#### 8.4 Elevation datums (reference - decided 2026-07-25)
+
+The project carries **two** elevation representations on purpose. Confusing them
+is a ~89 ft error that looks plausible, so the rules are written down here.
+
+| | Field | Units | Datum | Source |
+|---|---|---|---|---|
+| Trail geometry | `Coordinate.elevation` | feet | orthometric (MSL) | DEM, `scripts/enrich-elevation*.py` |
+| Recorded track | `TrackPoint.altitudeEllipsoidM` | metres | WGS 84 ellipsoid | GNSS, raw |
+
+Relation: `h = H + N`, where `h` is ellipsoidal, `H` orthometric, `N` the geoid
+height. For the Belknap Range `N ≈ -27.1 m`, so **raw GNSS altitude reads ~27 m
+(89 ft) lower than map elevation.** Recovering orthometric: `H = h - N`.
+
+**One constant, not a geoid model.** Sampled from the NOAA NGS geoid API
+(GEOID12B): SW corner (43.47, -71.42) -27.174; NE corner (43.58, -71.22) -27.154;
+`white-trail` centroid -27.114; `red-trail` centroid -27.096. Total variation
+across the whole range is **0.078 m** - two to three orders of magnitude below
+GNSS vertical noise (VDOP typically runs 1.5-3x HDOP, so tens of metres under
+canopy, because every satellite is above the horizon and none below). Per-point
+geoid modelling would be false precision. The GEOID12B/GEOID18 difference here is
+also a few cm, likewise below the noise floor.
+
+Rules:
+
+- **Store raw, convert at the boundary.** `TrackPoint` keeps uncorrected
+  ellipsoidal metres. The correction lives only in `gpxExport.ts`. Never store a
+  corrected copy beside the raw one - two representations drift.
+- **Datum belongs in the field name.** `altitudeEllipsoidM`, not `altitude`.
+  TypeScript cannot distinguish two `number`s, so the name is the only
+  enforcement at each read site.
+- **The DEM stays authoritative for `trails.json`.** It is ground-referenced
+  (GNSS measures the antenna, in a pocket, under canopy) and smoother. Recorded
+  altitude's job is cross-checking, not populating trail data. Caveat worth
+  remembering: DEM elevation is sampled at whatever coordinates you supply, so it
+  inherits horizontal error amplified by slope - ~10 m horizontal on a 30% grade
+  is ~3 m of elevation error. That is the defect Phase 8 is fixing, which is why
+  an independent vertical observation is worth having at all.
+- **Exports are self-describing.** GPX carries orthometric `<ele>` plus the
+  `<geoidheight>` actually applied, so `h = ele + geoidheight` recovers the raw
+  value with no external knowledge. GPX 1.1 defines `<geoidheight>` as exactly
+  this (geoid above WGS 84 ellipsoid, per the NMEA GGA message).
 
 ---
 
@@ -906,5 +1004,15 @@ const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 | 2026-06-30 | Audit found duplicate/mislocated geometry; documented in `docs/trail-validation.md` | Done |
 | 2026-06-30 | Added AMC 12-summit traverse to `loops.json`; renamed old traverse stub to Mack-Major segment | Done |
 | 2026-06-30 | Phase 8: Trail data cleanup (roster extraction, data-bug fixes, ordered walk list) | Planned |
+| 2026-07-25 | Phase 7.10: capture GNSS altitude on track points (`TrackPoint.altitudeEllipsoidM`, raw ellipsoidal) ahead of the device walk; fixed a wrong "above sea level" datum comment | Done |
+| 2026-07-25 | GPX export writes orthometric `<ele>` + `<geoidheight>`; `BELKNAP_GEOID_HEIGHT_M = -27.1` from NGS sampling (167 tests) | Done |
+| 2026-07-25 | Phase 8.3: added the missing post-import elevation re-enrichment step (GPX import wipes `elevation` + summary fields) | Planned |
+| 2026-07-25 | Phase 8.4: documented the two elevation datums and the store-raw/convert-at-boundary rule | Done |
+| 2026-07-25 | Export hardened to strict GPX 1.1: `<metadata>` (name/desc/link/time/bounds), schemaLocation, xsd:decimal formatting, CDATA-terminator escaping, accuracy in a namespaced `<extensions>`; validates against gpx.xsd via xmllint | Done |
+| 2026-07-25 | Phase 7.10: split `<trkseg>` on recording gaps so a stall reads as missing data, not a straight-line route (180 tests) | Done |
+| 2026-07-25 | Replaced regex GPX parsing with `fast-xml-parser` in `scripts/lib/gpx.mjs`; XSD validation via `xmllint-wasm` against vendored `schema/gpx-1.1.xsd`. 15-file fixture regression proves the swap is behaviour-preserving | Done |
+| 2026-07-25 | Added the ingest gate `scripts/lib/trackQuality.mjs` (bbox from the trusted anchor hull, speed, gaps, density, length, ele datum). All thresholds reused from the repo or calibrated, none invented | Done |
+| 2026-07-25 | Gate's first run found `data/gpx/Whiteface_Mountain_Trail.gpx` is a different mountain ~25 km NE; dataset unaffected. See `docs/trail-validation.md` | Done |
+| 2026-07-25 | Added `scripts/replace-trail-geometry.mjs` - the Phase 8 single-trail replacement tool, with refuse-on-warning and `data/import-log.jsonl` provenance (286 tests) | Done |
 
 <!-- Update this log after each work session -->

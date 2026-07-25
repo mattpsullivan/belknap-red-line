@@ -1,7 +1,7 @@
 {
   "name": "belknap-redline-tracker",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -54,6 +54,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "fake-indexeddb": "^6.2.5",
+    "fast-xml-parser": "^5.10.1",
     "globals": "^16.5.0",
     "jsdom": "^27.3.0",
     "tailwindcss": "^4.1.18",
@@ -61,6 +62,7 @@
     "typescript-eslint": "^8.46.4",
     "vite": "^7.2.4",
     "vite-plugin-pwa": "^1.2.0",
-    "vitest": "^4.0.16"
+    "vitest": "^4.0.16",
+    "xmllint-wasm": "^5.2.0"
   }
 }

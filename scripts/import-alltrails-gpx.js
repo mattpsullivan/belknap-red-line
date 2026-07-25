@@ -1,191 +1,221 @@
 #!/usr/bin/env node
 
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+/**
+ * Batch redensifier: improve SPARSE trail geometry from the AllTrails exports in
+ * data/gpx, by matching a sub-segment of the right length near a trail's endpoint.
+ *
+ * Parsing moved to lib/gpx.mjs (a real XML parser). This script previously read
+ * GPX with `/<trkpt lat="([^"]+)" lon="([^"]+)">/g`, which silently found zero
+ * points for any file that swapped attribute order, self-closed the tag, used
+ * single quotes, or added an attribute - and then reported "no improvement found".
+ *
+ * NOTE ON SCOPE: the `>= 40 coords` guard below means this script cannot touch
+ * any Phase 8 walk-to-fix target (red-trail 112, blue-trail 71, boulder-trail
+ * 177, mack-ridge-trail 213, yellow-trail-shannon 41). For replacing one known
+ * trail's geometry from one recorded track, use replace-trail-geometry.mjs.
+ *
+ * Usage: node scripts/import-alltrails-gpx.js [--dry-run]
+ */
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
+import { parseGPXFile, checkGPX } from './lib/gpx.mjs'
+import { assessTrack, formatAssessment } from './lib/trackQuality.mjs'
+import { distance, METERS_PER_MILE } from './lib/geo.mjs'
 
-// Load current trails
-const trailsPath = path.join(__dirname, '../src/data/trails.json');
-const trails = JSON.parse(fs.readFileSync(trailsPath, 'utf8'));
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const dryRun = process.argv.includes('--dry-run')
 
-// Parse GPX file and extract track points
-function parseGPX(filePath) {
-  const content = fs.readFileSync(filePath, 'utf8');
-  const points = [];
+const trailsPath = path.join(__dirname, '../src/data/trails.json')
+const trails = JSON.parse(fs.readFileSync(trailsPath, 'utf8'))
 
-  const nameMatch = content.match(/<name><!\[CDATA\[(.*?)\]\]><\/name>/);
-  const name = nameMatch ? nameMatch[1] : path.basename(filePath, '.gpx');
+/**
+ * Find a sub-segment of roughly targetLengthMeters starting near nearPoint.
+ * Unchanged heuristics; now operates on a single trkseg's points, never across a
+ * segment boundary.
+ */
+function findSegmentByLength(points, nearPoint, targetLengthMeters, tolerance = 0.3) {
+  const candidates = []
 
-  const trkptRegex = /<trkpt lat="([^"]+)" lon="([^"]+)">/g;
-  let match;
-  while ((match = trkptRegex.exec(content)) !== null) {
-    points.push({
-      lat: parseFloat(match[1]),
-      lng: parseFloat(match[2])
-    });
-  }
+  for (let startIdx = 0; startIdx < points.length; startIdx++) {
+    const startDist = distance(nearPoint, points[startIdx])
+    if (startDist > 150) continue
 
-  return { name, points };
-}
+    let runningLength = 0
+    for (let endIdx = startIdx + 1; endIdx < points.length; endIdx++) {
+      runningLength += distance(points[endIdx - 1], points[endIdx])
 
-// Calculate distance between two points in meters (Haversine)
-function distance(p1, p2) {
-  const R = 6371000;
-  const dLat = (p2.lat - p1.lat) * Math.PI / 180;
-  const dLon = (p2.lng - p1.lng) * Math.PI / 180;
-  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(p1.lat * Math.PI / 180) * Math.cos(p2.lat * Math.PI / 180) *
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-}
-
-// Calculate total length of a path in meters
-function pathLength(coords) {
-  let total = 0;
-  for (let i = 1; i < coords.length; i++) {
-    total += distance(coords[i-1], coords[i]);
-  }
-  return total;
-}
-
-// Find segment of target length starting near a point
-function findSegmentByLength(gpxPoints, nearPoint, targetLengthMeters, tolerance = 0.3) {
-  // Find starting points near the given point
-  const candidates = [];
-
-  for (let startIdx = 0; startIdx < gpxPoints.length; startIdx++) {
-    const startDist = distance(nearPoint, gpxPoints[startIdx]);
-    if (startDist > 150) continue; // Start point must be within 150m
-
-    // Try to find a segment of the right length
-    let runningLength = 0;
-    for (let endIdx = startIdx + 1; endIdx < gpxPoints.length; endIdx++) {
-      runningLength += distance(gpxPoints[endIdx-1], gpxPoints[endIdx]);
-
-      // Check if we're close to target length
-      const ratio = runningLength / targetLengthMeters;
-      if (ratio >= (1 - tolerance) && ratio <= (1 + tolerance)) {
+      const ratio = runningLength / targetLengthMeters
+      if (ratio >= 1 - tolerance && ratio <= 1 + tolerance) {
         candidates.push({
           startIdx,
           endIdx,
           startDist,
           length: runningLength,
           ratio,
-          points: gpxPoints.slice(startIdx, endIdx + 1)
-        });
+          points: points.slice(startIdx, endIdx + 1),
+        })
       }
 
-      // Stop if we've gone too far
-      if (ratio > (1 + tolerance)) break;
+      if (ratio > 1 + tolerance) break
     }
   }
 
-  // Return best candidate (closest start point with best length match)
-  if (candidates.length === 0) return null;
+  if (candidates.length === 0) return null
 
   candidates.sort((a, b) => {
-    // Prefer better length match, then closer start
-    const aScore = Math.abs(1 - a.ratio) * 100 + a.startDist;
-    const bScore = Math.abs(1 - b.ratio) * 100 + b.startDist;
-    return aScore - bScore;
-  });
+    const aScore = Math.abs(1 - a.ratio) * 100 + a.startDist
+    const bScore = Math.abs(1 - b.ratio) * 100 + b.startDist
+    return aScore - bScore
+  })
 
-  return candidates[0];
+  return candidates[0]
 }
 
-// Load GPX files
-const gpxDir = path.join(__dirname, '../data/gpx');
-const gpxFiles = fs.readdirSync(gpxDir).filter(f => f.endsWith('.gpx') && !f.includes('(1)'));
+// --- load ------------------------------------------------------------------
 
-console.log('Loading GPX files...\n');
+const gpxDir = path.join(__dirname, '../data/gpx')
+const gpxFiles = fs
+  .readdirSync(gpxDir)
+  .filter((f) => f.endsWith('.gpx') && !f.includes('(1)'))
 
-const gpxTracks = [];
-gpxFiles.forEach(file => {
-  const gpx = parseGPX(path.join(gpxDir, file));
-  console.log(`  ${gpx.name}: ${gpx.points.length} points`);
-  gpxTracks.push(gpx);
-});
+console.log(`Loading GPX files${dryRun ? ' (dry run)' : ''}...\n`)
 
-console.log(`\nTotal GPX tracks: ${gpxTracks.length}\n`);
+const gpxTracks = []
+let failed = 0
 
-// Find improvements for sparse trails
-console.log('Matching sparse trails to GPX data...\n');
+for (const file of gpxFiles) {
+  const full = path.join(gpxDir, file)
+  let track
+  try {
+    track = parseGPXFile(full)
+  } catch (err) {
+    // Loud. The old version turned this into a silent zero-point track.
+    console.error(`  ERROR ${file}: ${err.message}`)
+    failed++
+    continue
+  }
 
-const improvements = [];
+  // Liberal accept: a schema-invalid file still gets parsed, but never silently.
+  const { valid, errors } = await checkGPX(fs.readFileSync(full, 'utf8'))
+  if (!valid) {
+    console.warn(`  WARN  ${file}: not schema-valid, parsing anyway`)
+    for (const e of errors.slice(0, 3)) console.warn(`          ${e}`)
+  }
 
-trails.forEach(trail => {
-  const currentCoords = trail.coordinates.length;
+  const assessment = assessTrack(track, { allowBridge: true })
+  const noteworthy = [...assessment.fatal, ...assessment.warnings]
+  console.log(
+    `  ${track.name}: ${track.points.length} points, ${track.segments.length} segment(s)`
+  )
+  if (noteworthy.length > 0) {
+    console.log(
+      formatAssessment({ ...assessment, info: [], skipped: [] })
+        .split('\n')
+        .map((l) => `  ${l}`)
+        .join('\n')
+    )
+  }
 
-  // Only try to improve trails with sparse data
-  if (currentCoords >= 40) return;
+  gpxTracks.push(track)
+}
 
-  const targetLength = trail.distance * 1609.34; // miles to meters
-  const trailStart = trail.coordinates[0];
-  const trailEnd = trail.coordinates[trail.coordinates.length - 1];
+console.log(`\nTotal GPX tracks: ${gpxTracks.length}${failed ? ` (${failed} failed to parse)` : ''}\n`)
 
-  // Try each GPX track
+if (gpxTracks.length === 0) {
+  console.error('No usable GPX tracks. Nothing to do.')
+  process.exit(1)
+}
+
+// --- match -----------------------------------------------------------------
+
+console.log('Matching sparse trails to GPX data...\n')
+
+const improvements = []
+
+trails.forEach((trail) => {
+  const currentCoords = trail.coordinates.length
+
+  // Sparse-only by design. See the scope note at the top of this file.
+  if (currentCoords >= 40) return
+
+  const targetLength = trail.distance * METERS_PER_MILE
+  const trailStart = trail.coordinates[0]
+  const trailEnd = trail.coordinates[trail.coordinates.length - 1]
+
   for (const gpx of gpxTracks) {
-    // Try from start point
-    let segment = findSegmentByLength(gpx.points, trailStart, targetLength, 0.25);
+    // Per segment, never across a boundary: a gap between segments is missing
+    // data, so a match spanning one would invent geometry.
+    for (const seg of gpx.segments) {
+      let segment = findSegmentByLength(seg, trailStart, targetLength, 0.25)
+      if (!segment) segment = findSegmentByLength(seg, trailEnd, targetLength, 0.25)
 
-    // Also try from end point if no match
-    if (!segment) {
-      segment = findSegmentByLength(gpx.points, trailEnd, targetLength, 0.25);
-    }
-
-    if (segment && segment.points.length > currentCoords * 1.3) {
-      improvements.push({
-        name: trail.name,
-        id: trail.id,
-        before: currentCoords,
-        after: segment.points.length,
-        expectedMiles: trail.distance,
-        actualMiles: (segment.length / 1609.34).toFixed(2),
-        source: gpx.name,
-        segment: segment.points
-      });
-      break;
+      if (segment && segment.points.length > currentCoords * 1.3) {
+        improvements.push({
+          name: trail.name,
+          id: trail.id,
+          before: currentCoords,
+          after: segment.points.length,
+          expectedMiles: trail.distance,
+          actualMiles: (segment.length / METERS_PER_MILE).toFixed(2),
+          source: gpx.name,
+          segment: segment.points.map((p) => ({ lat: p.lat, lng: p.lng })),
+        })
+        return
+      }
     }
   }
-});
+})
 
-// Show improvements
-console.log('Potential improvements:\n');
-improvements.sort((a, b) => (b.after - b.before) - (a.after - a.before));
+// --- report ----------------------------------------------------------------
 
-improvements.forEach(imp => {
-  console.log(`  ${imp.name}:`);
-  console.log(`    Points: ${imp.before} → ${imp.after}`);
-  console.log(`    Distance: ${imp.expectedMiles} mi expected, ${imp.actualMiles} mi actual`);
-  console.log(`    Source: ${imp.source}\n`);
-});
+console.log('Potential improvements:\n')
+improvements.sort((a, b) => b.after - b.before - (a.after - a.before))
+
+improvements.forEach((imp) => {
+  console.log(`  ${imp.name}:`)
+  console.log(`    Points: ${imp.before} -> ${imp.after}`)
+  console.log(`    Distance: ${imp.expectedMiles} mi expected, ${imp.actualMiles} mi actual`)
+  console.log(`    Source: ${imp.source}\n`)
+})
 
 if (improvements.length === 0) {
-  console.log('  No additional improvements found\n');
+  console.log('  No additional improvements found\n')
 }
 
-// Apply improvements
-if (improvements.length > 0) {
-  console.log(`\nApplying ${improvements.length} improvements...`);
+// --- apply -----------------------------------------------------------------
 
-  improvements.forEach(imp => {
-    const trail = trails.find(t => t.id === imp.id);
+if (improvements.length > 0 && !dryRun) {
+  console.log(`\nApplying ${improvements.length} improvements...`)
+
+  improvements.forEach((imp) => {
+    const trail = trails.find((t) => t.id === imp.id)
     if (trail) {
-      trail.coordinates = imp.segment;
-      trail.trailhead = imp.segment[0];
+      trail.coordinates = imp.segment
+      trail.trailhead = imp.segment[0]
     }
-  });
+  })
 
-  fs.writeFileSync(trailsPath, JSON.stringify(trails, null, 2));
-  console.log('Saved updated trails.json');
+  fs.writeFileSync(trailsPath, JSON.stringify(trails, null, 2))
+  console.log('Saved updated trails.json')
+  console.log(
+    '\nElevation is now STALE on the replaced trails - the GPX import carries no\n' +
+      'DEM elevation. Re-enrich before committing:\n' +
+      '  python scripts/enrich-elevation-api.py --dataset ned10m --output /tmp/trails.json\n' +
+      '  diff <(jq -S . src/data/trails.json) <(jq -S . /tmp/trails.json)'
+  )
+} else if (improvements.length > 0) {
+  console.log(`\nDry run - not writing. ${improvements.length} improvement(s) would be applied.`)
 }
 
-// Summary
-const coordCounts = trails.map(t => t.coordinates.length);
-console.log('\nFinal stats:');
-console.log(`  Total points: ${coordCounts.reduce((a, b) => a + b, 0)}`);
-console.log(`  Min coords: ${Math.min(...coordCounts)}`);
-console.log(`  Trails with <20 coords: ${coordCounts.filter(c => c < 20).length}`);
-console.log(`  Trails with <40 coords: ${coordCounts.filter(c => c < 40).length}`);
+// --- summary ---------------------------------------------------------------
+
+const coordCounts = trails.map((t) => t.coordinates.length)
+console.log('\nFinal stats:')
+console.log(`  Total points: ${coordCounts.reduce((a, b) => a + b, 0)}`)
+console.log(`  Min coords: ${Math.min(...coordCounts)}`)
+console.log(`  Trails with <20 coords: ${coordCounts.filter((c) => c < 20).length}`)
+console.log(`  Trails with <40 coords: ${coordCounts.filter((c) => c < 40).length}`)
+
+if (failed > 0) process.exit(1)

@@ -111,13 +111,70 @@ Matches trails from BRATTS workbook with OpenStreetMap data.
 node scripts/match-osm-trails.js
 ```
 
-### import-alltrails-gpx.js
+## GPX handling
 
-Imports GPX tracks from AllTrails to improve trail coordinate data.
+All GPX parsing goes through `lib/gpx.mjs`, which uses a real XML parser
+(`fast-xml-parser`) and validates against the vendored `schema/gpx-1.1.xsd` using
+`xmllint-wasm` - libxml2 as WebAssembly, so there is no native toolchain, no
+node-gyp and no Java, and it behaves identically on every platform.
+
+Three stages, deliberately different in strictness. Postel's "be liberal in what
+you accept" governs **syntax**, not **data quality**; conflating them is how bad
+geometry lands in an authoritative dataset.
+
+| Stage | Rule |
+|---|---|
+| Parse | Liberal. Any well-formed GPX - attribute order, quoting, self-closing tags, namespace prefixes, CDATA or plain text. Schema-invalid input warns and still parses. Fatal only on malformed XML or zero points. |
+| Ingest | **Strict.** `lib/trackQuality.mjs` gates everything entering `trails.json`. Warnings need an explicit override, which gets recorded. |
+| Export | **Strict.** `validateGPX()` hard-fails; the app's export is checked in the test suite. |
+
+### replace-trail-geometry.mjs
+
+Replace **one** trail's geometry from **one** recorded track. This is the Phase 8
+tool. Use it after walking a trail whose stored geometry is wrong.
 
 ```bash
+# always look first
+node scripts/replace-trail-geometry.mjs --trail red-trail --gpx track.gpx --dry-run
+
+# a loop file covers several trails - slice out the part you walked
+node scripts/replace-trail-geometry.mjs --trail red-trail --gpx loop.gpx --range 1:212
+```
+
+| Option | Meaning |
+|---|---|
+| `--segment N` | pick trkseg N (1-based) from a multi-segment recording |
+| `--range A:B` | use only points A..B (1-based, inclusive) |
+| `--reverse` | reverse point order (you walked it the other way) |
+| `--accept-warnings` | proceed despite warnings; they are recorded in the import log |
+| `--allow-bridge` | treat a multi-segment file as one. Fabricates geometry across the gap |
+| `--dry-run` | report only |
+| `--output <path>` | write somewhere other than `src/data/trails.json` |
+
+It refuses to write on any fatal finding, and on warnings without
+`--accept-warnings`. Every write appends its decision - source file, point counts,
+warnings accepted, options used - to `data/import-log.jsonl`, so geometry repaired
+over months carries its own provenance.
+
+**A replaced trail loses its elevation.** GPX `<ele>` is discarded on purpose:
+`trails.json` elevation comes from the DEM, which is ground-referenced and
+smoother than GNSS vertical. Re-run elevation enrichment afterwards - the script
+prints the exact command.
+
+### import-alltrails-gpx.js
+
+Batch redensifier for **sparse** trail geometry, matching sub-segments of the
+AllTrails exports in `data/gpx/` by length near a trail endpoint.
+
+```bash
+node scripts/import-alltrails-gpx.js --dry-run
 node scripts/import-alltrails-gpx.js
 ```
+
+Only considers trails with **fewer than 40 coordinates**, so it cannot touch any
+Phase 8 walk-to-fix target (`red-trail` 112, `blue-trail` 71, `boulder-trail` 177,
+`mack-ridge-trail` 213, `yellow-trail-shannon` 41). Use
+`replace-trail-geometry.mjs` for those.
 
 ## Data Directory Structure
 

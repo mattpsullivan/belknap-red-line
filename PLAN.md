@@ -761,6 +761,27 @@ capture before building.
       stall lands, so reading status at addPoint time can miss it.
 - [ ] Re-test on a real device, screen off, in a pocket (emulator can't
       reproduce Doze/pocket behavior).
+      **The 2026-06-13 failure was recorded on a build with NONE of the three
+      fixes above.** Discovered 2026-07-25: the APK on the phone was a local
+      *debug* build, `1b339b0` ("polish: bigger splash logo"), stamped
+      2026-06-13 15:05 UTC - built ~1 hour before that hike started
+      (16:06 UTC). Stall detection (b837bc9), haptic buzz (0ac9724) and the setup
+      gate (181f4ba) all landed later, so the observed 19-point track says nothing
+      about whether they work. The first genuine test of them is the next walk on
+      a release build.
+- [x] **Debug-signed builds block release updates** (2026-07-25). Obtainium
+      reported `failureConflict` updating to v1.0.1. Not the release's fault:
+      v1.0.0 and v1.0.1 share a signing cert
+      (`fe7a2eef...40f6a63`), package (`com.belknaptracker.app`) and an increasing
+      versionCode (127 -> 128). The installed app was the debug build above, signed
+      with the *debug* key, so Android refuses an in-place update from a
+      release-signed APK. v1.0.0 was therefore never actually installed, which is
+      why "verify a future release updates over the top" stayed open.
+      **Fix is uninstall then install the release.** Export completions first
+      (Settings -> Export Raw Data JSON); there is no bulk track export, only
+      per-track GPX. Diagnostic: debug builds SHOW the in-app build stamp,
+      release builds hide it (`RELEASE_BUILD=1`, vite.config.ts). A visible stamp
+      means it is not a release build. Applies to Kristin's phone too.
 
 Note: robust Android background GPS is genuinely hard (Doze, OEM killers); expect
 iteration. This blocks the app's core value (recording hikes to redline trails).

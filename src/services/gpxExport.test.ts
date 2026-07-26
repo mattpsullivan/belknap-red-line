@@ -259,10 +259,25 @@ describe('splitOnStall', () => {
     expect(segs[1]).toHaveLength(1)
   })
 
-  it('does NOT split a long pause with no movement (a rest stop)', () => {
-    // 30 minutes standing still: the distance filter suppressed points, but
+  it('does NOT split a short pause with no movement (a rest stop)', () => {
+    // 3 minutes standing still: the distance filter suppressed points, but
     // connecting them fabricates nothing.
-    const pts = [at(43.5123, -71.2937, 0), at(43.51231, -71.29371, 30 * 60_000)]
+    const pts = [at(43.5123, -71.2937, 0), at(43.51231, -71.29371, 3 * 60_000)]
+    expect(splitOnStall(pts)).toHaveLength(1)
+  })
+
+  it('splits a long silence even when the hiker ended up back where they started', () => {
+    // Regression for the 2026-07-25 out-and-back. Recording died at 15:05:41 and
+    // resumed with one point at 16:21:45 - 76 minutes covering a whole hike - but
+    // the two points were 9 m apart because the walk returned to the trailhead.
+    // The displacement gate alone kept that in one segment, presenting total
+    // recording failure as contiguous data.
+    const pts = [at(43.5123, -71.2937, 0), at(43.51238, -71.29372, 76 * 60_000)]
+    expect(splitOnStall(pts)).toHaveLength(2)
+  })
+
+  it('still joins across a gap under the quiet ceiling', () => {
+    const pts = [at(43.5123, -71.2937, 0), at(43.51231, -71.29371, 4 * 60_000)]
     expect(splitOnStall(pts)).toHaveLength(1)
   })
 

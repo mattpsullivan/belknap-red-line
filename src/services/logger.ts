@@ -1,40 +1,72 @@
 /**
- * Lightweight on-device debug logger.
+ * On-device diagnostic log.
  *
- * Captures app logs, console errors/warnings, and uncaught errors into a capped
- * ring buffer persisted to localStorage (so logs survive a crash + the
- * reload-on-stale-chunk recovery). `shareDebugLogs()` exports them via the
- * native share sheet so they can be emailed.
+ * Rebuilt 2026-07-25 after an 81-minute recording produced a two-line log, both
+ * lines being "logger initialised". Nothing on the GPS path logged anything, so
+ * the reason background recording died was undiagnosable from the artifact - the
+ * only evidence was what the log did NOT contain.
  *
- * The core is a factory with injected storage/clock so it's tested without a
- * mock framework.
+ * Design follows from what that day could not answer:
+ *
+ *   - **Structured, not prose.** Entries are objects with a category, an event
+ *     name and typed fields, exported as JSONL so they can be filtered and
+ *     analysed rather than read.
+ *   - **Volume-capable.** A fix every 5s for two hours is ~1,400 entries. The old
+ *     localStorage sink re-serialised the entire array on every write; this one
+ *     batches into IndexedDB.
+ *   - **Survives a kill.** Entries persist, so evidence outlives the process.
+ *   - **Silence is evidence.** With a heartbeat running, a gap in entries is a
+ *     positive signal that JS was frozen - the distinction between "location was
+ *     revoked" and "the whole WebView was suspended".
+ *
+ * The sink is injected so tests drive an in-memory implementation with
+ * state-based assertions - no mock framework.
  */
 
-import { Capacitor } from '@capacitor/core'
 import { exportTextFile } from './fileExport'
 
-export type LogLevel = 'log' | 'info' | 'warn' | 'error'
+export type LogLevel = 'debug' | 'info' | 'warn' | 'error'
+
+/** Coarse grouping so a reader can filter a 2,000-line export down to one question. */
+export type LogCategory =
+  | 'app' // lifecycle: start, resume, pause, visibility
+  | 'gps' // every fix arrival and what the filters did with it
+  | 'health' // recording-health transitions, stall alerts, haptics
+  | 'device' // permissions, battery optimisation, Doze - see deviceState.ts
+  | 'track' // recording start/stop, point storage
+  | 'error'
 
 export interface LogEntry {
+  id?: number
   ts: number
   level: LogLevel
-  message: string
+  cat: LogCategory
+  event: string
+  /** Event-specific fields. Kept flat so JSONL stays greppable. */
+  data?: Record<string, unknown>
 }
 
-const STORAGE_KEY = 'belknap-debug-log'
-const DEFAULT_CAPACITY = 300
-
-type MinimalStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>
+/** Where entries go to be persisted. Async and batched. */
+export interface LogSink {
+  write(entries: LogEntry[]): Promise<void>
+  readAll(): Promise<LogEntry[]>
+  clear(): Promise<void>
+}
 
 export interface LoggerDeps {
-  storage?: MinimalStorage
+  sink?: LogSink
   now?: () => number
-  capacity?: number
+  /** Entries buffered before a flush is triggered. */
+  batchSize?: number
+  /** Max entries held in memory for synchronous inspection. */
+  memoryCapacity?: number
 }
 
 function stringifyArg(arg: unknown): string {
   if (typeof arg === 'string') return arg
-  if (arg instanceof Error) return `${arg.name}: ${arg.message}${arg.stack ? '\n' + arg.stack : ''}`
+  if (arg instanceof Error) {
+    return `${arg.name}: ${arg.message}${arg.stack ? '\n' + arg.stack : ''}`
+  }
   try {
     return JSON.stringify(arg)
   } catch {
@@ -42,93 +74,194 @@ function stringifyArg(arg: unknown): string {
   }
 }
 
+/** Values that survive structuredClone into IndexedDB and JSON.stringify alike. */
+function sanitise(data: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {}
+  for (const [k, v] of Object.entries(data)) {
+    if (v === undefined) continue
+    out[k] =
+      v === null || ['string', 'number', 'boolean'].includes(typeof v)
+        ? v
+        : stringifyArg(v)
+  }
+  return out
+}
+
 export interface Logger {
-  log: (...args: unknown[]) => void
-  info: (...args: unknown[]) => void
-  warn: (...args: unknown[]) => void
-  error: (...args: unknown[]) => void
-  entries: () => LogEntry[]
-  clear: () => void
-  format: (header?: Record<string, string>) => string
+  /** Structured event - the primary API. */
+  event(cat: LogCategory, event: string, data?: Record<string, unknown>, level?: LogLevel): void
+  /** Console-style helpers, retained for error capture. */
+  info(...args: unknown[]): void
+  warn(...args: unknown[]): void
+  error(...args: unknown[]): void
+  /** In-memory tail, most recent last. */
+  entries(): LogEntry[]
+  /** Persist anything buffered. Safe to call often. */
+  flush(): Promise<void>
+  /** Everything persisted plus anything buffered, oldest first. */
+  readAll(): Promise<LogEntry[]>
+  clear(): Promise<void>
+  /** JSONL: one entry per line, header first. */
+  format(entries: LogEntry[], header?: Record<string, unknown>): string
 }
 
 export function createLogger(deps: LoggerDeps = {}): Logger {
-  const { storage, capacity = DEFAULT_CAPACITY } = deps
+  const { sink, batchSize = 25, memoryCapacity = 500 } = deps
   const now = deps.now ?? (() => Date.now())
-  let entries: LogEntry[] = []
 
-  if (storage) {
-    try {
-      const raw = storage.getItem(STORAGE_KEY)
-      if (raw) entries = JSON.parse(raw)
-    } catch {
-      /* corrupt or unavailable; start fresh */
+  let memory: LogEntry[] = []
+  let pending: LogEntry[] = []
+  let flushing: Promise<void> = Promise.resolve()
+
+  function record(entry: LogEntry) {
+    memory.push(entry)
+    if (memory.length > memoryCapacity) {
+      memory.splice(0, memory.length - memoryCapacity)
     }
+    if (!sink) return
+    pending.push(entry)
+    if (pending.length >= batchSize) void flush()
   }
 
-  function persist() {
-    if (!storage) return
-    try {
-      storage.setItem(STORAGE_KEY, JSON.stringify(entries))
-    } catch {
-      /* quota / unavailable - keep going with the in-memory buffer */
-    }
-  }
-
-  function record(level: LogLevel, args: unknown[]) {
-    entries.push({ ts: now(), level, message: args.map(stringifyArg).join(' ') })
-    if (entries.length > capacity) entries.splice(0, entries.length - capacity)
-    persist()
+  function flush(): Promise<void> {
+    if (!sink || pending.length === 0) return flushing
+    const batch = pending
+    pending = []
+    // Serialise flushes so batches land in order even under rapid calls.
+    flushing = flushing
+      .then(() => sink.write(batch))
+      .catch(() => {
+        /* a failed flush must never break recording; the memory tail remains */
+      })
+    return flushing
   }
 
   return {
-    log: (...a) => record('log', a),
-    info: (...a) => record('info', a),
-    warn: (...a) => record('warn', a),
-    error: (...a) => record('error', a),
-    entries: () => entries.slice(),
-    clear: () => {
-      entries = []
-      if (storage) {
-        try {
-          storage.removeItem(STORAGE_KEY)
-        } catch {
-          /* ignore */
-        }
-      }
+    event(cat, event, data, level = 'info') {
+      record({
+        ts: now(),
+        level,
+        cat,
+        event,
+        ...(data && Object.keys(data).length ? { data: sanitise(data) } : {}),
+      })
     },
-    format: (header = {}) => {
-      const head = Object.entries(header)
-        .map(([k, v]) => `${k}: ${v}`)
-        .join('\n')
-      const body = entries
-        .map((e) => `${new Date(e.ts).toISOString()} [${e.level.toUpperCase()}] ${e.message}`)
-        .join('\n')
-      return `${head}\n\n${body}\n`
+
+    info: (...a) =>
+      record({ ts: now(), level: 'info', cat: 'app', event: 'log', data: { message: a.map(stringifyArg).join(' ') } }),
+    warn: (...a) =>
+      record({ ts: now(), level: 'warn', cat: 'app', event: 'log', data: { message: a.map(stringifyArg).join(' ') } }),
+    error: (...a) =>
+      record({ ts: now(), level: 'error', cat: 'error', event: 'log', data: { message: a.map(stringifyArg).join(' ') } }),
+
+    entries: () => memory.slice(),
+    flush,
+
+    async readAll() {
+      await flush()
+      if (!sink) return memory.slice()
+      const stored = await sink.readAll()
+      return stored.sort((a, b) => a.ts - b.ts)
+    },
+
+    async clear() {
+      memory = []
+      pending = []
+      if (sink) await sink.clear()
+    },
+
+    format(entries, header = {}) {
+      const lines = [JSON.stringify({ type: 'header', ...header })]
+      for (const e of entries) {
+        lines.push(
+          JSON.stringify({
+            t: new Date(e.ts).toISOString(),
+            lvl: e.level,
+            cat: e.cat,
+            ev: e.event,
+            ...(e.data ?? {}),
+          })
+        )
+      }
+      return lines.join('\n') + '\n'
     },
   }
 }
 
-/** App-wide singleton, backed by localStorage when available. */
+// ---------------------------------------------------------------------------
+// App wiring
+// ---------------------------------------------------------------------------
+
+/** Keep the log bounded: oldest entries are dropped past this many rows. */
+const MAX_STORED_ENTRIES = 20_000
+
+/**
+ * IndexedDB sink. Imported lazily so the logger module stays usable in tests and
+ * in any context where Dexie has not been initialised.
+ */
+const dexieSink: LogSink = {
+  async write(entries) {
+    const { db } = await import('./database/db')
+    await db.logs.bulkAdd(entries)
+    const count = await db.logs.count()
+    if (count > MAX_STORED_ENTRIES) {
+      const excess = await db.logs
+        .orderBy('ts')
+        .limit(count - MAX_STORED_ENTRIES)
+        .primaryKeys()
+      await db.logs.bulkDelete(excess)
+    }
+  },
+  async readAll() {
+    const { db } = await import('./database/db')
+    return db.logs.orderBy('ts').toArray()
+  },
+  async clear() {
+    const { db } = await import('./database/db')
+    await db.logs.clear()
+  },
+}
+
+/** App-wide singleton. */
 export const logger = createLogger({
-  storage: typeof localStorage !== 'undefined' ? localStorage : undefined,
+  sink: typeof indexedDB !== 'undefined' ? dexieSink : undefined,
 })
 
 let installed = false
 
-/** Capture console errors/warnings and uncaught errors. Call once at startup. */
+/** Capture uncaught errors and console noise. Call once at startup. */
 export function initLogger() {
-  if (installed || typeof window === 'undefined') return
+  if (installed) return
   installed = true
 
-  window.addEventListener('error', (e) => {
-    logger.error('window.error', e.message, `${e.filename}:${e.lineno}:${e.colno}`)
-  })
-  window.addEventListener('unhandledrejection', (e) => {
-    logger.error('unhandledrejection', e.reason)
-  })
+  if (typeof window !== 'undefined') {
+    window.addEventListener('error', (e) => {
+      logger.event('error', 'window.error', {
+        message: e.message,
+        source: `${e.filename}:${e.lineno}:${e.colno}`,
+      }, 'error')
+    })
+    window.addEventListener('unhandledrejection', (e) => {
+      logger.event('error', 'unhandledrejection', { reason: stringifyArg(e.reason) }, 'error')
+    })
 
-  // Tee console.error/warn into the buffer while preserving normal output.
+    // Lifecycle. A freeze shows up as a gap between entries; these bracket it,
+    // which is how we tell "the OS suspended us" from "nothing happened".
+    document.addEventListener('visibilitychange', () => {
+      logger.event('app', 'visibilitychange', { state: document.visibilityState })
+      if (document.visibilityState === 'hidden') void logger.flush()
+    })
+    window.addEventListener('pagehide', () => {
+      logger.event('app', 'pagehide')
+      void logger.flush()
+    })
+    window.addEventListener('freeze', () => {
+      logger.event('app', 'freeze', {}, 'warn')
+      void logger.flush()
+    })
+    window.addEventListener('resume', () => logger.event('app', 'resume'))
+  }
+
   for (const level of ['error', 'warn'] as const) {
     const original = console[level].bind(console)
     console[level] = (...args: unknown[]) => {
@@ -137,17 +270,36 @@ export function initLogger() {
     }
   }
 
-  logger.info('logger initialised', `platform=${Capacitor.getPlatform()}`)
+  logger.event('app', 'startup', {
+    platform: typeof navigator !== 'undefined' ? navigator.userAgent : 'n/a',
+  })
 }
 
-/** Export the debug log via the native share sheet (or download on web). */
-export function shareDebugLogs(share = exportTextFile): Promise<void> {
-  const header: Record<string, string> = {
+/**
+ * Export the diagnostic log as JSONL via the native share sheet.
+ *
+ * JSONL rather than prose so it can be filtered and analysed - e.g.
+ *   jq -c 'select(.cat=="gps")' log.jsonl
+ *   jq -c 'select(.ev=="heartbeat") | .t' log.jsonl   # gaps here mean frozen JS
+ */
+export async function shareDebugLogs(
+  share = exportTextFile,
+  read: () => Promise<LogEntry[]> = () => logger.readAll()
+): Promise<void> {
+  const entries = await read()
+  const span = entries.length
+    ? {
+        firstEntry: new Date(entries[0].ts).toISOString(),
+        lastEntry: new Date(entries[entries.length - 1].ts).toISOString(),
+      }
+    : {}
+  const body = logger.format(entries, {
     app: 'Belknap Tracker',
     exportedAt: new Date().toISOString(),
-    platform: Capacitor.getPlatform(),
     userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'n/a',
-    entries: String(logger.entries().length),
-  }
-  return share('belknap-debug-log.txt', logger.format(header), 'text/plain')
+    entries: entries.length,
+    ...span,
+  })
+  const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')
+  return share(`belknap-debug-${stamp}.jsonl`, body, 'application/x-ndjson')
 }

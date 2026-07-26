@@ -102,9 +102,28 @@ function cdata(s: string): string {
 
 /**
  * Below this displacement, joining two points fabricates nothing worth flagging,
- * so the segment stays whole even after a long pause.
+ * so the segment stays whole even after a long pause - but only up to
+ * SEGMENT_BREAK_MAX_QUIET_MS. See the out-and-back note on splitOnStall.
  */
 export const SEGMENT_BREAK_MIN_DISPLACEMENT_M = 50
+
+/**
+ * Past this, a gap is a break regardless of how far the hiker appears to have
+ * moved.
+ *
+ * The 2026-07-25 track proved the displacement gate alone is wrong. Recording
+ * died at 15:05:41 and produced one further point at 16:21:45 - a 76-minute hole
+ * spanning an entire hike - but because the walk was an out-and-back that
+ * returned to the same trailhead, the two points either side were 9 m apart. The
+ * displacement gate read that as "did not move, nothing fabricated" and kept it
+ * in one segment, so the export presented 76 minutes of total recording failure
+ * as contiguous data. Exactly the concealment the split exists to prevent, in the
+ * commonest hike shape there is.
+ *
+ * Five minutes is well past any pause the 5 m distance filter could explain and
+ * well short of a lunch stop that genuinely should stay joined.
+ */
+export const SEGMENT_BREAK_MAX_QUIET_MS = 5 * 60_000
 
 /**
  * Split points into contiguous runs, breaking where connecting two consecutive
@@ -139,7 +158,8 @@ export const SEGMENT_BREAK_MIN_DISPLACEMENT_M = 50
 export function splitOnStall(
   points: TrackPoint[],
   stallThresholdMs: number = STALL_THRESHOLD_MS,
-  minDisplacementM: number = SEGMENT_BREAK_MIN_DISPLACEMENT_M
+  minDisplacementM: number = SEGMENT_BREAK_MIN_DISPLACEMENT_M,
+  maxQuietMs: number = SEGMENT_BREAK_MAX_QUIET_MS
 ): TrackPoint[][] {
   if (points.length === 0) return []
   const segments: TrackPoint[][] = [[points[0]]]
@@ -148,7 +168,13 @@ export function splitOnStall(
     const cur = points[i]
     const gap = cur.timestamp - prev.timestamp
     const moved = calculateDistance(prev.lat, prev.lng, cur.lat, cur.lng)
-    if (gap > stallThresholdMs && moved > minDisplacementM) {
+    // Long enough AND moved -> a gap walked through unrecorded.
+    // Long enough on its own, past maxQuietMs -> a gap regardless of where the
+    // hiker was standing when it ended. Returning to the start does not make a
+    // recording failure contiguous.
+    const movedThroughGap = gap > stallThresholdMs && moved > minDisplacementM
+    const quietTooLong = gap > maxQuietMs
+    if (movedThroughGap || quietTooLong) {
       segments.push([cur])
     } else {
       segments[segments.length - 1].push(cur)

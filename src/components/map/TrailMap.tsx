@@ -12,7 +12,9 @@ import {
   useLoops,
 } from '@/hooks'
 import { useRecordingHealth } from '@/hooks/useRecordingHealth'
+import { useRecordingHeartbeat } from '@/hooks/useRecordingHeartbeat'
 import { alertVibrate } from '@/services/haptics'
+import { logger } from '@/services/logger'
 import { usePMTiles } from '@/providers/pmtilesContext'
 import { styleConfig } from '@/config/styles'
 import { POIMarkers } from './POIMarkers'
@@ -90,12 +92,42 @@ export function TrailMap() {
     completedTrailIds
   )
 
+  // A tick every 20s while recording. If ticks stop, JS stopped - that is what
+  // distinguishes "location was revoked" from "the WebView was frozen".
+  useRecordingHeartbeat(isRecording)
+
+  // Log every health transition. "Did it buzz?" was unanswerable after the
+  // 2026-07-25 hike because nothing on this path wrote to the log.
+  const prevStatusRef = useRef(recordingStatus.status)
+  useEffect(() => {
+    if (prevStatusRef.current === recordingStatus.status) return
+    logger.event(
+      'health',
+      'status.change',
+      {
+        from: prevStatusRef.current,
+        to: recordingStatus.status,
+        secondsSinceFix: recordingStatus.secondsSinceFix ?? undefined,
+      },
+      recordingStatus.status === 'stalled' ? 'warn' : 'info'
+    )
+    prevStatusRef.current = recordingStatus.status
+  }, [recordingStatus.status, recordingStatus.secondsSinceFix])
+
   // Buzz when tracking stalls - a pocketed phone can't show a banner. Fires on
   // entering the stalled state and keeps nudging every 20s until it recovers.
   useEffect(() => {
     if (recordingStatus.status !== 'stalled') return
-    void alertVibrate()
-    const id = setInterval(() => void alertVibrate(), 20000)
+    let n = 0
+    const buzz = () => {
+      // Logged so the buzz is evidence rather than something to be remembered.
+      // Note this only records that a buzz was *requested*: if the WebView is
+      // frozen this effect never runs, and the absence is itself the finding.
+      logger.event('health', 'stall.buzz', { n: ++n }, 'warn')
+      void alertVibrate()
+    }
+    buzz()
+    const id = setInterval(buzz, 20000)
     return () => clearInterval(id)
   }, [recordingStatus.status])
 
@@ -137,7 +169,6 @@ export function TrailMap() {
         // fitBounds above, so it belongs in an effect; the lint rule can't see
         // that the setState here mirrors external state rather than cascading.
         const centerIdx = Math.floor(coords.length / 2)
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- sync to URL param, not a render cascade
         setSelectedTrail({
           trail: highlightedTrail,
           lng: coords[centerIdx].lng,

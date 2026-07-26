@@ -1,11 +1,18 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { calculateDistance } from '@/services/geo';
+import { logger } from '@/services/logger';
 import {
   createGeolocationProvider,
   supportsBackgroundGeolocation,
   type GeoPosition,
   type GeolocationProvider,
 } from '@/services/geolocation';
+
+/** Keep logged floats readable without losing meaningful precision. */
+function round(n: number, dp: number): number {
+  const f = 10 ** dp;
+  return Math.round(n * f) / f;
+}
 
 // Re-export GeoPosition for consumers
 export type { GeoPosition } from '@/services/geolocation';
@@ -76,11 +83,23 @@ export function useGeolocation(
   const lastUpdateRef = useRef<number>(0);
   const lastPositionRef = useRef<GeoPosition | null>(null);
   const lastFixWriteRef = useRef<number>(0);
+  /** Wall-clock of the previous arriving fix, for the gps.fix log only. */
+  const lastFixAtRef = useRef<number | null>(null);
 
   // Handle incoming position from provider
   const handlePosition = useCallback(
     (pos: GeoPosition) => {
       const now = Date.now();
+
+      // Every arriving fix is logged BEFORE the throttle and distance filters.
+      // This is the distinction the 2026-07-25 hike could not make: stored track
+      // points are not fixes, so "the provider went silent" and "fixes arrived
+      // and were filtered out" looked identical in the exported track. With this,
+      // fix entries continuing while points stop means the filters are eating
+      // them; fix entries stopping while heartbeats continue means location was
+      // cut; both stopping means the WebView was frozen.
+      const sinceLast = lastFixAtRef.current ? now - lastFixAtRef.current : null;
+      lastFixAtRef.current = now;
 
       // Liveness: record that a fix arrived (before throttle/distance gating, so
       // standing still doesn't read as a stall). Throttle the state write so a
@@ -90,24 +109,40 @@ export function useGeolocation(
         setLastFixAt(now);
       }
 
+      const moved = lastPositionRef.current
+        ? calculateDistance(
+            lastPositionRef.current.lat,
+            lastPositionRef.current.lng,
+            pos.lat,
+            pos.lng
+          )
+        : null;
+
+      const logFix = (outcome: 'accepted' | 'throttled' | 'under-distance') =>
+        logger.event('gps', 'fix', {
+          outcome,
+          lat: round(pos.lat, 6),
+          lng: round(pos.lng, 6),
+          accuracy: round(pos.accuracy, 1),
+          altitude: pos.altitude === undefined ? undefined : round(pos.altitude, 1),
+          speed: pos.speed === undefined ? undefined : round(pos.speed, 2),
+          movedM: moved === null ? undefined : round(moved, 1),
+          sinceLastFixMs: sinceLast ?? undefined,
+        });
+
       // Throttle updates
       if (now - lastUpdateRef.current < throttleMs) {
+        logFix('throttled');
         return;
       }
 
       // Skip if moved less than minimum distance
-      if (lastPositionRef.current) {
-        const distance = calculateDistance(
-          lastPositionRef.current.lat,
-          lastPositionRef.current.lng,
-          pos.lat,
-          pos.lng
-        );
-        if (distance < minDistanceMeters) {
-          return;
-        }
+      if (moved !== null && moved < minDistanceMeters) {
+        logFix('under-distance');
+        return;
       }
 
+      logFix('accepted');
       lastUpdateRef.current = now;
       lastPositionRef.current = pos;
       setPosition(pos);
@@ -118,6 +153,7 @@ export function useGeolocation(
 
   // Handle errors from provider
   const handleError = useCallback((err: { message: string }) => {
+    logger.event('gps', 'provider.error', { message: err.message }, 'error');
     setError(err.message);
     setIsWatching(false);
     watcherIdRef.current = null;
@@ -152,8 +188,17 @@ export function useGeolocation(
       })
       .then((watcherId) => {
         watcherIdRef.current = watcherId;
+        logger.event('gps', 'watch.started', {
+          watcherId,
+          supportsBackground: provider.supportsBackground,
+          enableBackground,
+          throttleMs,
+          minDistanceMeters,
+          accuracy: enableHighAccuracy ? 'high' : 'balanced',
+        });
       })
       .catch((err) => {
+        logger.event('gps', 'watch.start-failed', { message: err?.message }, 'error');
         setError(err.message || 'Failed to start geolocation');
         setIsWatching(false);
       });
@@ -161,6 +206,7 @@ export function useGeolocation(
     handlePosition,
     handleError,
     throttleMs,
+    minDistanceMeters,
     enableHighAccuracy,
     enableBackground,
     backgroundNotificationTitle,

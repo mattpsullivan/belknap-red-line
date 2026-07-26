@@ -786,6 +786,80 @@ capture before building.
 Note: robust Android background GPS is genuinely hard (Doze, OEM killers); expect
 iteration. This blocks the app's core value (recording hikes to redline trails).
 
+#### 7.11 Diagnostic instrumentation (spike, 2026-07-25 evening - UNREVIEWED)
+
+The 2026-07-25 hike failed the same way as 2026-06-13, on a build containing all
+three 7.10 fixes, and **could not be diagnosed** from what it produced: an
+81-minute recording yielded 27 points and a two-line debug log, both lines being
+"logger initialised". Nothing on the GPS path logged anything.
+
+What the artifacts did establish:
+
+- Recording worked for 5 minutes (26 points, cadence 5-14s, accuracy improving to
+  4m), then location callbacks **stopped entirely** at 15:05:41. One further
+  point at 16:21:45, the moment recording was stopped by hand, with a clean 10.2m
+  fix - so the receiver was fine and the app could still get a position.
+- Elevation range across the whole track is 512-534m; the summit is ~727m. It
+  never left the parking lot.
+- `initLogger()` runs once per WebView load, and the log holds exactly two inits
+  (11:26 and 14:57 EDT) with the export at 18:05. **The process was never
+  restarted**, so the app was frozen, not killed.
+
+What they could NOT establish, and why:
+
+- **Stored points are not fixes.** With `minDistanceMeters = 5`, a frozen GPS that
+  keeps delivering the same position is discarded by the distance filter and looks
+  exactly like standing still. "No fixes arrived" and "fixes arrived and were
+  filtered" are indistinguishable in a track file.
+- **Whether background permission was actually granted.** It cannot be read:
+  `backgroundGeolocationClient.checkPermissions()` is backed by
+  @capacitor/geolocation, which reports ACCESS_FINE_LOCATION and flattens it to
+  granted/denied/prompt. "While using the app" and "Allow all the time" are the
+  same value. The 7.10 setup gate could instruct but never verify - a guide
+  wearing a gate's clothing.
+- **Whether the stall detector or haptic ever fired.** Neither logs.
+
+Built (all UNREVIEWED, uncommitted):
+
+- [x] **Structured JSONL log** (`services/logger.ts` rewritten). Categories
+      app/gps/health/device/track/error, typed fields, batched into IndexedDB
+      (Dexie **v3** `logs` table, capped at 20k rows) so evidence survives a kill.
+      The old localStorage sink re-serialised the whole array per write and was
+      unusable at the needed volume. Exported as `.jsonl`:
+      `jq -c 'select(.cat=="gps")' log.jsonl`
+- [x] **Every fix logged before the filters** (`useGeolocation.handlePosition`),
+      tagged `accepted` / `throttled` / `under-distance` with accuracy, altitude
+      and distance moved. This is the stored-points-are-not-fixes fix.
+- [x] **Heartbeat** (`useRecordingHeartbeat`, 20s while recording) carrying
+      lateness per tick. Makes silence into evidence: ticks continuing while fixes
+      stop means location was cut; both stopping means the WebView froze; ticks
+      arriving very late means throttling rather than a clean freeze.
+- [x] **Device-state ground truth** - new Java Capacitor plugin
+      `DeviceStatePlugin` reporting ACCESS_BACKGROUND_LOCATION,
+      `isIgnoringBatteryOptimizations`, `isDeviceIdleMode`, `isPowerSaveMode`,
+      `isBackgroundRestricted`, location services, and SDK/model. Registered in
+      `MainActivity.onCreate` before `super`. JS wrapper (`services/deviceState.ts`)
+      is fail-safe: a missing or throwing plugin logs `available: false` and never
+      breaks a recording. Sampled at record-start, every ~5 min, and on resume.
+- [x] **Health transitions and stall buzzes logged**, so "did it buzz" is data.
+      Note the buzz entry records that a buzz was *requested* - if the WebView is
+      frozen the effect never runs, and that absence is itself the finding.
+- [x] Lifecycle logging: visibilitychange, pagehide, freeze, resume.
+
+Verified: 305 tests, lint 0 problems, tsc clean, `./gradlew assembleDebug` exit 0,
+and `DeviceStatePlugin` confirmed present in the APK's dex. **Not verified on a
+device** - that is the review step.
+
+What the next hike's log will answer, by inspection:
+
+| Observation | Conclusion |
+|---|---|
+| heartbeats continue, `gps.fix` stops | OS revoked location; app alive |
+| heartbeats and fixes both stop | WebView frozen (Doze) |
+| heartbeats arrive with large `lateMs` | timer throttling, not a clean freeze |
+| `gps.fix` continues, points stop | the distance/throttle filters are eating them |
+| `device.state` shows `backgroundLocation: false` | permission was never granted - the simple answer |
+
 **Dependencies:**
 - Capacitor v6+ (latest stable)
 - @capgo/background-geolocation (latest)
@@ -1035,5 +1109,8 @@ const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 | 2026-07-25 | Added the ingest gate `scripts/lib/trackQuality.mjs` (bbox from the trusted anchor hull, speed, gaps, density, length, ele datum). All thresholds reused from the repo or calibrated, none invented | Done |
 | 2026-07-25 | Gate's first run found `data/gpx/Whiteface_Mountain_Trail.gpx` is a different mountain ~25 km NE; dataset unaffected. See `docs/trail-validation.md` | Done |
 | 2026-07-25 | Added `scripts/replace-trail-geometry.mjs` - the Phase 8 single-trail replacement tool, with refuse-on-warning and `data/import-log.jsonl` provenance (286 tests) | Done |
+| 2026-07-25 | First release-build hike still failed: 81 min, 27 pts, 232 m. Location callbacks stopped 5 min in; process never restarted, so frozen not killed. Undiagnosable from the artifacts | Done |
+| 2026-07-25 | Fixed `splitOnStall` out-and-back blind spot - a 76-min gap was hidden behind 9 m of displacement because the walk returned to the trailhead | Unreviewed |
+| 2026-07-25 | Phase 7.11 spike: structured JSONL log to IndexedDB, pre-filter fix logging, recording heartbeat, native DeviceStatePlugin for background-permission ground truth (305 tests, APK compiles) | Unreviewed |
 
 <!-- Update this log after each work session -->

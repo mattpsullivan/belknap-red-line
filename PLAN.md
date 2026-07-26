@@ -860,6 +860,76 @@ What the next hike's log will answer, by inspection:
 | `gps.fix` continues, points stop | the distance/throttle filters are eating them |
 | `device.state` shows `backgroundLocation: false` | permission was never granted - the simple answer |
 
+#### 7.12 Root cause found and fixed (2026-07-26 - UNREVIEWED)
+
+The 7.11 instrumentation worked. The 2026-07-26 dog walk produced 1,319 log
+entries and an unambiguous diagnosis, which was **not** what either of us
+expected: location was never the problem.
+
+**Ground truth, visible for the first time:** `backgroundLocation: false`,
+`ignoringBatteryOptimizations: false`, `sdkInt: 37`, Pixel 9a. Neither of the setup
+gate's own requirements was met - yet recording still received fixes, because
+@capgo's `startForeground` service with FOREGROUND_SERVICE_LOCATION keeps location
+alive without ACCESS_BACKGROUND_LOCATION. Worth fixing regardless, and now
+verifiable.
+
+**The actual root cause.** Two paths ran in the same GPS callback, same 23
+minutes, same IndexedDB:
+
+| Path | Mechanism | Delivered |
+|---|---|---|
+| `logger.event()` | direct call -> array -> batched Dexie write | **1300 / 1300** |
+| track point | `setPosition()` -> **React render** -> `useEffect` -> `addPoint()` | **15 / 153** |
+
+1,300 fixes arrived at 1.0/s, uninterrupted for 21 minutes while backgrounded, and
+153 passed the throttle and distance filters. Only 15 became points, clustered in
+the three windows the app was foreground - one of which is Matt looking at the
+phone to restart a podcast. **Chromium throttles the render scheduler in a
+backgrounded WebView**, so `setPosition` never caused a render, TrailMap's effect
+never ran, and the point was discarded. An accidental controlled experiment: the
+only difference between 100% and 10% delivery is whether React is involved.
+
+Worse, `useTrackRecording` held the whole track in `useState` and only wrote it on
+stop - React state *was* the storage, so a kill at minute 90 lost everything.
+
+Also established: the throttling is **not** power management. @capgo already holds
+a PARTIAL_WAKE_LOCK (`BackgroundGeolocationService.java:96`), so the CPU never
+sleeps. `setInterval` produced 8 ticks where 71 were due (one 468s late) while GPS
+callbacks ran continuously - a Chromium page policy, not Doze. That is why the
+7.11 heartbeat measured timer throttling rather than JS liveness.
+
+Fixed (UNREVIEWED, uncommitted):
+
+- [x] **`services/tracking/trackingService.ts`** - plain TS, no React. Owns the one
+      provider subscription (@capgo permits a single watch; `nativeProvider.ts:85`
+      throws on a second), applies the filters, and appends+persists points inside
+      the GPS callback. Batched Dexie writes every 10 points / 15s, plus a flush on
+      `visibilitychange:hidden` and `pagehide`. Points now survive a mid-hike kill.
+- [x] **`useTracking`** via `useSyncExternalStore` - React observes, never
+      mediates. `useGeolocation` and `useTrackRecording` retired along with their
+      `vi.mock`-based tests (which predated the Nullables convention); their
+      behaviour is covered better by 20 service tests using the null provider.
+- [x] **Independent liveness: `HeartbeatPlugin` (Java)** - a native
+      `ScheduledExecutorService` notifying JS via `notifyListeners('tick')`. Native
+      timers escape Chromium's throttling, and bridge callbacks demonstrably wake
+      the JS context. This is the non-GPS health signal the app previously lacked:
+      without it, "no data" and "no liveness" are the same observation. JS falls
+      back to `setInterval` off-device and **labels which source produced each
+      tick**, since the two mean different things in a log.
+- [x] **`BackgroundReadiness`** - the setup gate now verifies via
+      `backgroundBlockers()` instead of instructing, with distinct
+      checking/verified/unavailable states. Absent data must not render as a pass.
+- [x] **Escalating stall alerts** - buzz on entry, again after 1 min, then every
+      5 min. No fix for two minutes is ordinary under canopy; buzzing every 20s
+      trains you to ignore it.
+
+325 tests, lint clean, tsc clean, `assembleDebug` exit 0 with both plugins present
+in the dex.
+
+**Acceptance criterion for the next hike** (the instrumentation emits both halves
+independently): the count of `gps.fix outcome:"accepted"` in the log should match
+the recorded track's point count. On 2026-07-26 it was 153 against 15.
+
 **Dependencies:**
 - Capacitor v6+ (latest stable)
 - @capgo/background-geolocation (latest)
@@ -1112,5 +1182,9 @@ const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 | 2026-07-25 | First release-build hike still failed: 81 min, 27 pts, 232 m. Location callbacks stopped 5 min in; process never restarted, so frozen not killed. Undiagnosable from the artifacts | Done |
 | 2026-07-25 | Fixed `splitOnStall` out-and-back blind spot - a 76-min gap was hidden behind 9 m of displacement because the walk returned to the trailhead | Unreviewed |
 | 2026-07-25 | Phase 7.11 spike: structured JSONL log to IndexedDB, pre-filter fix logging, recording heartbeat, native DeviceStatePlugin for background-permission ground truth (305 tests, APK compiles) | Unreviewed |
+| 2026-07-26 | Instrumentation paid off: 1,319 log entries diagnosed the failure. Location was fine (1,300 fixes at 1/s backgrounded); React render throttling was dropping the points | Done |
+| 2026-07-26 | Device ground truth: `backgroundLocation:false`, `ignoringBatteryOptimizations:false` on a Pixel 9a / Android 17 - neither setup-gate requirement was ever met | Done |
+| 2026-07-26 | Phase 7.12: recording moved off the render path into `services/tracking`; incremental persistence; `useGeolocation`/`useTrackRecording` retired for `useTracking` | Unreviewed |
+| 2026-07-26 | Phase 7.12: native `HeartbeatPlugin` gives a liveness signal independent of GPS; setup gate now verifies via `backgroundBlockers()`; escalating stall alerts (325 tests) | Unreviewed |
 
 <!-- Update this log after each work session -->

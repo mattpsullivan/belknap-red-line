@@ -6,11 +6,10 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import {
   useTrails,
   useCompletions,
-  useGeolocation,
-  useTrackRecording,
   useTrailDetection,
   useLoops,
 } from '@/hooks'
+import { useTracking } from '@/hooks/useTracking'
 import { useRecordingHealth } from '@/hooks/useRecordingHealth'
 import { useRecordingHeartbeat } from '@/hooks/useRecordingHeartbeat'
 import { alertVibrate } from '@/services/haptics'
@@ -18,6 +17,7 @@ import { logger } from '@/services/logger'
 import { usePMTiles } from '@/providers/pmtilesContext'
 import { styleConfig } from '@/config/styles'
 import { POIMarkers } from './POIMarkers'
+import { BackgroundReadiness } from './BackgroundReadiness'
 import type { Trail } from '@/types'
 
 const ONLINE_MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty'
@@ -35,15 +35,25 @@ export function TrailMap() {
   const { trails, getTrailById } = useTrails()
   const { isTrailCompleted, addCompletion, completedTrailIds } = useCompletions()
   const { isOfflineMode, offlineStyle } = usePMTiles()
+  // One hook, one service. Recording happens in the service whether or not this
+  // component ever renders - which is the whole point, since a backgrounded
+  // WebView does not render. See services/tracking/trackingService.ts.
   const {
     position,
     error,
     isWatching,
     lastFixAt,
+    isRecording,
+    currentTrack,
+    trackPoints,
+    totalDistance,
     startWatching,
     stopWatching,
+    startRecording,
+    stopRecording,
+    cancelRecording,
     openLocationSettings,
-  } = useGeolocation()
+  } = useTracking()
   const [showCompletionPrompt, setShowCompletionPrompt] = useState(false)
   const [pendingCompletions, setPendingCompletions] = useState<Trail[]>([])
   const [showRecordingReminder, setShowRecordingReminder] = useState(false)
@@ -66,17 +76,6 @@ export function TrailMap() {
   const { getLoopById } = useLoops()
   const highlightedLoopId = searchParams.get('loop')
   const highlightedLoop = highlightedLoopId ? getLoopById(highlightedLoopId) : null
-  const {
-    isRecording,
-    currentTrack,
-    trackPoints,
-    totalDistance,
-    startRecording,
-    stopRecording,
-    cancelRecording,
-    addPoint,
-  } = useTrackRecording()
-
   // Warn when recording but GPS fixes have stopped arriving (background
   // suspension / lost fix / missing "Allow all the time").
   const recordingStatus = useRecordingHealth(
@@ -114,36 +113,37 @@ export function TrailMap() {
     prevStatusRef.current = recordingStatus.status
   }, [recordingStatus.status, recordingStatus.secondsSinceFix])
 
-  // Buzz when tracking stalls - a pocketed phone can't show a banner. Fires on
-  // entering the stalled state and keeps nudging every 20s until it recovers.
+  // Buzz when tracking stalls - a pocketed phone can't show a banner.
+  //
+  // Backs off rather than nagging. No fix for a couple of minutes is ordinary
+  // under canopy or in a col, and buzzing every 20s through a legitimately weak
+  // stretch trains you to ignore it - the same alert-fatigue failure the trail
+  // ingest gate was built to avoid. So: buzz on entering the stalled state, again
+  // after a minute, then every five minutes.
   useEffect(() => {
     if (recordingStatus.status !== 'stalled') return
     let n = 0
     const buzz = () => {
       // Logged so the buzz is evidence rather than something to be remembered.
-      // Note this only records that a buzz was *requested*: if the WebView is
-      // frozen this effect never runs, and the absence is itself the finding.
+      // Only records that a buzz was *requested*: if JS is not running this never
+      // fires, and the absence is itself the finding.
       logger.event('health', 'stall.buzz', { n: ++n }, 'warn')
       void alertVibrate()
     }
     buzz()
-    const id = setInterval(buzz, 20000)
-    return () => clearInterval(id)
+    const followUp = setTimeout(buzz, 60_000)
+    const recurring = setInterval(buzz, 5 * 60_000)
+    return () => {
+      clearTimeout(followUp)
+      clearInterval(recurring)
+    }
   }, [recordingStatus.status])
 
-  // Add position to track when recording
-  useEffect(() => {
-    if (isRecording && position) {
-      addPoint({
-        lat: position.lat,
-        lng: position.lng,
-        accuracy: position.accuracy,
-        timestamp: position.timestamp,
-        // Raw ellipsoidal metres; stays undefined when there is no vertical fix.
-        altitudeEllipsoidM: position.altitude,
-      })
-    }
-  }, [isRecording, position, addPoint])
+  // NOTE: there used to be an effect here that called addPoint() whenever
+  // `position` changed. That was the bug. It required a React render per fix, and
+  // Chromium throttles renders in a backgrounded WebView, so 138 of 153 accepted
+  // fixes were silently discarded on the 2026-07-26 walk. Points are now appended
+  // and persisted inside the service's GPS callback, which needs no render.
 
   // Fit bounds to highlighted trail from URL param
   useEffect(() => {
@@ -941,22 +941,7 @@ export function TrailMap() {
                   Do you have the Ten Essentials?
                 </a>
               </p>
-              <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-amber-900">
-                <p className="font-semibold">Keep tracking with your phone away</p>
-                <p className="mt-1 text-amber-800">
-                  Set this app's Location to{' '}
-                  <strong>&ldquo;Allow all the time&rdquo;</strong> and turn off
-                  battery optimization - otherwise the track stops whenever your
-                  screen is off (so the whole hike can be lost).
-                </p>
-                <button
-                  type="button"
-                  onClick={() => void openLocationSettings()}
-                  className="mt-2 font-semibold underline"
-                >
-                  Open location settings
-                </button>
-              </div>
+              <BackgroundReadiness onOpenSettings={() => void openLocationSettings()} />
             </div>
             <div className="flex gap-3">
               <button

@@ -105,3 +105,15 @@ export function createHeartbeatSource(): HeartbeatSource {
     },
   }
 }
+
+/**
+ * Whether the native scheduler is present, without starting it.
+ *
+ * For the About panel: a build that shipped without its plugins registered would
+ * silently fall back to a throttled JS timer, which is close to useless as
+ * supervision. Better to see that on screen than to infer it from a bad log after
+ * a hike.
+ */
+export function isNativeHeartbeatAvailable(): boolean {
+  return Capacitor.isNativePlatform() && Capacitor.isPluginAvailable('Heartbeat')
+}

@@ -45,4 +45,17 @@
 
     <!-- Required for notification on Android 13+ -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!--
+      Lets the setup gate offer a one-tap battery-optimisation exemption via
+      ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS. Doze throttles background
+      location without it, and it was NOT exempt on the 2026-07-26 walk. This is
+      the only one of the four background settings Android allows us to fix
+      directly - the rest can only be navigated to.
+
+      Note: Google Play restricts this permission and requires justification. That
+      does not apply while distributing sideloaded APKs via GitHub Releases, but it
+      would need addressing before any Play Store submission.
+    -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 </manifest>

@@ -930,6 +930,51 @@ in the dex.
 independently): the count of `gps.fix outcome:"accepted"` in the log should match
 the recorded track's point count. On 2026-07-26 it was 153 against 15.
 
+#### 7.13 Build identity and settings deep-links (2026-07-26 - UNREVIEWED)
+
+Two gaps that cost diagnostic time rather than data.
+
+**Nothing identified the installed build.** `__APP_COMMIT__`/`__APP_BUILD_TIME__`
+render only in the header and only when `__SHOW_BUILD_STAMP__`, which the release
+workflow switches off. On 2026-07-25 the phone turned out to be running a *debug*
+APK from 2026-06-13, and the only clue was that the stamp happened to be visible -
+on a release build there would have been none.
+
+- [x] `AboutBuild` in Settings → About: versionName + versionCode, commit, build
+      time, device + API level, and **whether each native plugin loaded**. Version
+      comes from `DeviceStatePlugin`, not `package.json`, because versionCode is the
+      CI commit count and the web bundle cannot know it. The plugin rows are the
+      point: a build shipped without them silently degrades to a throttled JS
+      heartbeat, which is near-useless as supervision, and that should be visible
+      rather than inferred from a poor log afterwards.
+
+**Settings could not be reached from where they were needed.** Only one of the four
+requirements can be deep-linked, and it is worth recording which:
+
+| Requirement | Android support |
+|---|---|
+| Background location | **No intent exists** for a specific permission toggle. Best available is `ACTION_APPLICATION_DETAILS_SETTINGS` plus written directions |
+| Battery optimisation | `ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` - **one tap**, grants outright. Needs the matching manifest permission |
+| Background activity | No intent; app details page |
+| Location services | `ACTION_LOCATION_SOURCE_SETTINGS` - direct |
+
+- [x] `DeviceStatePlugin` gains `openAppSettings`, `requestIgnoreBatteryOptimizations`
+      (falls back to the settings list when already exempt) and
+      `openLocationSourceSettings`. Manifest declares
+      REQUEST_IGNORE_BATTERY_OPTIMIZATIONS - confirmed present in the merged
+      manifest. **Note:** Google Play restricts that permission; irrelevant for
+      sideloaded distribution but it would block a Play submission.
+- [x] `backgroundChecks()` returns every requirement with state, value and remedy;
+      `backgroundBlockers()` now derives from it. One source, because a gate wants
+      only failures while Settings wants the full checklist.
+- [x] `BackgroundChecklist` replaces `BackgroundReadiness`, rendering both modes -
+      `gate` (failures only) and `settings` (all four with current values). Each
+      failing row carries its own action, so the remedy is attached to the problem
+      rather than offered as a menu to match up yourself.
+
+337 tests, lint clean, tsc clean, `assembleDebug` exit 0 with no deprecation
+warnings and both plugins in the dex.
+
 **Dependencies:**
 - Capacitor v6+ (latest stable)
 - @capgo/background-geolocation (latest)
@@ -1186,5 +1231,7 @@ const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 | 2026-07-26 | Device ground truth: `backgroundLocation:false`, `ignoringBatteryOptimizations:false` on a Pixel 9a / Android 17 - neither setup-gate requirement was ever met | Done |
 | 2026-07-26 | Phase 7.12: recording moved off the render path into `services/tracking`; incremental persistence; `useGeolocation`/`useTrackRecording` retired for `useTracking` | Unreviewed |
 | 2026-07-26 | Phase 7.12: native `HeartbeatPlugin` gives a liveness signal independent of GPS; setup gate now verifies via `backgroundBlockers()`; escalating stall alerts (325 tests) | Unreviewed |
+| 2026-07-26 | Phase 7.13: About shows version/build/device and whether each native plugin loaded - release builds previously hid all build identity | Unreviewed |
+| 2026-07-26 | Phase 7.13: per-requirement settings actions. Battery optimisation is one tap; background location cannot be deep-linked at all (no such Android intent) so directions are given instead (337 tests) | Unreviewed |
 
 <!-- Update this log after each work session -->

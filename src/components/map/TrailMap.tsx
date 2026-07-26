@@ -17,7 +17,7 @@ import { logger } from '@/services/logger'
 import { usePMTiles } from '@/providers/pmtilesContext'
 import { styleConfig } from '@/config/styles'
 import { POIMarkers } from './POIMarkers'
-import { BackgroundReadiness } from './BackgroundReadiness'
+import { BackgroundChecklist } from '@/components/BackgroundChecklist'
 import type { Trail } from '@/types'
 
 const ONLINE_MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty'
@@ -941,7 +941,7 @@ export function TrailMap() {
                   Do you have the Ten Essentials?
                 </a>
               </p>
-              <BackgroundReadiness onOpenSettings={() => void openLocationSettings()} />
+              <BackgroundChecklist mode="gate" onOpenSettings={() => void openLocationSettings()} />
             </div>
             <div className="flex gap-3">
               <button

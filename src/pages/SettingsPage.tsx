@@ -8,6 +8,8 @@ import {
 } from '@/services/redlineExport'
 import { exportTextFile } from '@/services/fileExport'
 import { shareDebugLogs } from '@/services/logger'
+import { AboutBuild } from '@/components/AboutBuild'
+import { BackgroundChecklist } from '@/components/BackgroundChecklist'
 
 export function SettingsPage() {
   const { completions, importCompletions, clearCompletions } = useCompletions()
@@ -411,6 +413,15 @@ export function SettingsPage() {
         </div>
       </section>
 
+      {/* Background recording readiness */}
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold text-primary">Background recording</h2>
+        <p className="text-sm text-secondary">
+          Recording continues with the screen off only if all four of these hold.
+        </p>
+        <BackgroundChecklist mode="settings" />
+      </section>
+
       {/* About */}
       <section className="space-y-3">
         <h2 className="text-lg font-semibold text-primary">About</h2>
@@ -432,6 +443,9 @@ export function SettingsPage() {
               Learn more about BRATTS →
             </a>
           </p>
+          <div className="pt-3 border-t border-gray-200">
+            <AboutBuild />
+          </div>
         </div>
       </section>
     </div>
